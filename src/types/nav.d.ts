@@ -5,8 +5,8 @@ export interface NavItemConfig {
   external?: boolean;
   label?: string;
   icon?: string;
-  href?: string;
-  items?: NavItemConfig[];
+  href: string;
+  subItems?: NavItemConfig[];
   // Matcher cannot be a function in order
   // to be able to use it on the server.
   // If you need to match multiple paths,

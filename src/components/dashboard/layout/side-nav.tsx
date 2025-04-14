@@ -1,20 +1,21 @@
 'use client';
 
 import * as React from 'react';
+import { useState } from 'react';
 import RouterLink from 'next/link';
 import { usePathname } from 'next/navigation';
 import Box from '@mui/material/Box';
 import Divider from '@mui/material/Divider';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
+import Collapse from '@mui/material/Collapse';
 
 import type { NavItemConfig } from '@/types/nav';
-import { paths } from '@/paths';
 import { isNavItemActive } from '@/lib/is-nav-item-active';
 import { Logo } from '@/components/core/logo';
+import { CaretDown, CaretUp } from '@phosphor-icons/react';
 
 import { navItems } from './config';
-import { navIcons } from './nav-icons';
 
 export function SideNav(): React.JSX.Element {
   const pathname = usePathname();
@@ -48,24 +49,30 @@ export function SideNav(): React.JSX.Element {
       }}
     >
       <Stack spacing={2} sx={{ p: 3 }}>
-        <Box component={RouterLink} href={paths.home} sx={{ display: 'inline-flex' }}>
-          <Logo color="light" height={32} width={122} />
-        </Box>
-        <Box
+        <Box sx={{ display: 'inline-flex', alignItems: 'center'}}>
+          <Logo color="light" height={32} width={32} />
+          <Box
           sx={{
             alignItems: 'center',
             backgroundColor: 'var(--mui-palette-neutral-950)',
-            cursor: 'pointer',
             display: 'flex',
             p: '4px 12px',
           }}
         >
           <Box sx={{ flex: '1 1 auto' }}>
-            <Typography color="inherit" variant='h4'>
+            <Typography sx={{color: '#BAB8B8', fontSize: '13px'}}>
               国家重点项目
             </Typography>
+            <Typography color="inherit" sx={{fontSize: '15px'}} >
+              面向复杂场景的图计算机
+            </Typography>
+            <Typography color="inherit" sx={{fontSize: '15px'}}>
+              (2023YFB4502300)
+            </Typography>
           </Box>
+         </Box>
         </Box>
+
       </Stack>
       <Divider sx={{ borderColor: 'var(--mui-palette-neutral-700)' }} />
       <Box component="nav" sx={{ flex: '1 1 auto', p: '12px' }}>
@@ -92,16 +99,22 @@ function renderNavItems({ items = [], pathname }: { items?: NavItemConfig[]; pat
   );
 }
 
-interface NavItemProps extends Omit<NavItemConfig, 'items'> {
+interface NavItemProps extends NavItemConfig {
   pathname: string;
 }
 
-function NavItem({ disabled, external, href, icon, matcher, pathname, title }: NavItemProps): React.JSX.Element {
-  const active = isNavItemActive({ disabled, external, href, matcher, pathname });
-  const Icon = icon ? navIcons[icon] : null;
+function NavItem({ disabled, external, href, pathname, title, subItems }: NavItemProps): React.JSX.Element {
+  const active = isNavItemActive({ href, pathname, subItems });
+
+  const [open, setOpen] = useState(false);
+  const handleClick = (): void => {
+    if (subItems && subItems.length > 0) {
+      setOpen(!open);
+    }
+  };
 
   return (
-    <li>
+    <Box sx={{margin: '4px 0 4px 0'}}>
       <Box
         {...(href
           ? {
@@ -119,7 +132,7 @@ function NavItem({ disabled, external, href, icon, matcher, pathname, title }: N
           display: 'flex',
           flex: '0 0 auto',
           gap: 1,
-          p: '6px 16px',
+          p: '4px 12px',
           position: 'relative',
           textDecoration: 'none',
           whiteSpace: 'nowrap',
@@ -130,16 +143,8 @@ function NavItem({ disabled, external, href, icon, matcher, pathname, title }: N
           }),
           ...(active && { bgcolor: 'var(--NavItem-active-background)', color: 'var(--NavItem-active-color)' }),
         }}
+        onClick={handleClick}
       >
-        <Box sx={{ alignItems: 'center', display: 'flex', justifyContent: 'center', flex: '0 0 auto' }}>
-          {Icon ? (
-            <Icon
-              fill={active ? 'var(--NavItem-icon-active-color)' : 'var(--NavItem-icon-color)'}
-              fontSize="var(--icon-fontSize-md)"
-              weight={active ? 'fill' : undefined}
-            />
-          ) : null}
-        </Box>
         <Box sx={{ flex: '1 1 auto' }}>
           <Typography
             component="span"
@@ -148,7 +153,29 @@ function NavItem({ disabled, external, href, icon, matcher, pathname, title }: N
             {title}
           </Typography>
         </Box>
+        {subItems && subItems.length > 0 ? (
+          <Box
+            component="span"
+            sx={{
+              alignItems: 'center',
+              display: 'flex',
+              justifyContent: 'center',
+              flex: '0 0 auto',
+              fontSize: 'var(--icon-fontSize-md)',
+            }}
+          >
+            {open ? <CaretUp /> : <CaretDown />}
+          </Box>
+        ) : null}
       </Box>
-    </li>
+      {subItems && subItems.length > 0 ? <Collapse in={open}>
+          <Box sx={{ pl: 3 }}>
+            {subItems.map((subItem) => (
+              // @ts-expect-error subItem won't have the same key with the parent item
+              <NavItem key={subItem.key} pathname={pathname} {...subItem} />
+            ))}
+          </Box>
+        </Collapse> : null}
+    </Box>
   );
 }

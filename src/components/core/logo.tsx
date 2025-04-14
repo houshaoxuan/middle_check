@@ -18,16 +18,10 @@ export interface LogoProps {
   width?: number;
 }
 
-export function Logo({ color = 'dark', emblem, height = HEIGHT, width = WIDTH }: LogoProps): React.JSX.Element {
-  let url: string;
+export function Logo({height = HEIGHT, width = WIDTH }: LogoProps): React.JSX.Element {
+  const url = '/assets/logo.jpg';
 
-  if (emblem) {
-    url = color === 'light' ? '/assets/logo-emblem.svg' : '/assets/logo-emblem--dark.svg';
-  } else {
-    url = color === 'light' ? '/assets/logo.svg' : '/assets/logo--dark.svg';
-  }
-
-  return <Box alt="logo" component="img" height={height} src={url} width={width} />;
+  return <Box alt="logo" component="img" height={height} width={width} maxWidth={width} src={url} />;
 }
 
 export interface DynamicLogoProps {
