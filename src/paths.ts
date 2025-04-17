@@ -2,7 +2,6 @@ export const paths = {
   home: '/',
   auth: { signIn: '/auth/sign-in', signUp: '/auth/sign-up', resetPassword: '/auth/reset-password' },
   dashboard: {
-    overview: '/dashboard',
     part1: '/dashboard/part1/sub1',
     part1_sub1: '/dashboard/part1/sub1',
     part1_sub2: '/dashboard/part1/sub2',
@@ -18,10 +17,6 @@ export const paths = {
     part5: '/dashboard/part5',
     part5_sub1: '/dashboard/part5/sub1',
     part5_sub2: '/dashboard/part5/sub2',
-    account: '/dashboard/account',
-    customers: '/dashboard/customers',
-    integrations: '/dashboard/integrations',
-    settings: '/dashboard/settings',
   },
   errors: { notFound: '/errors/not-found' },
 } as const;
