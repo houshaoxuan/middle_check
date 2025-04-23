@@ -14,8 +14,9 @@ export const navItems = [
   },
   { key: '课题三', title: '图计算编程环境', href: paths.dashboard.part3, icon: 'plugs-connected',
     subItems: [
-      {key: '内容一', title: '内容一', href: paths.dashboard.part3_sub1},
-      {key: '内容二', title: '内容二', href: paths.dashboard.part3_sub2}
+      {key: '内容一', title: '编程模型框架', href: paths.dashboard.part3_sub1},
+      {key: '内容二', title: '框架转换', href: paths.dashboard.part3_sub2},
+      {key: '内容三', title: '动态图数据管理', href: paths.dashboard.part3_sub3},
     ]
   },
   { key: '课题四', title: '分布式图计算框架', href: paths.dashboard.part4, icon: 'gear-six',

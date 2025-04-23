@@ -21,31 +21,28 @@ import {
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 
 const algorithms = ['PageRank', 'k-Clique', 'GCN'];
-const datasets = ['Web-Google', 'RoadNet-CA', 'Social-Slashdot'];
+const datasets = ['Rmat-16','Rmat-18','Rmat-20', 'Wiki-Vote', 'Ego-Gplus', 'Web-Google'];
 const allDatasetsOption = 'all-datasets';
 
 const algorithmDetails = {
   PageRank: {
-    description: '迭代式网页排名算法',
-    complexity: 'O(kE)',
-    parameters: '阻尼系数: 0.85, 迭代次数: 20',
+    description: '标准图遍历算法',
   },
   'k-Clique': {
-    description: '寻找k阶完全子图',
-    complexity: 'O(n^k)',
-    parameters: 'k值: 5, 最小规模: 10',
+    description: '标准图挖掘算法',
   },
   GCN: {
-    description: '图卷积神经网络',
-    complexity: 'O(L(n + m))',
-    parameters: '层数: 3, 特征维度: 128',
+    description: '标准图学习算法',
   },
 };
 
 const datasetInfo = {
-  'Web-Google': { nodes: 875713, edges: 5105039 },
-  'RoadNet-CA': { nodes: 1965206, edges: 2766607 },
-  'Social-Slashdot': { nodes: 82168, edges: 948464 },
+  'Rmat-16': { nodes: '2^16', edges: '2^20' },
+  'Rmat-18': { nodes: '2^18', edges: '2^22' },
+  'Rmat-20': { nodes: '2^20', edges: '2^24' },
+  'Wiki-Vote': { nodes: 7115, edges: 103689 },
+  'Ego-Gplus': { nodes: 107614, edges: 13673453 },
+  'Web-Google': { nodes: 'xxx', edges: 'xxx' },
 };
 
 export default function Page() {
@@ -281,13 +278,7 @@ export default function Page() {
                 算法详情
               </Typography>
               <Typography variant="body2" color="text.secondary" paragraph>
-                <strong>算法类型:</strong> {algorithmDetails[selectedAlgo].description}
-              </Typography>
-              <Typography variant="body2" color="text.secondary" paragraph>
-                <strong>时间复杂度:</strong> {algorithmDetails[selectedAlgo].complexity}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                <strong>参数设置:</strong> {algorithmDetails[selectedAlgo].parameters}
+                <strong>算法说明:</strong> {algorithmDetails[selectedAlgo].description}
               </Typography>
             </Paper>
           </Grid>
@@ -311,8 +302,8 @@ export default function Page() {
                     <Box key={ds} sx={{ mb: 2 }}>
                       <Typography variant="body2" color="text.secondary">
                         <strong>{ds}:</strong>
-                        节点数 {datasetInfo[ds].nodes.toLocaleString()},
-                        边数 {datasetInfo[ds].edges.toLocaleString()}
+                        节点规模： {datasetInfo[ds].nodes.toLocaleString()},
+                        边规模： {datasetInfo[ds].edges.toLocaleString()}
                       </Typography>
                     </Box>
                   ))}
@@ -320,10 +311,10 @@ export default function Page() {
               ) : (
                 <Box>
                   <Typography variant="body2" color="text.secondary" paragraph>
-                    <strong>节点数:</strong> {datasetInfo[selectedDataset].nodes.toLocaleString()}
+                    <strong>节点规模:</strong> {datasetInfo[selectedDataset].nodes.toLocaleString()}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    <strong>边数:</strong> {datasetInfo[selectedDataset].edges.toLocaleString()}
+                    <strong>边规模:</strong> {datasetInfo[selectedDataset].edges.toLocaleString()}
                   </Typography>
                 </Box>
               )}
