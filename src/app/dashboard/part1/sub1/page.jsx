@@ -18,11 +18,19 @@ import {
   TableRow,
   LinearProgress,
 } from '@mui/material';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
+import request from '@/lib/request/request'; // 假设你有一个请求库
 
 const algorithms = ['PageRank', 'k-Clique', 'GCN'];
 const datasets = ['Rmat-16','Rmat-18','Rmat-20', 'Wiki-Vote', 'Ego-Gplus', 'Web-Google'];
 const allDatasetsOption = 'all-datasets';
+
+// 新增算法与数据集允许组合配置
+const allowedCombinations = {
+  PageRank: [],
+  'k-Clique': ['Rmat-16','Rmat-18','Rmat-20'],
+  GCN: [],
+};
 
 const algorithmDetails = {
   PageRank: {
@@ -54,16 +62,30 @@ export default function Page() {
   const [performanceData, setPerformanceData] = useState([]);
   const [chartMetric, setChartMetric] = useState('time');
 
+  // 新增判断按钮是否可用的逻辑
+  const isButtonDisabled = () => {
+    if (running) return true;
+
+    // 判断单个数据集是否允许
+    if (selectedDataset !== allDatasetsOption) {
+      return !allowedCombinations[selectedAlgo].includes(selectedDataset);
+    }
+
+    // 判断"全部数据集"是否允许（检查算法是否有可用的数据集）
+    return true;
+  };
+
   // 生成随机性能数据
-  const generatePerformanceData = (dataset) => {
-    const baseData = datasetInfo[dataset];
+  const generatePerformanceData = (res) => {
+    const baseData = res.data;
     return {
-      dataset,
-      nodes: baseData.nodes,
-      edges: baseData.edges,
-      cpu: Math.random() * 50 + 10,
-      accelerator: Math.random() * 10 + 2,
-      throughput: Math.random() * 200 + 400
+      dataset: baseData.Dataset,
+      nodes: baseData.Vertices,
+      edges: baseData.Edges,
+      cpu: baseData['CPU-Time(s)'],
+      accelerator: baseData["ACC-Time(s)"],
+      speedUp: baseData["Speedup"],
+      throughput: baseData["GTSPS"]
     };
   };
 
@@ -86,8 +108,65 @@ export default function Page() {
     }));
   };
 
+  // 模拟请求函数
+const mockRequest = async () => {
+  // 模拟的 JSON 对象
+  const mockData = {
+      "status": 200,
+      "data": {
+          "Dataset": "Rmat-16",
+          "Vertices": 65536,
+          "Edges": 477603,
+          "CPU-Time(s)": 0.212805,
+          "ACC-Time(s)": 0.016535,
+          "Speedup": 12.87,
+          "GTSPS": 12.869736
+      },
+      "logs": [
+          "Log file created: /home/jinjm/results/Triangle_Rmat-16_20250427_193719.log",
+          "Algorithm: Triangle Counting",
+          "Dataset: Rmat-16",
+          "Timestamp: 2025-04-27 19:37:19",
+          "",
+          "Opening device 0",
+          "Loading xclbin /home/tgx/tangexing/tgx_data/Projects_clone/triangle_gcn_bk/krnl_triangle_count.xclbin",
+          "Running single-device parallel execution mode",
+          "Reading file...",
+          "Converting format...",
+          "Partitioning data...",
+          "Allocating buffers in global memory",
+          "Allocating mappings in host memory",
+          "Synchronizing input buffer data to device global memory",
+          "Executing kernels ...",
+          "Getting output data from kernels",
+          "",
+          "==================== FPGA KERNEL PERFORMANCE SUMMARY ====================",
+          "Timestamp: 2025-04-27 19:37:20",
+          "+----------------------------+--------------------------------------+",
+          "| Metric                      | Value                                  |",
+          "+----------------------------+--------------------------------------+",
+          "| Kernel Time                 | 16.535312 ms                           |",
+          "| Triangle Count              | 3876448                                |",
+          "| Subgraph Count              | 212805104                              |",
+          "| GTSPS                       | 12.869736                              |",
+          "| CPU Time                    | 0.212805                               s |",
+          "| Speedup                     | 12.87                                 x |",
+          "+----------------------------+--------------------------------------+",
+          "Dataset         Vertices    Edges       CPU Time(s)     ACC Time(s)     Speedup     GTSPS           ",
+          "Rmat-16         65536       477603      0.212805        0.016535        12.87       12.869736       ",
+          "Result file created: /home/jinjm/results/Result_Rmat-16_193719.txt"
+      ]
+  };
+  return new Promise((resolve) => {
+      setTimeout(() => {
+          resolve(mockData);
+      }, 1000); // 模拟请求延迟
+  });
+};
+
   const handleRun = async () => {
     setRunning(true);
+    setLogs([]);
 
     try {
       const targets = selectedDataset === allDatasetsOption
@@ -96,14 +175,21 @@ export default function Page() {
 
       // 批量执行任务
       for (const dataset of targets) {
-        setLogs(prev => [...prev, `[${new Date().toLocaleTimeString()}] 开始执行 ${selectedAlgo} - ${dataset}`]);
+        // setLogs(prev => [...prev, `[${new Date().toLocaleTimeString()}] 开始执行 ${selectedAlgo} - ${dataset}`]);
+        const res = await mockRequest();
+/*         const res = await request({
+          url: '/helloworld',
+          data: {helloworld: 'helloworld'},
+          method: 'GET',
+        }); */
+        console.log('test--', res);
 
         // 模拟执行过程
-        await mockProcess('加载数据集元数据', dataset);
-        await mockProcess('初始化加速器环境', dataset);
+        // await mockProcess('加载数据集元数据', dataset);
+        // await mockProcess('初始化加速器环境', dataset);
 
         // 生成模拟结果
-        const newResult = generatePerformanceData(dataset);
+        const newResult = generatePerformanceData(res);
 
         // 更新性能数据
         setPerformanceData(prev => {
@@ -112,8 +198,8 @@ export default function Page() {
             .sort((a, b) => datasets.indexOf(a.dataset) - datasets.indexOf(b.dataset));
         });
 
-        await mockProcess('生成性能报告', dataset);
-        setLogs(prev => [...prev, `[${new Date().toLocaleTimeString()}] ✅ ${dataset} 执行成功`]);
+        // await mockProcess('生成性能报告', dataset);
+        setLogs(res.logs);
       }
     } catch (error) {
       setLogs(prev => [...prev, `[${new Date().toLocaleTimeString()}] ❌ 执行失败: ${error}`]);
@@ -255,7 +341,7 @@ export default function Page() {
                 variant="contained"
                 fullWidth
                 onClick={handleRun}
-                disabled={running}
+                disabled={isButtonDisabled()}
                 color="success"
                 sx={{ py: 1.5 }}
               >
@@ -328,7 +414,7 @@ export default function Page() {
           <Grid item xs={12}>
             <Paper elevation={3} sx={{
               p: 2,
-              height: 300,
+              height: 470,
               borderRadius: 3,
               overflow: 'hidden'
             }}>
@@ -343,7 +429,7 @@ export default function Page() {
                 执行日志
               </Typography>
               <Box sx={{
-                height: 230,
+                height: 400,
                 overflow: 'auto',
                 fontFamily: 'monospace',
                 fontSize: '0.8rem',
@@ -408,8 +494,8 @@ export default function Page() {
                           <TableCell>{row.edges.toLocaleString()}</TableCell>
                           <TableCell>{row.cpu.toFixed(2)}</TableCell>
                           <TableCell>{row.accelerator.toFixed(2)}</TableCell>
-                          <TableCell>{(row.cpu / row.accelerator).toFixed(1)}x</TableCell>
-                          <TableCell>{Math.round(row.throughput)}</TableCell>
+                          <TableCell>{row.speedUp}x</TableCell>
+                          <TableCell>{row.throughput}</TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
@@ -427,88 +513,53 @@ export default function Page() {
                     <Tab label="吞吐量" value="throughput" />
                   </Tabs>
 
-                  <LineChart
-                    width={800}
-                    height={300}
-                    data={getChartData()}
-                    margin={{ top: 20, right: 30, left: 20, bottom: 10 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="dataset" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
+                  <BarChart
+            width={800}
+            height={300}
+            data={getChartData()}
+            margin={{ top: 20, right: 30, left: 20, bottom: 10 }}
+        >
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="dataset" />
+            <YAxis />
+            <Tooltip />
+            <Legend />
 
-                    {chartMetric === 'time' && (
-                      <>
-                        <Line
-                          type="linear"
-                          dataKey="cpu"
-                          stroke="#7f58af"
-                          strokeWidth={2}
-                          name="CPU时间"
-                          dot={{
-                            r: 5,
-                            fill: '#7f58af',
-                            strokeWidth: 1
-                          }}
-                          activeDot={{ r: 8 }}
-                          animationDuration={0}
-                        />
-                        <Line
-                          type="linear"
-                          dataKey="accelerator"
-                          stroke="#64b5f6"
-                          strokeWidth={2}
-                          name="加速器时间"
-                          dot={{
-                            r: 5,
-                            fill: '#64b5f6',
-                            strokeWidth: 1
-                          }}
-                          activeDot={{ r: 8 }}
-                          animationDuration={0}
+            {chartMetric === 'time' && (
+                <>
+                    <Bar
+                        dataKey="cpu"
+                        fill="#7f58af"
+                        name="CPU时间"
+                        barSize={50}
+                    />
+                    <Bar
+                        dataKey="accelerator"
+                        fill="#64b5f6"
+                        name="加速器时间"
+                        barSize={50}
+                    />
+                </>
+            )}
 
-                        />
-                      </>
-                    )}
+            {chartMetric === 'speedup' && (
+                <Bar
+                    dataKey="speedup"
+                    fill="#ef5350"
+                    name="加速比"
+                    barSize={50}
+                />
+            )}
 
-                    {chartMetric === 'speedup' && (
-                      <Line
-                        type="linear"
-                        dataKey="speedup"
-                        stroke="#ef5350"
-                        strokeWidth={2}
-                        name="加速比"
-                        dot={{
-                          r: 5,
-                          fill: '#ef5350',
-                          strokeWidth: 1
-                        }}
-                        activeDot={{ r: 8 }}
-                        animationDuration={0}
-
-                      />
-                    )}
-
-                    {chartMetric === 'throughput' && (
-                      <Line
-                        type="linear"
-                        dataKey="throughput"
-                        stroke="#26a69a"
-                        strokeWidth={2}
-                        name="吞吐量"
-                        dot={{
-                          r: 5,
-                          fill: '#26a69a',
-                          strokeWidth: 1
-                        }}
-                        activeDot={{ r: 8 }}
-                        animationDuration={0}
-
-                      />
-                    )}
-                  </LineChart>
+            {chartMetric === 'throughput' && (
+                <Bar
+                    dataKey="throughput"
+                    fill="#26a69a"
+                    name="吞吐量"
+                    barSize={50}
+                />
+            )}
+        </BarChart>
                 </Box>
               )}
             </Paper>
