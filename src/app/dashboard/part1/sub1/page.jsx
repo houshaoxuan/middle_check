@@ -79,6 +79,8 @@ export default function Page() {
   const generatePerformanceData = (res) => {
     const baseData = res.data;
     return {
+      combinedKey: `${baseData.Algorithm}-${baseData.Dataset}`,
+      algorithm: baseData.Algorithm,
       dataset: baseData.Dataset,
       nodes: baseData.Vertices,
       edges: baseData.Edges,
@@ -91,21 +93,12 @@ export default function Page() {
 
   // 获取有效数据（已执行的数据集）
   const getValidData = () => {
-    return performanceData.filter(item =>
-      typeof item.cpu === 'number' &&
-      typeof item.accelerator === 'number'
-    );
+    return performanceData
   };
 
   // 生成图表数据
   const getChartData = () => {
-    return getValidData().map(item => ({
-      dataset: item.dataset,
-      cpu: item.cpu,
-      accelerator: item.accelerator,
-      speedup: item.cpu / item.accelerator,
-      throughput: item.throughput
-    }));
+    return getValidData();
   };
 
   // 模拟请求函数
@@ -114,6 +107,7 @@ const mockRequest = async () => {
   const mockData = {
       "status": 200,
       "data": {
+        "Algorithm": "k-Clique",
           "Dataset": "Rmat-16",
           "Vertices": 65536,
           "Edges": 477603,
@@ -190,6 +184,7 @@ const mockRequest = async () => {
 
         // 生成模拟结果
         const newResult = generatePerformanceData(res);
+        console.log('newresult', newResult)
 
         // 更新性能数据
         setPerformanceData(prev => {
@@ -477,6 +472,7 @@ const mockRequest = async () => {
                   <Table size="small">
                     <TableHead>
                       <TableRow>
+                        <TableCell>算法</TableCell>
                         <TableCell>数据集</TableCell>
                         <TableCell>节点数</TableCell>
                         <TableCell>边数</TableCell>
@@ -489,12 +485,13 @@ const mockRequest = async () => {
                     <TableBody>
                       {getValidData().map((row) => (
                         <TableRow key={row.dataset}>
+                          <TableCell>{row.algorithm}</TableCell>
                           <TableCell>{row.dataset}</TableCell>
                           <TableCell>{row.nodes.toLocaleString()}</TableCell>
                           <TableCell>{row.edges.toLocaleString()}</TableCell>
                           <TableCell>{row.cpu.toFixed(2)}</TableCell>
                           <TableCell>{row.accelerator.toFixed(2)}</TableCell>
-                          <TableCell>{row.speedUp}x</TableCell>
+                          <TableCell>{row.speedUp}</TableCell>
                           <TableCell>{row.throughput}</TableCell>
                         </TableRow>
                       ))}
@@ -509,7 +506,7 @@ const mockRequest = async () => {
                     sx={{ mb: 2 }}
                   >
                     <Tab label="执行时间" value="time" />
-                    <Tab label="加速比" value="speedup" />
+                    <Tab label="加速比" value="speedUp" />
                     <Tab label="吞吐量" value="throughput" />
                   </Tabs>
 
@@ -520,7 +517,7 @@ const mockRequest = async () => {
             margin={{ top: 20, right: 30, left: 20, bottom: 10 }}
         >
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="dataset" />
+            <XAxis dataKey="combinedKey" />
             <YAxis />
             <Tooltip />
             <Legend />
@@ -542,9 +539,9 @@ const mockRequest = async () => {
                 </>
             )}
 
-            {chartMetric === 'speedup' && (
+            {chartMetric === 'speedUp' && (
                 <Bar
-                    dataKey="speedup"
+                    dataKey="speedUp"
                     fill="#ef5350"
                     name="加速比"
                     barSize={50}
