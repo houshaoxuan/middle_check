@@ -169,13 +169,23 @@ const mockRequest = async () => {
 
       // 批量执行任务
       for (const dataset of targets) {
-        // setLogs(prev => [...prev, `[${new Date().toLocaleTimeString()}] 开始执行 ${selectedAlgo} - ${dataset}`]);
-        const res = await mockRequest();
-/*         const res = await request({
-          url: '/helloworld',
-          data: {helloworld: 'helloworld'},
+        //const res = await mockRequest();
+        let urlAlgo, urlData
+        if (selectedAlgo == 'k-Clique') {
+          urlAlgo = 'kclique';
+        }
+
+        if (selectedDataset == 'Rmat-16') {
+          urlData = 'rmat16';
+        } else if (selectedDataset == 'Rmat-18') {
+          urlData = 'rmat18';
+        } else if (selectedDataset == 'Rmat-20') {
+          urlData = 'rmat20';
+        }
+        const res = await request({
+          url: `/${urlAlgo}/${urlData}`,
           method: 'GET',
-        }); */
+        });
         console.log('test--', res);
 
         // 模拟执行过程
