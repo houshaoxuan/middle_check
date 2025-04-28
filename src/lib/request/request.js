@@ -39,20 +39,22 @@ export default async function request(config) {
 
     const response = await fetch(BASE_URL + config.url, requestConfig);
 
-    // 响应状态检查
+/*     // 响应状态检查
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
-    }
+    } */
 
     // 响应数据处理
     const responseData = await (responseType === 'text'
       ? response.text()
       : response.json());
 
-    // 响应拦截器（示例）
+      console.log('response', responseData)
+
+/*     // 响应拦截器（示例）
     if (typeof responseInterceptor === 'function') {
       return responseInterceptor(responseData);
-    }
+    } */
 
     return responseData;
   } catch (error) {
@@ -71,9 +73,6 @@ async function requestInterceptor(config) {
 // 响应拦截器示例
 function responseInterceptor(response) {
   // 处理通用响应格式
-  if (response.code !== 0) {
-    throw new Error(response.message);
-  }
   return response.data;
 }
 
