@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 
 const ClockWaveform = ({
   data = [0, 1],
-  widthPerSegment = 80,
+  widthPerSegment = 100,
   height = 40,
 }) => {
   // 生成时钟节拍序列（每个数据点对应两个电平变化）

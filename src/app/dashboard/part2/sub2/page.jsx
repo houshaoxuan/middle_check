@@ -1,160 +1,111 @@
 "use client";
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Box, Grid, Button, Select, MenuItem, TextField,
-  Paper, Typography, FormControl, InputLabel,
+  Paper, Typography, Tabs, Tab,
   LinearProgress
 } from '@mui/material';
 import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
+  BarChart, Bar, XAxis, YAxis
 } from 'recharts';
+import request from '@/lib/request/request';
 
-const algorithms = ['SVM', 'Random Forest', 'Neural Network'];
-const datasets = ['Iris', 'MNIST', 'CIFAR-10', 'Boston Housing', 'Diabetes', 'Wine'];
+import { algorithmCodeMap } from './algorithmCodeMap';
+import { chartResults} from './chartResults';
 
-const algorithmCodeMap = {
-  'SVM': `// SVM示例代码
-import SVM from 'ml-svm';
+const algorithms = ['CF', 'GCN', 'PR'];
+const datasets = {
+  CF: ['rmat-16', 'rmat-18', 'rmat-20', 'wiki-vote', 'web-google', 'slashdot08'],
+  GCN: ['rmat-16', 'rmat-17', 'rmat-18', 'Cora', 'Citeseer', 'Pubmed'],
+  PR: ['rmat-16', 'rmat-18', 'rmat-20', 'wiki-vote', 'web-google', 'ego-gplus'],
+}
 
-const svm = new SVM({
-  kernel: 'rbf',
-  gamma: 0.5,
-  C: 1.0
-});
-
-svm.train(trainData, trainLabels);
-return svm.predict(testData);import SVM from 'ml-svm';
-
-const svm = new SVM({
-  kernel: 'rbf',
-  gamma: 0.5,
-  C: 1.0
-});
-
-svm.train(trainData, trainLabels);
-return svm.predict(testData);import SVM from 'ml-svm';
-
-const svm = new SVM({
-  kernel: 'rbf',
-  gamma: 0.5,
-  C: 1.0
-});
-
-svm.train(trainData, trainLabels);
-return svm.predict(testData);import SVM from 'ml-svm';
-
-const svm = new SVM({
-  kernel: 'rbf',
-  gamma: 0.5,
-  C: 1.0
-});
-
-svm.train(trainData, trainLabels);
-return svm.predict(testData);import SVM from 'ml-svm';
-
-const svm = new SVM({
-  kernel: 'rbf',
-  gamma: 0.5,
-  C: 1.0
-});
-
-svm.train(trainData, trainLabels);
-return svm.predict(testData);import SVM from 'ml-svm';
-
-const svm = new SVM({
-  kernel: 'rbf',
-  gamma: 0.5,
-  C: 1.0
-});
-
-svm.train(trainData, trainLabels);
-return svm.predict(testData);`,
-
-  'Random Forest': `// 随机森林示例代码
-import { RandomForestClassifier } from 'ml-random-forest';
-
-const options = {
-  seed: 42,
-  maxFeatures: 'sqrt',
-  replacement: true,
-  nEstimators: 100
-};
-
-const classifier = new RandomForestClassifier(options);
-classifier.train(trainData, trainLabels);
-return classifier.predict(testData);`,
-
-  'Neural Network': `// 神经网络示例代码
-import { Sequential, Dense } from 'tfjs-layers';
-
-const model = new Sequential();
-model.add(Dense({units: 64, activation: 'relu', inputShape: [inputSize]}));
-model.add(Dense({units: 32, activation: 'relu'}));
-model.add(Dense({units: outputSize, activation: 'softmax'}));
-
-model.compile({
-  optimizer: 'adam',
-  loss: 'categoricalCrossentropy',
-  metrics: ['accuracy']
-});
-
-await model.fit(trainData, trainLabels, {
-  epochs: 50,
-  batchSize: 32,
-  validationSplit: 0.2
-});`
-};
+const logFileMap = {
+  CF: {
+    'rmat-16': 'cf_on_rmat_16',
+    'rmat-18': 'cf_on_rmat_18',
+    'rmat-20': 'cf_on_rmat_20',
+    'wiki-vote': 'cf_on_wikivote',
+    'web-google': 'cf_on_web_google',
+    'slashdot08': 'cf_on_slashdot08'
+  },
+  GCN: {
+    'rmat-16': 'gcn_on_rmat_16_x10',
+    'rmat-17': 'gcn_on_rmat_17_x10',
+    'rmat-18': 'gcn_on_rmat_18_x10',
+    'Cora': 'gcn_on_cora_x10',
+    'Citeseer': 'gcn_on_citeseer_x10',
+    'Pubmed': 'gcn_on_pubmed_x10'
+  },
+  PR: {
+    'rmat-16': 'pr_on_rmat_16',
+    'rmat-18': 'pr_on_rmat_18',
+    'rmat-20': 'pr_on_rmat_20',
+    'wiki-vote': 'pr_on_wikivote',
+    'web-google': 'pr_on_web_google',
+    'ego-gplus': 'pr_on_ego_gplus'
+  }
+}
 
 export default function Page() {
   const [selectedAlgo, setSelectedAlgo] = useState(algorithms[0]);
-  const [selectedDataset, setSelectedDataset] = useState(datasets[0]);
-  const [terminalData, setTerminalData] = useState(['系统准备就绪']);
+  const [selectedDataset, setSelectedDataset] = useState(datasets['CF'][0]);
+  const [terminalData, setTerminalData] = useState([]);
   const [chartData, setChartData] = useState([]);
   const [displayCode, setDisplayCode] = useState(algorithmCodeMap[algorithms[0]]);
   const [isRunning, setIsRunning] = useState(false);
+  const [chartMetric, setChartMetric] = useState('performance');
+  const terminalRef = useRef(null); // 添加 ref 用于终端容器
+
 
   useEffect(() => {
+    console.log('Selected Algorithm:', selectedAlgo, algorithmCodeMap);
     setDisplayCode(algorithmCodeMap[selectedAlgo]);
   }, [selectedAlgo]);
 
-  const generateMockData = () => {
-    const metrics = ['准确率', '精确率', '召回率', 'F1分数'];
-    return metrics.map((metric, index) => ({
-      指标: metric,
-      值: Math.random() * 40 + 60,
-      算法: selectedAlgo,
-      数据集: selectedDataset
-    }));
+  // 添加 useEffect 监听 terminalData 变化并滚动到底部
+  useEffect(() => {
+    if (terminalRef.current) {
+      terminalRef.current.scrollTop = terminalRef.current.scrollHeight;
+    }
+  }, [terminalData]);
+
+  const generateChartData = () => {
+    return chartResults[selectedAlgo][selectedDataset];
   };
+
+  const streamLogData = async () => {
+    const data = await request({
+      url: `/logfile/${logFileMap[selectedAlgo][selectedDataset]}`,
+      method: 'GET',
+      responseType: 'text',
+    })
+    const logLines = data.split('\n');
+    let currentIndex = 0;
+
+    while (currentIndex < logLines.length) {
+      const nextChunk = logLines.slice(currentIndex, currentIndex + 5);
+      setTerminalData(prev => [...prev, ...nextChunk]);
+      currentIndex += 5;
+      await new Promise(resolve => setTimeout(resolve, 500));
+    }
+  };
+
 
   const runProcess = async () => {
     setIsRunning(true);
-    setTerminalData(['初始化运行环境...']);
+    setTerminalData([]);
     setChartData([]);
 
     try {
-      await mockBackendCall('开始预处理数据');
-      await mockBackendCall('特征工程处理中');
-      await mockBackendCall('模型训练中...');
-      await mockBackendCall('模型评估阶段');
-
-      const results = generateMockData();
+      await streamLogData();
+      const results = generateChartData();
       setChartData(results);
-      setTerminalData(prev => [...prev, '✅ 运行成功']);
     } catch (error) {
       setTerminalData(prev => [...prev, '❌ 运行失败: ' + error]);
     } finally {
       setIsRunning(false);
     }
-  };
-
-  const mockBackendCall = async (message) => {
-    return new Promise(resolve => {
-      setTimeout(() => {
-        setTerminalData(prev => [...prev, `[${new Date().toLocaleTimeString()}] ${message}`]);
-        resolve();
-      }, 1000);
-    });
   };
 
   return (
@@ -269,7 +220,11 @@ export default function Page() {
                   <Select
                     fullWidth
                     value={selectedAlgo}
-                    onChange={(e) => setSelectedAlgo(e.target.value)}
+                    onChange={(e) => {
+                      setSelectedAlgo(e.target.value);
+                      setSelectedDataset(datasets[e.target.value][0])
+                    }
+                  }
                     disabled={isRunning}
                   >
                     {algorithms.map((algo) => (
@@ -296,7 +251,7 @@ export default function Page() {
                     disabled={isRunning}
                     fullWidth
                   >
-                    {datasets.map((dataset) => (
+                    {datasets[selectedAlgo].map((dataset) => (
                       <MenuItem key={dataset} value={dataset} sx={{ py: 1 }}>
                         <Typography variant="body1">{dataset}</Typography>
                       </MenuItem>
@@ -400,8 +355,10 @@ export default function Page() {
               运行状态
             </Typography>
 
-            <Box sx={{
-              height: '85%',
+            <Box
+            ref={terminalRef}
+            sx={{
+              height: '400px',
               overflow: 'auto',
               fontFamily: 'monospace',
               fontSize: '0.8rem',
@@ -440,42 +397,94 @@ export default function Page() {
 
             <Box sx={{height: 400}}>
               {chartData.length > 0 ? (
-                <ResponsiveContainer width="100%" height='100%'>
-                  <BarChart data={chartData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis
-                      dataKey="指标"
-                      label={{
-                        value: '评估指标',
-                        position: 'bottom',
-                        offset: -20
-                      }}
-                      height={60}
-                    />
+              <>
+                <Tabs
+                  value={chartMetric}
+                  onChange={(e, v) => setChartMetric(v)}
+                  sx={{ mb: 2 }}
+                >
+                  <Tab label="性能" value="performance" />
+                  <Tab label="性能功耗比" value="consumption" />
+                </Tabs>
+                {chartMetric == 'performance' && (
+                    <BarChart
+                    data={chartData.slice(0, 2).filter(item => item.value !== null)}
+                    margin={{ top: 40, right: 20, left: 20, bottom: 20 }} // 顶部留出40px给标题
+                    width={580}
+                    height={350}
+                  >
+                    {/* 图表标题（居中于BarChart） */}
+                    <text
+                      x="50%"
+                      y={20} // 调整y坐标使其在顶部居中
+                      textAnchor="middle"
+                      style={{ fontSize: '16px', fontWeight: 'bold' }}
+                    >
+                      {`${selectedAlgo}-${selectedDataset} 性能测试结果`}
+                    </text>
+
+                    <XAxis dataKey="key" />
                     <YAxis
                       label={{
-                        value: '性能值 (%)',
+                        value: '性能值',
                         angle: -90,
                         position: 'insideLeft'
                       }}
-                      domain={[0, 100]}
-                    />
-                    <Tooltip
-                      formatter={(value) => [`${value.toFixed(2)}%`, '性能值']}
-                      contentStyle={{ borderRadius: 4 }}
-                    />
-                    <Legend
-                      verticalAlign="top"
-                      wrapperStyle={{ paddingBottom: 10 }}
                     />
                     <Bar
-                      dataKey="值"
-                      fill="#4caf50"
+                      dataKey="value"
+                      fill="#1976d2"
                       radius={[4, 4, 0, 0]}
-                      name="性能指标"
+                      barSize={100}
+                      label={{
+                        position: 'top',
+                        formatter: (value) => value?.toFixed(5)
+                      }}
                     />
                   </BarChart>
-                </ResponsiveContainer>
+                  )
+                }
+                {
+                  chartMetric == 'consumption' && (
+                    <BarChart
+                    data={chartData.slice(2, 4)}
+                    margin={{ top: 40, right: 20, left: 20, bottom: 20 }} // 顶部留出40px给标题
+                    width={580}
+                    height={350}
+                  >
+                    {/* 图表标题（居中于BarChart） */}
+                    <text
+                      x="50%"
+                      y={20} // 调整y坐标使其在顶部居中
+                      textAnchor="middle"
+                      style={{ fontSize: '16px', fontWeight: 'bold' }}
+                    >
+                      {`${selectedAlgo}-${selectedDataset} 功耗比测试结果`}
+                    </text>
+
+                    <XAxis dataKey="key" />
+                    <YAxis
+                      label={{
+                        value: '性能值',
+                        angle: -90,
+                        position: 'insideLeft'
+                      }}
+                    />
+                    <Bar
+                      dataKey="value"
+                      fill="#1976d2"
+                      radius={[4, 4, 0, 0]}
+                      barSize={100}
+                      label={{
+                        position: 'top',
+                        formatter: (value) => value?.toFixed(5)
+                      }}
+                    />
+                  </BarChart>
+                  )
+                }
+
+              </>
               ) : (
                 <Box sx={{
                   height: '100%',

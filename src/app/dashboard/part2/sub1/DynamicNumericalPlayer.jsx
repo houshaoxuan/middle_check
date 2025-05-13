@@ -3,7 +3,7 @@ import NumericalWaveform from './NumericalWaveform';
 
 const DynamicNumericalPlayer = ({
   data,
-  widthPerSegment = 80,
+  widthPerSegment = 100,
   height = 40,
   currentIndex = 0
 }) => {

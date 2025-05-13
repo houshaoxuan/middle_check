@@ -6,7 +6,6 @@ const SyncWavePlayer = ({ data, currentIndex }) => {
   const extendedData = useMemo(() =>
     data.flatMap(d => [d, d]),
   [data]);
-  console.log('extendedData', data);
 
   return (
     <div style={{ display: 'grid', gap: 20 }}>

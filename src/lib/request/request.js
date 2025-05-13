@@ -49,7 +49,7 @@ export default async function request(config) {
       ? response.text()
       : response.json());
 
-      console.log('response', responseData)
+    console.log('response', responseData)
 
 /*     // 响应拦截器（示例）
     if (typeof responseInterceptor === 'function') {

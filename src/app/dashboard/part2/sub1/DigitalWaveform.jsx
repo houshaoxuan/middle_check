@@ -1,10 +1,10 @@
 import React, { useMemo } from 'react';
 
-const DigitalWaveform = ({ data = [0, 1, 0, 1], widthPerSegment = 80, height = 40 }) => {
+const DigitalWaveform = ({ data = [0, 1, 0, 1], widthPerSegment = 100, height = 40 }) => {
   const segments = useMemo(() => {
     return data.map((value, index) => {
       const x = index * widthPerSegment;
-      const y = value === 1 ? 0 : 40; // 上下位置
+      const y = (value === 1 || value === "1") ? 0 : 40; // 上下位置
       const prevValue = data[index - 1];
 
       return {

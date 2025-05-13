@@ -14,7 +14,7 @@ export const paths = {
     part3_sub3: '/dashboard/part3/sub3',
     part4: '/dashboard/part4/sub1',
     part4_sub1: '/dashboard/part4/sub1',
-    part5: '/dashboard/part5',
+    part5: '/dashboard/part5/sub1',
     part5_sub1: '/dashboard/part5/sub1',
     part5_sub2: '/dashboard/part5/sub2',
   },

@@ -4,7 +4,7 @@ import DynamicWavePlayer from "./DynamicWavePlayer";
 import DynamicNumericalPlayer from "./DynamicNumericalPlayer";
 import SyncWavePlayer from "./SyncWavePlayer";
 
-const Waveform = ({ data, currentIndex, setCurrentIndex }) => {
+const Waveform = ({ data, currentIndex, setCurrentIndex, height }) => {
   const [waveformData, setWaveformData] = useState([]);
   const [signalNames, setSignalNames] = useState([]);
   const [signalTypes, setSignalTypes] = useState([]);
@@ -27,21 +27,22 @@ const Waveform = ({ data, currentIndex, setCurrentIndex }) => {
           if (index == 0) {
             for (let i = 0; i < signalNameLength; i++) {
               if (tempSignalTypes[i] === "signal") {
-                waveData.push([parseInt(item[i])]); // Ensure item[i] is parsed to an integer
+                waveData.push([item[i]]); // Ensure item[i] is parsed to an integer
               } else if (tempSignalTypes[i] === "data") {
-                waveData.push([parseInt(item[i])]); // Ensure item[i] is parsed to an integer
+                waveData.push([item[i]]); // Ensure item[i] is parsed to an integer
               }
             }
           } else {
             for (let i = 0; i < signalNameLength; i++) {
               if (tempSignalTypes[i] === "signal") {
-                waveData[i].push(parseInt(item[i])); // Ensure item[i] is parsed to an integer
+                waveData[i].push(item[i]); // Ensure item[i] is parsed to an integer
               } else if (tempSignalTypes[i] === "data") {
-                waveData[i].push(parseInt(item[i])); // Ensure item[i] is parsed to an integer
+                waveData[i].push(item[i]); // Ensure item[i] is parsed to an integer
               }
             }
           }
         })
+        console.log("waveData", waveData);
         setWaveformData(waveData);
         const tempTotalBeats = totalBeats;
         tempTotalBeats.push(tempTotalBeats.length + 1);
@@ -57,7 +58,6 @@ const Waveform = ({ data, currentIndex, setCurrentIndex }) => {
 
   useEffect(() => {
     let timer;
-    console.log('---',currentIndex, waveformData[0]?.length - 1)
     if (currentIndex < waveformData[0]?.length - 1) {
       timer = setInterval(() => {
         setCurrentIndex(prev => prev + 1);
@@ -73,7 +73,7 @@ const Waveform = ({ data, currentIndex, setCurrentIndex }) => {
       <Box key={index} sx={{height: 45, mb: "5px"}}>
         {data && data.length > 0 && (<Box display={"flex"} alignItems="center">
           <DynamicWavePlayer
-            data={data.map((value) => parseInt(value))}
+            data={data.map((value) => value)}
             interval={500}
             currentIndex={currentIndex}
           />
@@ -87,7 +87,7 @@ const Waveform = ({ data, currentIndex, setCurrentIndex }) => {
       <Box key={index} sx={{height: 45, mb: "5px"}}>
         {data && data.length > 0 && (
           <DynamicNumericalPlayer
-            data={data.map((value) => parseInt(value))}
+            data={data.map((value) => value)}
             interval={500}
             currentIndex={currentIndex}
           />
@@ -99,7 +99,7 @@ const Waveform = ({ data, currentIndex, setCurrentIndex }) => {
 
   return (
     <Box sx={{display: 'flex', flexDirection: 'column'}}>
-      <Box border="1px solid #ccc" p={2} height={300} overflow="auto" sx={{display: 'flex'}}>
+      <Box border="1px solid #ccc" p={2} height={height} overflow="auto" sx={{display: 'flex'}}>
         <Box >
           {signalNames.length > 0 &&
             <Typography variant="body1" sx={{
