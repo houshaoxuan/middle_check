@@ -6,7 +6,7 @@ import {
   LinearProgress
 } from '@mui/material';
 
-import { chartResults} from './chartResults';
+import Image from 'next/image'; // 添加Image组件
 
 const scene = ['金融风控', '电力潮流计算'];
 const datasets = {
@@ -14,15 +14,25 @@ const datasets = {
   电力潮流计算: ['electric_data_test', 'origin_power_data'],
 }
 
+const resultImages = {
+  '金融风控': {
+    'financial_data_test': '/image_1.png',
+    'atec_task3_seq': '/image_1.png'
+  },
+  '电力潮流计算': {
+    'electric_data_test': '/image_2.png',
+    'origin_power_data': '/image_2.png'
+  }
+};
 
 export default function Page() {
   const [selectedSecne, setSelectedScene] = useState(scene[0]);
   const [selectedDataset, setSelectedDataset] = useState(datasets[scene[0]][0]);
   const [terminalData, setTerminalData] = useState([]);
-  const [chartData, setChartData] = useState([]);
   const [isRunning, setIsRunning] = useState(false);
   const terminalRef = useRef(null); // 添加 ref 用于终端容器
-
+  const [showResultImage, setShowResultImage] = useState(false); // 新增状态控制图片显示
+  const [imageSrc, setImageSrc] = useState(''); // 新增状态存储图片路径
 
   const logDataMap = {
     '金融风控': {
@@ -347,14 +357,12 @@ only showing top 10 rows
     }
   }
 
-  const generateChartData = () => {
-    return '';
-  };
 
   const streamLogData = async () => {
     const data = logDataMap[selectedSecne][selectedDataset];
     const logLines = data.split('\n');
     let currentIndex = 0;
+    await new Promise(resolve => setTimeout(resolve, 500));
 
     while (currentIndex < logLines.length) {
       const nextChunk = logLines.slice(currentIndex, currentIndex + 5);
@@ -367,13 +375,13 @@ only showing top 10 rows
 
   const runProcess = async () => {
     setIsRunning(true);
+    setShowResultImage(false);
     setTerminalData([]);
-    setChartData([]);
 
     try {
       await streamLogData();
-      const results = generateChartData();
-      setChartData(results);
+      setImageSrc(resultImages[selectedSecne][selectedDataset]);
+      setShowResultImage(true);
     } catch (error) {
       setTerminalData(prev => [...prev, '❌ 运行失败: ' + error]);
     } finally {
@@ -450,8 +458,6 @@ only showing top 10 rows
           </Box>
         </Typography>
       </Paper>
-
-
       </Grid>
       <Grid container spacing={3}>
         {/* 控制面板 */}
@@ -539,8 +545,6 @@ only showing top 10 rows
               </Box>
             )}
           </Paper>
-
-
         </Grid>
         <Grid item xs={12} md={4}>
           <Paper elevation={3} sx={{ p: 2, borderRadius: 3 }}>
@@ -640,10 +644,20 @@ only showing top 10 rows
               结果展示
             </Typography>
 
-            <Box sx={{height: 400}}>
-              {chartData.length > 0 ? (
-              <>
-              </>
+          <Box sx={{
+            height: '400px', // 减去标题高度
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            overflow: 'hidden'
+          }}>
+            {showResultImage ? (
+              <Image
+                src={imageSrc}
+                alt="处理结果示意图"
+                width={600}
+                height={300}
+              />
               ) : (
                 <Box sx={{
                   height: '100%',

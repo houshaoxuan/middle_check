@@ -82,6 +82,7 @@ export default function Page() {
     })
     const logLines = data.split('\n');
     let currentIndex = 0;
+    await new Promise(resolve => setTimeout(resolve, 500));
 
     while (currentIndex < logLines.length) {
       const nextChunk = logLines.slice(currentIndex, currentIndex + 5);
