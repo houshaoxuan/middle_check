@@ -1,28 +1,24 @@
-"use client";
-import React, { useState, useEffect, useRef } from 'react';
-import {
-  Box, Grid, Button, Select, MenuItem,
-  Paper, Typography,
-  LinearProgress
-} from '@mui/material';
+'use client';
 
+import React, { useEffect, useRef, useState } from 'react';
 import Image from 'next/image'; // 添加Image组件
+import { Box, Button, Grid, LinearProgress, MenuItem, Paper, Select, Typography } from '@mui/material';
 
 const scene = ['金融风控', '电力潮流计算'];
 const datasets = {
   金融风控: ['financial_data_test', 'atec_task3_seq'],
   电力潮流计算: ['electric_data_test', 'origin_power_data'],
-}
+};
 
 const resultImages = {
-  '金融风控': {
-    'financial_data_test': '/image_1.png',
-    'atec_task3_seq': '/image_1.png'
+  金融风控: {
+    financial_data_test: '/image_1.png',
+    atec_task3_seq: '/image_1.png',
   },
-  '电力潮流计算': {
-    'electric_data_test': '/image_2.png',
-    'origin_power_data': '/image_2.png'
-  }
+  电力潮流计算: {
+    electric_data_test: '/image_2.png',
+    origin_power_data: '/image_2.png',
+  },
 };
 
 export default function Page() {
@@ -35,8 +31,8 @@ export default function Page() {
   const [imageSrc, setImageSrc] = useState(''); // 新增状态存储图片路径
 
   const logDataMap = {
-    '金融风控': {
-      'financial_data_test': `✅ 数据读取完成！
+    金融风控: {
+      financial_data_test: `✅ 数据读取完成！
 开始数据清洗流程...
 ✅ 预处理已完成！
 ✅ 数据已保存到: ./cleaned_outputs/test_output/step1_preprocess.csv
@@ -124,7 +120,7 @@ only showing top 10 rows
 +---+---+---------+
 
 ✅ 数据清洗完成，结果保存在 ./cleaned_outputs/test_output 目录下。`,
-      'atec_task3_seq': `✅ 数据读取完成！
+      atec_task3_seq: `✅ 数据读取完成！
 开始数据清洗流程...
 ✅ 预处理已完成！
 ✅ 数据已保存到: ./cleaned_outputs/atec_output/step1_preprocess.csv
@@ -234,10 +230,10 @@ only showing top 10 rows
 +-------+-------+---------+
 only showing top 10 rows
 
-✅ 数据清洗完成，结果保存在 ./cleaned_outputs/atec_output 目录下。`
+✅ 数据清洗完成，结果保存在 ./cleaned_outputs/atec_output 目录下。`,
     },
-    '电力潮流计算': {
-      'electric_data_test': `正在加载数据文件: electric_data_test.csv ...
+    电力潮流计算: {
+      electric_data_test: `正在加载数据文件: electric_data_test.csv ...
 ✅ 数据加载成功，共 10 行 8 列。
 
 📊 显示前10行和前10列的中间结果：
@@ -293,7 +289,7 @@ only showing top 10 rows
 ✅ 已保存：test_output_4.csv
 
 🎉 数据清洗完成，所有文件已保存。`,
-      'origin_power_data': `📂 正在加载数据文件: origin_power_data.csv ...
+      origin_power_data: `📂 正在加载数据文件: origin_power_data.csv ...
 ✅ 数据加载成功，共 82 行 380000 列。
 
 📊 显示前10行和前10列的中间结果：
@@ -353,25 +349,23 @@ only showing top 10 rows
 ✅ 已保存：output_3.csv
 ✅ 已保存：output_4.csv
 
-🎉 数据清洗完成，所有文件已保存。`
-    }
-  }
-
+🎉 数据清洗完成，所有文件已保存。`,
+    },
+  };
 
   const streamLogData = async () => {
     const data = logDataMap[selectedSecne][selectedDataset];
     const logLines = data.split('\n');
     let currentIndex = 0;
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, 500));
 
     while (currentIndex < logLines.length) {
       const nextChunk = logLines.slice(currentIndex, currentIndex + 5);
-      setTerminalData(prev => [...prev, ...nextChunk]);
+      setTerminalData((prev) => [...prev, ...nextChunk]);
       currentIndex += 5;
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 500));
     }
   };
-
 
   const runProcess = async () => {
     setIsRunning(true);
@@ -383,146 +377,166 @@ only showing top 10 rows
       setImageSrc(resultImages[selectedSecne][selectedDataset]);
       setShowResultImage(true);
     } catch (error) {
-      setTerminalData(prev => [...prev, '❌ 运行失败: ' + error]);
+      setTerminalData((prev) => [...prev, '❌ 运行失败: ' + error]);
     } finally {
       setIsRunning(false);
     }
   };
 
   // 添加 useEffect 监听 terminalData 变化并滚动到底部
-    useEffect(() => {
-      if (terminalRef.current) {
-        terminalRef.current.scrollTop = terminalRef.current.scrollHeight;
-      }
-    }, [terminalData]);
-
+  useEffect(() => {
+    if (terminalRef.current) {
+      terminalRef.current.scrollTop = terminalRef.current.scrollHeight;
+    }
+  }, [terminalData]);
 
   return (
-    <Box sx={{ p: 3, backgroundColor: '#f5f6fa',  }}>
+    <Box sx={{ p: 3, backgroundColor: '#f5f6fa' }}>
       <Grid item xs={12} sx={{ mb: 3 }}>
-      <Paper elevation={0} sx={{
-        p: 3,
-        borderRadius: 2,
-        backgroundColor: '#f0f4f8',
-        border: '1px solid #e0e0e0'
-      }}>
-        <Typography variant="body1" component="div" sx={{
-          lineHeight: 1.6,
-          color: '#2d3436',
-          fontSize: '0.95rem',
-          '& .red-bold': {
-            fontWeight: 600,
-            color: '#ff4444',
-            display: 'inline',
-            padding: '0 2px'
-          },
-          '& strong': {
-            fontWeight: 600
-          }
-        }}>
-          <strong>考核指标</strong>
-          <Box component="span" display="block">
-            针对图计算场景研发图应用相关辅助工具
-          </Box>
+        <Paper
+          elevation={0}
+          sx={{
+            p: 3,
+            borderRadius: 2,
+            backgroundColor: '#f0f4f8',
+            border: '1px solid #e0e0e0',
+          }}
+        >
+          <Typography
+            variant="body1"
+            component="div"
+            sx={{
+              lineHeight: 1.6,
+              color: '#2d3436',
+              fontSize: '0.95rem',
+              '& .red-bold': {
+                fontWeight: 600,
+                color: '#ff4444',
+                display: 'inline',
+                padding: '0 2px',
+              },
+              '& strong': {
+                fontWeight: 600,
+              },
+            }}
+          >
+            <strong>考核指标</strong>
+            <Box component="span" display="block">
+              针对图计算场景研发图应用相关辅助工具
+            </Box>
 
-          <strong>中期指标：</strong>
-          <Box component="span" display="block">
-            研发1～3个领域专用的图数据清洗工具
-          </Box>
+            <strong>中期指标：</strong>
+            <Box component="span" display="block">
+              指标5.1：研发<span className="red-bold">1～3</span>个领域专用的图数据清洗工具
+            </Box>
 
-          <strong>中期指标完成情况：</strong>
-          <Box component="span" display="block">
-            ① 完成面向金融风控场景的图数据自动清洗工具
-          </Box>
-          <Box component="span" display="block">
-            ② 完成面向电力潮流分析场景的图数据自动清洗工具
-          </Box>
-          <Box component="span" display="block">
-            ③ 实现面向金融图数据的仿真生成工具，用于构建基于金融领域的生成图
-          </Box>
-          <strong>完成时指标：</strong>
-          <Box component="span" display="block">
-            研发1～3个领域专用的构图工具
-          </Box>
-          <strong>考核方式：</strong>
-          <Box component="span" display="block">
-            提供测试大纲并进行第三方评测，运行环境依托主流处理器Intel(R) Xeon(R) Gold 6148 CPU @ 2.40GHz
-          </Box>
+            <strong>中期指标完成情况：</strong>
+            <Box component="span" display="block">
+              ① 完成面向金融风控场景的图数据自动清洗工具
+            </Box>
+            <Box component="span" display="block">
+              ② 完成面向电力潮流分析场景的图数据自动清洗工具
+            </Box>
+            <Box component="span" display="block">
+              ③ 实现面向金融图数据的仿真生成工具，用于构建基于金融领域的生成图
+            </Box>
+            <strong>完成时指标：</strong>
+            <Box component="span" display="block">
+              指标5.1：研发1～3个领域专用的构图工具
+            </Box>
+            <strong>考核方式：</strong>
+            <Box component="span" display="block">
+              <Box>
+                本测试通过编写python自动化脚本finalcial_daat_clean.py自动运行每一步清洗流程并验证结果是否匹配预期值。
+              </Box>
+              <Box> 支持典型电力数据清洗流程，包括非数值检测与替换、缺失值填充、数据拆分与保存等操作。</Box>
+              <Box> 编译部署金融图仿真生成工具，生成数据并构件图，检查构建的图及其规模。</Box>
+              运行环境依托主流处理器Intel(R) Xeon(R) Gold 6148 CPU @ 2.40GHz。
+            </Box>
 
-          <strong>数据集来源：</strong>
-          <Box component="span" display="block">
-            1.前沿科技探索社区（Adavanced Technology Exploration Community, ATEC）提供的农村金融风险预测数据集，采用atec_task3_seq.csv数据集。
-          </Box>
-          <Box component="span" display="block">
-            2.采用南瑞提供的电力领域数据集origin_power_data.csv。
-          </Box>
-        </Typography>
-      </Paper>
+            <strong>数据集来源：</strong>
+            <Box component="span" display="block">
+              1.前沿科技探索社区（Adavanced Technology Exploration Community,
+              ATEC）提供的农村金融风险预测数据集，采用atec_task3_seq.csv数据集。
+            </Box>
+            <Box component="span" display="block">
+              2.采用南瑞提供的电力领域数据集origin_power_data.csv。
+            </Box>
+          </Typography>
+        </Paper>
       </Grid>
       <Grid container spacing={3}>
         {/* 控制面板 */}
         <Grid item xs={12} md={4}>
           <Paper elevation={3} sx={{ p: 2, borderRadius: 3 }}>
-            <Typography variant="h6" sx={{
-              fontWeight: 700,
-              mb: 2,
-              color: 'second.main',
-              borderBottom: '2px solid',
-              borderColor: 'second.main',
-              pb: 1
-            }}>
+            <Typography
+              variant="h6"
+              sx={{
+                fontWeight: 700,
+                mb: 2,
+                color: 'second.main',
+                borderBottom: '2px solid',
+                borderColor: 'second.main',
+                pb: 1,
+              }}
+            >
               运行选项
             </Typography>
 
             <Grid container spacing={2}>
               <Grid item xs={12}>
-                  <Typography variant="h6" sx={{
+                <Typography
+                  variant="h6"
+                  sx={{
                     fontWeight: 550,
                     fontSize: '16px',
                     mb: 1,
-                  }}>
-                    场景选择
-                  </Typography>
-                  <Select
-                    fullWidth
-                    value={selectedSecne}
-                    onChange={(e) => {
-                      setSelectedScene(e.target.value);
-                      setSelectedDataset(datasets[e.target.value][0])
-                    }
-                  }
-                    disabled={isRunning}
-                  >
-                    {scene.map((scene) => (
-                      <MenuItem key={scene} value={scene} sx={{ py: 1 }}>
-                        <Typography variant="body1" fontWeight="500">
-                          {scene}
-                        </Typography>
-                      </MenuItem>
-                    ))}
-                  </Select>
+                  }}
+                >
+                  场景选择
+                </Typography>
+                <Select
+                  fullWidth
+                  value={selectedSecne}
+                  onChange={(e) => {
+                    setSelectedScene(e.target.value);
+                    setSelectedDataset(datasets[e.target.value][0]);
+                  }}
+                  disabled={isRunning}
+                >
+                  {scene.map((scene) => (
+                    <MenuItem key={scene} value={scene} sx={{ py: 1 }}>
+                      <Typography variant="body1" fontWeight="500">
+                        {scene}
+                      </Typography>
+                    </MenuItem>
+                  ))}
+                </Select>
               </Grid>
 
               <Grid item xs={12}>
-                  <Typography variant="h6" sx={{
+                <Typography
+                  variant="h6"
+                  sx={{
                     fontWeight: 550,
                     fontSize: '16px',
                     mb: 1,
-                  }}>
-                    选择数据集
-                  </Typography>
-                  <Select
-                    value={selectedDataset}
-                    onChange={(e) => setSelectedDataset(e.target.value)}
-                    disabled={isRunning}
-                    fullWidth
-                  >
-                    {datasets[selectedSecne].map((dataset) => (
-                      <MenuItem key={dataset} value={dataset} sx={{ py: 1 }}>
-                        <Typography variant="body1">{dataset}</Typography>
-                      </MenuItem>
-                    ))}
-                  </Select>
+                  }}
+                >
+                  选择数据集
+                </Typography>
+                <Select
+                  value={selectedDataset}
+                  onChange={(e) => setSelectedDataset(e.target.value)}
+                  disabled={isRunning}
+                  fullWidth
+                >
+                  {datasets[selectedSecne].map((dataset) => (
+                    <MenuItem key={dataset} value={dataset} sx={{ py: 1 }}>
+                      <Typography variant="body1">{dataset}</Typography>
+                    </MenuItem>
+                  ))}
+                </Select>
               </Grid>
 
               <Grid item xs={12}>
@@ -548,22 +562,27 @@ only showing top 10 rows
         </Grid>
         <Grid item xs={12} md={4}>
           <Paper elevation={3} sx={{ p: 2, borderRadius: 3 }}>
-            <Typography variant="h6" sx={{
-              fontWeight: 700,
-              mb: 2,
-              color: 'secondary.main',
-              borderBottom: '2px solid',
-              borderColor: 'secondary.main',
-              pb: 1
-            }}>
+            <Typography
+              variant="h6"
+              sx={{
+                fontWeight: 700,
+                mb: 2,
+                color: 'secondary.main',
+                borderBottom: '2px solid',
+                borderColor: 'secondary.main',
+                pb: 1,
+              }}
+            >
               {'数据清洗工具详情'}
             </Typography>
             <Box>
               <Typography variant="body2" color="text.secondary" paragraph>
-                <strong>面向金融风控场景数据清洗工具详情：</strong>本工具提供高效自动化清洗流程，涵盖预处理、行过滤、列过滤、列分割、填充缺失值及去重生成边数据等核心功能。工具确保数据完整性和准确性，符合标准图数据格式，满足金融风控应用需求。
+                <strong>面向金融风控场景数据清洗工具详情：</strong>
+                本工具提供高效自动化清洗流程，涵盖预处理、行过滤、列过滤、列分割、填充缺失值及去重生成边数据等核心功能。工具确保数据完整性和准确性，符合标准图数据格式，满足金融风控应用需求。
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                <strong>面向电力潮流分析场景数据清洗工具详情：</strong>本工具支持非数值检测与替换、缺失值填充、数据拆分等操作。工具确保数据清洗准确、满足电力数据分析需求。
+                <strong>面向电力潮流分析场景数据清洗工具详情：</strong>
+                本工具支持非数值检测与替换、缺失值填充、数据拆分等操作。工具确保数据清洗准确、满足电力数据分析需求。
               </Typography>
             </Box>
           </Paper>
@@ -571,14 +590,17 @@ only showing top 10 rows
         {/* 数据集信息卡片 */}
         <Grid item xs={12} md={4}>
           <Paper elevation={3} sx={{ p: 2, borderRadius: 3 }}>
-            <Typography variant="h6" sx={{
-              fontWeight: 700,
-              mb: 2,
-              color: 'secondary.main',
-              borderBottom: '2px solid',
-              borderColor: 'secondary.main',
-              pb: 1
-            }}>
+            <Typography
+              variant="h6"
+              sx={{
+                fontWeight: 700,
+                mb: 2,
+                color: 'secondary.main',
+                borderBottom: '2px solid',
+                borderColor: 'secondary.main',
+                pb: 1,
+              }}
+            >
               {'数据集信息'}
             </Typography>
             <Box>
@@ -592,36 +614,43 @@ only showing top 10 rows
           </Paper>
         </Grid>
         <Grid item xs={12} md={6}>
-          <Paper elevation={3} sx={{
-            p: 2,
-            borderRadius: 3,
-          }}>
-            <Typography variant="h6" sx={{
-              fontWeight: 700,
-              mb: 2,
-              color: 'second.main',
-            }}>
+          <Paper
+            elevation={3}
+            sx={{
+              p: 2,
+              borderRadius: 3,
+            }}
+          >
+            <Typography
+              variant="h6"
+              sx={{
+                fontWeight: 700,
+                mb: 2,
+                color: 'second.main',
+              }}
+            >
               运行日志
             </Typography>
 
             <Box
-            ref={terminalRef}
-            sx={{
-              height: '85%',
-              overflow: 'auto',
-              fontFamily: 'monospace',
-              fontSize: '0.8rem',
-              backgroundColor: '#000',
-              borderRadius: 2,
-              height: 400,
-              p: 1.5,
-              '& > div': {
-                color: '#4caf50',
-                lineHeight: 1.6,
-                borderBottom: '1px solid rgba(255,255,255,0.1)',
-                py: 0.5
-              }
-            }}>
+              ref={terminalRef}
+              sx={{
+                height: '85%',
+                overflow: 'auto',
+                fontFamily: 'monospace',
+                fontSize: '0.8rem',
+                backgroundColor: '#000',
+                borderRadius: 2,
+                height: 400,
+                p: 1.5,
+                '& > div': {
+                  color: '#4caf50',
+                  lineHeight: 1.6,
+                  borderBottom: '1px solid rgba(255,255,255,0.1)',
+                  py: 0.5,
+                },
+              }}
+            >
               {terminalData.map((line, index) => (
                 <div key={index}>{`> ${line}`}</div>
               ))}
@@ -631,44 +660,47 @@ only showing top 10 rows
 
         {/* 分析结果 */}
         <Grid item xs={12} md={6}>
-          <Paper elevation={3} sx={{
-            p: 2,
-            borderRadius: 3,
-            position: 'relative'
-          }}>
-            <Typography variant="h6" sx={{
-              fontWeight: 700,
-              mb: 2,
-              color: 'second.main',
-            }}>
+          <Paper
+            elevation={3}
+            sx={{
+              p: 2,
+              borderRadius: 3,
+              position: 'relative',
+            }}
+          >
+            <Typography
+              variant="h6"
+              sx={{
+                fontWeight: 700,
+                mb: 2,
+                color: 'second.main',
+              }}
+            >
               结果展示
             </Typography>
 
-          <Box sx={{
-            height: '400px', // 减去标题高度
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            overflow: 'hidden'
-          }}>
-            {showResultImage ? (
-              <Image
-                src={imageSrc}
-                alt="处理结果示意图"
-                width={600}
-                height={300}
-              />
+            <Box
+              sx={{
+                height: '400px', // 减去标题高度
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                overflow: 'hidden',
+              }}
+            >
+              {showResultImage ? (
+                <Image src={imageSrc} alt="处理结果示意图" width={600} height={300} />
               ) : (
-                <Box sx={{
-                  height: '100%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: 'text.secondary'
-                }}>
-                  <Typography variant="h6">
-                    {isRunning ? '数据生成中...' : '等待运行结果'}
-                  </Typography>
+                <Box
+                  sx={{
+                    height: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: 'text.secondary',
+                  }}
+                >
+                  <Typography variant="h6">{isRunning ? '数据生成中...' : '等待运行结果'}</Typography>
                 </Box>
               )}
             </Box>

@@ -3,6 +3,8 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Button, Grid, LinearProgress, MenuItem, Paper, Select, Typography } from '@mui/material';
 
+import Image from 'next/image'; // 添加Image组件
+
 import ReadOnlyCodeBox from './CodeContainer'; // 确保路径正确
 import { formatTabularData, formatTableData } from './result';
 
@@ -11,6 +13,11 @@ const datasets = {
   金融风控: ['atec_task3_seq'],
   电力潮流计算: ['origin_power_data'],
 };
+
+const imageSrcMap = {
+  金融风控: '/financial.png',
+  电力潮流计算: '/financial.png',
+}
 
 let financial_data = {
   dataset: `index	payee_user_id_list	payee_pay_amt_list	payer_user_id_list	payer_pay_amt_list
@@ -149,12 +156,15 @@ export default function Page() {
 
   const [selectedSecne, setSelectedScene] = useState(scene[0]);
   const [selectedDataset, setSelectedDataset] = useState(datasets[scene[0]][0]);
+    const [imageSrc, setImageSrc] = useState(imageSrcMap['金融风控']); // 新增状态存储图片路径
+
 
   // 不同场景的最大step
   const maxStep = selectedSecne === '金融风控' ? 6 : 3;
 
   const handleSceneChange = (event) => {
     setSelectedScene(event.target.value);
+    setImageSrc(imageSrcMap[event.target.value])
     setSelectedDataset(datasets[event.target.value][0]);
     setStep(0);
   };
@@ -266,7 +276,7 @@ export default function Page() {
       {/* 运行控制模块单独一行 */}
       <Grid container spacing={3} mb={2} alignItems="center">
         <Grid item xs={12} md={4}>
-          <Paper elevation={3} sx={{ p: 2, borderRadius: 3 }}>
+          <Paper elevation={3} sx={{ p: 2, borderRadius: 3, height: '350px' }}>
             <Typography
               variant="h6"
               sx={{
@@ -356,6 +366,40 @@ export default function Page() {
             )}
           </Paper>
         </Grid>
+        <Grid item xs={12} md={5}>
+          <Paper
+            elevation={3}
+            sx={{
+              p: 2,
+              borderRadius: 3,
+              position: 'relative',
+              height: '350px'
+            }}
+          >
+            <Typography
+              variant="h6"
+              sx={{
+                fontWeight: 700,
+                mb: 2,
+                color: 'second.main',
+              }}
+            >
+              流程展示
+            </Typography>
+
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                overflow: 'hidden',
+              }}
+            >
+              <Image src={imageSrc} alt="处理结果示意图" width={500} height={250} />
+            </Box>
+          </Paper>
+        </Grid>
+
       </Grid>
 
       {/* 其余示例和展示模块 */}
@@ -563,7 +607,7 @@ export default function Page() {
           <Grid item xs={12} md={6}>
             <Paper elevation={3} sx={{ p: 2, borderRadius: 3, height: 500 }}>
               <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: 'secondary.main' }}>
-                Terminal执行结果 步骤④
+                Terminal执行结果 步骤③
               </Typography>
               <Box
                 sx={{

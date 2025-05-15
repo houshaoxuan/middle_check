@@ -116,62 +116,90 @@ export default function Page() {
                 fontWeight: 600
               }
             }}>
-              <strong>考核指标</strong>
+              <strong style={{ fontSize: '16px' }}>考核指标</strong>
               <Box component="span" display="block">
-                ① 标准图遍历算法 PageRank 计算性能，性能功耗比
+                指标2.1：标准图遍历算法 PageRank 计算性能
               </Box>
               <Box component="span" display="block">
-                ② 标准图挖掘算法 k-Clique 计算性能，性能功耗比
+                指标2.2：标准图挖掘算法 k-Clique 计算性能
               </Box>
               <Box component="span" display="block">
-                ③ 标准图学习算法 GCN 计算性能，性能功耗比
+                指标2.3：标准图学习算法 GCN 计算性能
+              </Box>
+              <Box component="span" display="block">
+                指标2.4：标准图遍历算法 PageRank 性能功耗比
+              </Box>
+              <Box component="span" display="block">
+                指标2.5：标准图挖掘算法 k-Clique  性能功耗比
+              </Box>
+              <Box component="span" display="block">
+                指标2.6：标准图学习算法 GCN 计算性能 性能功耗比
               </Box>
 
-              <strong>中期指标：</strong>
+              <strong style={{ fontSize: '16px' }}>中期指标：</strong>
               <Box component="span" display="block">
-                ① 基于模拟器的图计算加速卡性能达到
-                <span className='red-bold'>100GTEPS，</span>
+                指标2.1：基于模拟器的图计算加速卡，标准图遍历算法PageRank计算性能达到
+                <span className='red-bold'>100GTEPS</span>
+              </Box>
+              <Box component="span" display="block">
+                指标2.2：基于模拟器的图计算加速卡，标准图挖掘算法k-Clique计算性能达到
+                <span className='red-bold'>20GTSPS</span>
+              </Box>
+              <Box component="span" display="block">
+                指标2.3：基于模拟器的图计算加速卡，标准图学习算法GCN计算性能达到
+                <span className='red-bold'>20GOPS</span>
+              </Box>
+              <Box component="span" display="block">
+                指标2.4：基于模拟器的图计算加速卡，标准图遍历算法PageRank
                 性能功耗比达到 <span className='red-bold'>2.5GTEPS/W</span>
               </Box>
               <Box component="span" display="block">
-                ② 基于模拟器的图计算加速卡性能达到
-                <span className='red-bold'>20GTSPS，</span>
+                指标2.5：基于模拟器的图计算加速卡，标准图挖掘算法k-Clique
                 性能功耗比达到 <span className='red-bold'>0.5GTSPS/W</span>
               </Box>
               <Box component="span" display="block">
-                ③ 基于模拟器的图计算加速卡性能达到
-                <span className='red-bold'>20GOPS，</span>
+                指标2.6：基于模拟器的图计算加速卡，标准图学习算法GCN
                 性能功耗比达到 <span className='red-bold'>0.5GOPS/W</span>
               </Box>
 
-              <strong>完成时指标：</strong>
+              <strong style={{ fontSize: '16px' }}>完成时指标：</strong>
               <Box component="span" display="block">
-                ① 基于图计算加速芯片的加速卡性能达到
-                <span className='red-bold'>100GTEPS，</span>
+                指标2.1：基于图计算加速芯片的加速卡，标准图遍历算法PageRank计算性能达到
+                <span className='red-bold'>100GTEPS</span>
+              </Box>
+              <Box component="span" display="block">
+                指标2.2：基于图计算加速芯片的加速卡，标准图挖掘算法k-Clique计算性能达到
+                <span className='red-bold'>20GTSPS</span>
+              </Box>
+              <Box component="span" display="block">
+                指标2.3：基于图计算加速芯片的加速卡，标准图学习算法GCN计算性能达到
+                <span className='red-bold'>20GOPS</span>
+              </Box>
+              <Box component="span" display="block">
+                指标2.4：基于图计算加速芯片的加速卡，标准图遍历算法PageRank
                 性能功耗比达到 <span className='red-bold'>2.5GTEPS/W</span>
               </Box>
               <Box component="span" display="block">
-                ② 基于图计算加速芯片的加速卡性能达到
-                <span className='red-bold'>20GTSPS，</span>
+                指标2.5：基于图计算加速芯片的加速卡，标准图挖掘算法k-Clique
                 性能功耗比达到 <span className='red-bold'>0.5GTSPS/W</span>
               </Box>
               <Box component="span" display="block">
-                ③ 基于图计算加速芯片的加速卡性能达到
-                <span className='red-bold'>20GOPS，</span>
+                指标2.6：基于图计算加速芯片的加速卡，标准图学习算法GCN
                 性能功耗比达到 <span className='red-bold'>0.5GOPS/W</span>
               </Box>
 
-              <strong>考核方式：</strong>
+              <strong style={{ fontSize: '16px' }}>考核方式：</strong>
               <Box component="span" display="block">
-                采用Graph500标准数据集运行PageRank、k-Clique和GCN
-                代码，进行实际性能测试。基准系统采用
-                2023年11月立项时的最新软件版本，
+                <Box>采用Graph500标准数据集在图计算加速卡模拟器上运行PageRank、k-Clique和GCN
+                代码，进行性能和性能功耗比测试。</Box>
+                基准系统采用
+                2023年11月立项时的最新软件版本（Ligra性能约为4GTEPS和性能功耗比约为0.02GTEPS/W、GraphPi性能约为1GTSPS和性能功耗比约为0.005GTSPS/W、PyG性能约为0.5GOPS和性能功耗比约为0.0025GOPS/W），
                 运行环境依托主流处理器Intel Xeon Gold 6338 CPU
               </Box>
 
-              <strong>数据集来源：</strong>
+              <strong style={{ fontSize: '16px' }}>数据集来源：</strong>
               <Box component="span" display="block">
-                采用Graph500标准数据集
+                采用3个Graph500标准数据集RMAT-16、RMAT-18、RMAT-20和7个自然图数据集wiki—Vote、ego-Gplus、web-Google、soc-Slashdot0811、Cora、CiteSeer、PubMed
               </Box>
             </Typography>
           </Paper>

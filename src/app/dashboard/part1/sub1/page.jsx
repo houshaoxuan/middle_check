@@ -242,56 +242,56 @@ const mockRequest = async () => {
               fontWeight: 600
             }
           }}>
-            <strong>考核指标</strong>
+            <strong style={{ fontSize: '16px' }}>考核指标</strong>
             <Box component="span" display="block">
-              ① 标准图遍历算法 PageRank 计算性能
+              指标1.1：标准图遍历算法 PageRank 计算性能
             </Box>
             <Box component="span" display="block">
-              ② 标准图挖掘算法 k-Clique 计算性能
+              指标1.2： 标准图挖掘算法 k-Clique 计算性能
             </Box>
             <Box component="span" display="block">
-              ③ 标准图学习算法 GCN 计算性能
+              指标1.3： 标准图学习算法 GCN 计算性能
             </Box>
 
-            <strong>中期指标：</strong>
+            <strong style={{ fontSize: '16px' }}>中期指标：</strong>
             <Box component="span" display="block">
-              ① 基于FPGA的图计算加速器性能达到
+              指标1.1：基于FPGA的图计算加速器，标准图遍历算法PageRank计算性能达到
               <span className='red-bold'>6GTEPS</span>
             </Box>
             <Box component="span" display="block">
-              ② 基于FPGA的图计算加速器性能达到
+              指标1.2：基于FPGA的图计算加速器，标准图挖掘算法k-Clique计算性能达到
               <span className='red-bold'>1.5GTSPS</span>
             </Box>
             <Box component="span" display="block">
-              ③ 基于FPGA的图计算加速器性能达到
+              指标1.3：基于FPGA的图计算加速器，标准图学习算法GCN计算性能达到
               <span className='red-bold'>1GOPS</span>
             </Box>
 
-            <strong>完成时指标：</strong>
+            <strong style={{ fontSize: '16px' }}>完成时指标：</strong>
             <Box component="span" display="block">
-              ① 基于FPGA的图计算加速器性能达到
+              指标1.1：基于FPGA的图计算加速器，标准图遍历算法PageRank计算性能达到
               <span className='red-bold'>10GTEPS</span>
             </Box>
             <Box component="span" display="block">
-              ② 基于FPGA的图计算加速器性能达到
+              指标1.2：基于FPGA的图计算加速器，标准图挖掘算法k-Clique计算性能达到
               <span className='red-bold'>2GTSPS</span>
             </Box>
             <Box component="span" display="block">
-              ③ 基于FPGA的图计算加速器性能达到
+              指标1.3：基于FPGA的图计算加速器，标准图学习算法GCN计算性能达到
               <span className='red-bold'>2GOPS</span>
             </Box>
 
-            <strong>考核方式：</strong>
+            <strong style={{ fontSize: '16px' }}>考核方式：</strong>
             <Box component="span" display="block">
-              采用Graph500标准数据集运行PageRank、k-Clique和GCN
-              代码，进行实际性能测试。基准系统采用
-              2023年11月立项时的最新软件版本，
+              <Box>采用Graph500标准数据集运行PageRank、k-Clique和GCN
+              代码，进行实际性能测试。</Box>基准系统采用
+              2023年11月立项时的最新软件版本（Ligra性能约为4GTEPS、GraphPi性能约为1GTSPS、PyG性能约为0.5GOPS），
               运行环境依托主流处理器Intel Xeon Gold 6338 CPU
             </Box>
 
-            <strong>数据集来源：</strong>
+            <strong style={{ fontSize: '16px' }}>数据集来源：</strong>
             <Box component="span" display="block">
-              采用Graph500标准数据集
+              采用Graph500标准数据集RMAT-16、RMAT-17、RMAT-18、RMAT-19和RMAT-20。
             </Box>
           </Typography>
         </Paper>
@@ -574,7 +574,7 @@ const mockRequest = async () => {
         </Grid>
       </Grid>
       {/* 代码转化卡片 */}
-      <Grid item xs={12} sx={{ mt: 2 }}>
+     {/*  <Grid item xs={12} sx={{ mt: 2 }}>
             <Paper elevation={3} sx={{ p: 2, borderRadius: 3 }}>
               <Typography variant="h6" sx={{
                 fontWeight: 700,
@@ -631,7 +631,7 @@ const mockRequest = async () => {
                 </Grid>
               </Grid>
             </Paper>
-          </Grid>
+          </Grid> */}
     </Box>
   );
 }
