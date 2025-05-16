@@ -6,19 +6,19 @@ import {
   LinearProgress
 } from '@mui/material';
 import {
-  BarChart, Bar, XAxis, YAxis
+  BarChart, Bar, XAxis, YAxis, ReferenceLine, Legend
 } from 'recharts';
 import request from '@/lib/request/request';
 
 import { algorithmCodeMap } from './algorithmCodeMap';
-import { chartResults} from './chartResults';
+import { chartResults } from './chartResults';
 
 const algorithms = ['CF', 'GCN', 'PR'];
 const datasets = {
   CF: ['rmat-16', 'rmat-18', 'rmat-20', 'wiki-vote', 'web-google', 'slashdot08'],
   GCN: ['rmat-16', 'rmat-17', 'rmat-18', 'Cora', 'Citeseer', 'Pubmed'],
   PR: ['rmat-16', 'rmat-18', 'rmat-20', 'wiki-vote', 'web-google', 'ego-gplus'],
-}
+};
 
 const logFileMap = {
   CF: {
@@ -45,25 +45,47 @@ const logFileMap = {
     'web-google': 'pr_on_web_google',
     'ego-gplus': 'pr_on_ego_gplus'
   }
+};
+
+const yAxisMap = {
+  CF: {
+    performance: 'GTSPS',
+    consumption: 'GTSPS/W',
+  },
+  GCN: {
+    performance: 'GOPS',
+    consumption: 'GOPS/W',
+  },
+  PR: {
+    performance: 'GTEPS',
+    consumption: 'GTEPS/W',
+  }
 }
+
+// Target metrics for reference lines
+const targetMetrics = {
+  CF: { performance: 20, consumption: 0.5 }, // GTSPS, GTSPS/W
+  GCN: { performance: 20, consumption: 0.5 }, // GOPS, GOPS/W
+  PR: { performance: 100, consumption: 2.5 } // GTEPS, GTEPS/W
+};
 
 export default function Page() {
   const [selectedAlgo, setSelectedAlgo] = useState(algorithms[0]);
   const [selectedDataset, setSelectedDataset] = useState(datasets['CF'][0]);
   const [terminalData, setTerminalData] = useState([]);
+  const [savedResults, setSavedResults] = useState({ CF: {}, GCN: {}, PR: {} });
   const [chartData, setChartData] = useState([]);
   const [displayCode, setDisplayCode] = useState(algorithmCodeMap[algorithms[0]]);
   const [isRunning, setIsRunning] = useState(false);
   const [chartMetric, setChartMetric] = useState('performance');
-  const terminalRef = useRef(null); // 添加 ref 用于终端容器
+  const terminalRef = useRef(null);
 
+  let tempSaveResults;
 
   useEffect(() => {
-    console.log('Selected Algorithm:', selectedAlgo, algorithmCodeMap);
     setDisplayCode(algorithmCodeMap[selectedAlgo]);
   }, [selectedAlgo]);
 
-  // 添加 useEffect 监听 terminalData 变化并滚动到底部
   useEffect(() => {
     if (terminalRef.current) {
       terminalRef.current.scrollTop = terminalRef.current.scrollHeight;
@@ -71,7 +93,22 @@ export default function Page() {
   }, [terminalData]);
 
   const generateChartData = () => {
-    return chartResults[selectedAlgo][selectedDataset];
+    const algoResults = tempSaveResults[selectedAlgo];
+
+    // 使用 datasets[selectedAlgo] 控制顺序，只包含 algoResults 中存在的数据集
+    const chartData = datasets[selectedAlgo]
+      .filter(dataset => algoResults[dataset] !== undefined) // 只包含 savedResults 中存在的数据集
+      .map(dataset => {
+        const results = algoResults[dataset];
+        return {
+          dataset,
+          performance: results[0]?.value || null,
+          ptarget: results[1]?.value || null,
+          consumption: results[2]?.value || null,
+          ctarget: results[3]?.value || null,
+        };
+    });
+    return chartData.filter(item => item.performance !== null || item.consumption !== null);
   };
 
   const streamLogData = async () => {
@@ -79,7 +116,7 @@ export default function Page() {
       url: `/logfile/${logFileMap[selectedAlgo][selectedDataset]}`,
       method: 'GET',
       responseType: 'text',
-    })
+    });
     const logLines = data.split('\n');
     let currentIndex = 0;
     await new Promise(resolve => setTimeout(resolve, 500));
@@ -92,16 +129,22 @@ export default function Page() {
     }
   };
 
-
   const runProcess = async () => {
     setIsRunning(true);
     setTerminalData([]);
-    setChartData([]);
 
     try {
       await streamLogData();
-      const results = generateChartData();
-      setChartData(results);
+      const results = chartResults[selectedAlgo][selectedDataset];
+      // Save results
+      tempSaveResults = { ...savedResults,
+        [selectedAlgo]: {
+          ...savedResults[selectedAlgo],
+          [selectedDataset]: results
+        }
+      };
+      setSavedResults(tempSaveResults);
+      setChartData(generateChartData())
     } catch (error) {
       setTerminalData(prev => [...prev, '❌ 运行失败: ' + error]);
     } finally {
@@ -109,118 +152,118 @@ export default function Page() {
     }
   };
 
+
+
   return (
-    <Box sx={{ p: 3, backgroundColor: '#f5f6fa',  }}>
+    <Box sx={{ p: 3, backgroundColor: '#f5f6fa' }}>
       <Grid item xs={12} sx={{ mb: 3 }}>
-      <Paper elevation={0} sx={{
-        p: 3,
-        borderRadius: 2,
-        backgroundColor: '#f0f4f8',
-        border: '1px solid #e0e0e0'
-      }}>
-        <Typography variant="body1" component="div" sx={{
-                      lineHeight: 1.6,
-                      color: '#2d3436',
-                      fontSize: '0.95rem',
-                      '& .red-bold': {
-                        fontWeight: 600,
-                        color: '#ff4444',
-                        display: 'inline',
-                        padding: '0 2px'
-                      },
-                      '& strong': {
-                        fontWeight: 600
-                      }
-                    }}>
-                      <strong style={{ fontSize: '16px' }}>考核指标</strong>
-                      <Box component="span" display="block">
-                        指标2.1：标准图遍历算法 PageRank 计算性能
-                      </Box>
-                      <Box component="span" display="block">
-                        指标2.2：标准图挖掘算法 k-Clique 计算性能
-                      </Box>
-                      <Box component="span" display="block">
-                        指标2.3：标准图学习算法 GCN 计算性能
-                      </Box>
-                      <Box component="span" display="block">
-                        指标2.4：标准图遍历算法 PageRank 性能功耗比
-                      </Box>
-                      <Box component="span" display="block">
-                        指标2.5：标准图挖掘算法 k-Clique  性能功耗比
-                      </Box>
-                      <Box component="span" display="block">
-                        指标2.6：标准图学习算法 GCN 计算性能 性能功耗比
-                      </Box>
+        <Paper elevation={0} sx={{
+          p: 3,
+          borderRadius: 2,
+          backgroundColor: '#f0f4f8',
+          border: '1px solid #e0e0e0'
+        }}>
+          <Typography variant="body1" component="div" sx={{
+            lineHeight: 1.6,
+            color: '#2d3436',
+            fontSize: '0.95rem',
+            '& .red-bold': {
+              fontWeight: 600,
+              color: '#ff4444',
+              display: 'inline',
+              padding: '0 2px'
+            },
+            '& strong': {
+              fontWeight: 600
+            }
+          }}>
+            <strong style={{ fontSize: '16px' }}>考核指标</strong>
+            <Box component="span" display="block">
+              指标2.1：标准图遍历算法 PageRank 计算性能
+            </Box>
+            <Box component="span" display="block">
+              指标2.2：标准图挖掘算法 k-Clique 计算性能
+            </Box>
+            <Box component="span" display="block">
+              指标2.3：标准图学习算法 GCN 计算性能
+            </Box>
+            <Box component="span" display="block">
+              指标2.4：标准图遍历算法 PageRank 性能功耗比
+            </Box>
+            <Box component="span" display="block">
+              指标2.5：标准图挖掘算法 k-Clique 性能功耗比
+            </Box>
+            <Box component="span" display="block">
+              指标2.6：标准图学习算法 GCN 计算性能 性能功耗比
+            </Box>
 
-                      <strong style={{ fontSize: '16px' }}>中期指标：</strong>
-                      <Box component="span" display="block">
-                        指标2.1：基于模拟器的图计算加速卡，标准图遍历算法PageRank计算性能达到
-                        <span className='red-bold'>100GTEPS</span>
-                      </Box>
-                      <Box component="span" display="block">
-                        指标2.2：基于模拟器的图计算加速卡，标准图挖掘算法k-Clique计算性能达到
-                        <span className='red-bold'>20GTSPS</span>
-                      </Box>
-                      <Box component="span" display="block">
-                        指标2.3：基于模拟器的图计算加速卡，标准图学习算法GCN计算性能达到
-                        <span className='red-bold'>20GOPS</span>
-                      </Box>
-                      <Box component="span" display="block">
-                        指标2.4：基于模拟器的图计算加速卡，标准图遍历算法PageRank
-                        性能功耗比达到 <span className='red-bold'>2.5GTEPS/W</span>
-                      </Box>
-                      <Box component="span" display="block">
-                        指标2.5：基于模拟器的图计算加速卡，标准图挖掘算法k-Clique
-                        性能功耗比达到 <span className='red-bold'>0.5GTSPS/W</span>
-                      </Box>
-                      <Box component="span" display="block">
-                        指标2.6：基于模拟器的图计算加速卡，标准图学习算法GCN
-                        性能功耗比达到 <span className='red-bold'>0.5GOPS/W</span>
-                      </Box>
+            <strong style={{ fontSize: '16px' }}>中期指标：</strong>
+            <Box component="span" display="block">
+              指标2.1：基于模拟器的图计算加速卡，标准图遍历算法PageRank计算性能达到
+              <span className='red-bold'>100GTEPS</span>
+            </Box>
+            <Box component="span" display="block">
+            指标2.2：基于模拟器的图计算加速卡，标准图挖掘算法k-Clique计算性能达到
+              <span className='red-bold'>20GTSPS</span>
+            </Box>
+            <Box component="span" display="block">
+              指标2.3：基于模拟器的图计算加速卡，标准图学习算法GCN计算性能达到
+              <span className='red-bold'>20GOPS</span>
+            </Box>
+            <Box component="span" display="block">
+              指标2.4：基于模拟器的图计算加速卡，标准图遍历算法PageRank
+              性能功耗比达到 <span className='red-bold'>2.5GTEPS/W</span>
+            </Box>
+            <Box component="span" display="block">
+              指标2.5：基于模拟器的图计算加速卡，标准图挖掘算法k-Clique
+              性能功耗比达到 <span className='red-bold'>0.5GTSPS/W</span>
+            </Box>
+            <Box component="span" display="block">
+              指标2.6：基于模拟器的图计算加速卡，标准图学习算法GCN
+              性能功耗比达到 <span className='red-bold'>0.5GOPS/W</span>
+            </Box>
 
-                      <strong style={{ fontSize: '16px' }}>完成时指标：</strong>
-                      <Box component="span" display="block">
-                        指标2.1：基于图计算加速芯片的加速卡，标准图遍历算法PageRank计算性能达到
-                        <span className='red-bold'>100GTEPS</span>
-                      </Box>
-                      <Box component="span" display="block">
-                        指标2.2：基于图计算加速芯片的加速卡，标准图挖掘算法k-Clique计算性能达到
-                        <span className='red-bold'>20GTSPS</span>
-                      </Box>
-                      <Box component="span" display="block">
-                        指标2.3：基于图计算加速芯片的加速卡，标准图学习算法GCN计算性能达到
-                        <span className='red-bold'>20GOPS</span>
-                      </Box>
-                      <Box component="span" display="block">
-                        指标2.4：基于图计算加速芯片的加速卡，标准图遍历算法PageRank
-                        性能功耗比达到 <span className='red-bold'>2.5GTEPS/W</span>
-                      </Box>
-                      <Box component="span" display="block">
-                        指标2.5：基于图计算加速芯片的加速卡，标准图挖掘算法k-Clique
-                        性能功耗比达到 <span className='red-bold'>0.5GTSPS/W</span>
-                      </Box>
-                      <Box component="span" display="block">
-                        指标2.6：基于图计算加速芯片的加速卡，标准图学习算法GCN
-                        性能功耗比达到 <span className='red-bold'>0.5GOPS/W</span>
-                      </Box>
+            <strong style={{ fontSize: '16px' }}>完成时指标：</strong>
+            <Box component="span" display="block">
+              指标2.1：基于图计算加速芯片的加速卡，标准图遍历算法PageRank计算性能达到
+              <span className='red-bold'>100GTEPS</span>
+            </Box>
+            <Box component="span" display="block">
+              指标2.2：基于图计算加速芯片的加速卡，标准图挖掘算法k-Clique计算性能达到
+              <span className='red-bold'>20GTSPS</span>
+            </Box>
+            <Box component="span" display="block">
+              指标2.3：基于图计算加速芯片的加速卡，标准图学习算法GCN计算性能达到
+              <span className='red-bold'>20GOPS</span>
+            </Box>
+            <Box component="span" display="block">
+              指标2.4：基于图计算加速芯片的加速卡，标准图遍历算法PageRank
+              性能功耗比达到 <span className='red-bold'>2.5GTEPS/W</span>
+            </Box>
+            <Box component="span" display="block">
+              指标2.5：基于图计算加速芯片的加速卡，标准图挖掘算法k-Clique
+              性能功耗比达到 <span className='red-bold'>0.5GTSPS/W</span>
+            </Box>
+            <Box component="span" display="block">
+              指标2.6：基于图计算加速芯片的加速卡，标准图学习算法GCN
+              性能功耗比达到 <span className='red-bold'>0.5GOPS/W</span>
+            </Box>
 
-                      <strong style={{ fontSize: '16px' }}>考核方式：</strong>
-                      <Box component="span" display="block">
-                        <Box>采用Graph500标准数据集在图计算加速卡模拟器上运行PageRank、k-Clique和GCN
-                        代码，进行性能和性能功耗比测试。</Box>
-                        基准系统采用
-                        2023年11月立项时的最新软件版本（Ligra性能约为4GTEPS和性能功耗比约为0.02GTEPS/W、GraphPi性能约为1GTSPS和性能功耗比约为0.005GTSPS/W、PyG性能约为0.5GOPS和性能功耗比约为0.0025GOPS/W），
-                        运行环境依托主流处理器Intel Xeon Gold 6338 CPU
-                      </Box>
+            <strong style={{ fontSize: '16px' }}>考核方式：</strong>
+            <Box component="span" display="block">
+              <Box>采用Graph500标准数据集在图计算加速卡模拟器上运行PageRank、k-Clique和GCN
+              代码，进行性能和性能功耗比测试。</Box>
+              基准系统采用
+              2023年11月立项时的最新软件版本（Ligra性能约为4GTEPS和性能功耗比约为0.02GTEPS/W、GraphPi性能约为1GTSPS和性能功耗比约为0.005GTSPS/W、PyG性能约为0.5GOPS和性能功耗比约为0.0025GOPS/W），
+              运行环境依托主流处理器Intel Xeon Gold 6338 CPU
+            </Box>
 
-                      <strong style={{ fontSize: '16px' }}>数据集来源：</strong>
-                      <Box component="span" display="block">
-                        采用3个Graph500标准数据集RMAT-16、RMAT-18、RMAT-20和7个自然图数据集wiki—Vote、ego-Gplus、web-Google、soc-Slashdot0811、Cora、CiteSeer、PubMed
-                      </Box>
-                    </Typography>
-      </Paper>
-
-
+            <strong style={{ fontSize: '16px' }}>数据集来源：</strong>
+            <Box component="span" display="block">
+              采用3个Graph500标准数据集RMAT-16、RMAT-18、RMAT-20和7个自然图数据集wiki—Vote、ego-Gplus、web-Google、soc-Slashdot0811、Cora、CiteSeer、PubMed
+            </Box>
+          </Typography>
+        </Paper>
       </Grid>
       <Grid container spacing={3}>
         {/* 控制面板 */}
@@ -239,53 +282,52 @@ export default function Page() {
 
             <Grid container spacing={2}>
               <Grid item xs={12}>
-                  <Typography variant="h6" sx={{
-                    fontWeight: 550,
-                    fontSize: '16px',
-                    mb: 1,
-                  }}>
-                      选择算法
-                  </Typography>
-                  <Select
-                    fullWidth
-                    value={selectedAlgo}
-                    onChange={(e) => {
-                      setSelectedAlgo(e.target.value);
-                      setSelectedDataset(datasets[e.target.value][0])
-                    }
-                  }
-                    disabled={isRunning}
-                  >
-                    {algorithms.map((algo) => (
-                      <MenuItem key={algo} value={algo} sx={{ py: 1 }}>
-                        <Typography variant="body1" fontWeight="500">
-                          {algo}
-                        </Typography>
-                      </MenuItem>
-                    ))}
-                  </Select>
+                <Typography variant="h6" sx={{
+                  fontWeight: 550,
+                  fontSize: '16px',
+                  mb: 1,
+                }}>
+                  选择算法
+                </Typography>
+                <Select
+                  fullWidth
+                  value={selectedAlgo}
+                  onChange={(e) => {
+                    setSelectedAlgo(e.target.value);
+                    setSelectedDataset(datasets[e.target.value][0]);
+                  }}
+                  disabled={isRunning}
+                >
+                  {algorithms.map((algo) => (
+                    <MenuItem key={algo} value={algo} sx={{ py: 1 }}>
+                      <Typography variant="body1" fontWeight="500">
+                        {algo}
+                      </Typography>
+                    </MenuItem>
+                  ))}
+                </Select>
               </Grid>
 
               <Grid item xs={12}>
-                  <Typography variant="h6" sx={{
-                    fontWeight: 550,
-                    fontSize: '16px',
-                    mb: 1,
-                  }}>
-                      选择数据集
-                  </Typography>
-                  <Select
-                    value={selectedDataset}
-                    onChange={(e) => setSelectedDataset(e.target.value)}
-                    disabled={isRunning}
-                    fullWidth
-                  >
-                    {datasets[selectedAlgo].map((dataset) => (
-                      <MenuItem key={dataset} value={dataset} sx={{ py: 1 }}>
-                        <Typography variant="body1">{dataset}</Typography>
-                      </MenuItem>
-                    ))}
-                  </Select>
+                <Typography variant="h6" sx={{
+                  fontWeight: 550,
+                  fontSize: '16px',
+                  mb: 1,
+                }}>
+                  选择数据集
+                </Typography>
+                <Select
+                  value={selectedDataset}
+                  onChange={(e) => setSelectedDataset(e.target.value)}
+                  disabled={isRunning}
+                  fullWidth
+                >
+                  {datasets[selectedAlgo].map((dataset) => (
+                    <MenuItem key={dataset} value={dataset} sx={{ py: 1 }}>
+                      <Typography variant="body1">{dataset}</Typography>
+                    </MenuItem>
+                  ))}
+                </Select>
               </Grid>
 
               <Grid item xs={12}>
@@ -305,9 +347,6 @@ export default function Page() {
             {isRunning && (
               <Box sx={{ mt: 2 }}>
                 <LinearProgress color="success" />
-{/*                 <Typography variant="caption" sx={{ color: 'text.secondary', mt: 0.5 }}>
-                  当前进度: {terminalData.length}/5 步骤
-                </Typography> */}
               </Box>
             )}
           </Paper>
@@ -372,23 +411,23 @@ export default function Page() {
             </Typography>
 
             <Box
-            ref={terminalRef}
-            sx={{
-              height: '400px',
-              overflow: 'auto',
-              fontFamily: 'monospace',
-              fontSize: '0.8rem',
-              backgroundColor: '#000',
-              borderRadius: 2,
-              height: 400,
-              p: 1.5,
-              '& > div': {
-                color: '#4caf50',
-                lineHeight: 1.6,
-                borderBottom: '1px solid rgba(255,255,255,0.1)',
-                py: 0.5
-              }
-            }}>
+              ref={terminalRef}
+              sx={{
+                height: '400px',
+                overflow: 'auto',
+                fontFamily: 'monospace',
+                fontSize: '0.8rem',
+                backgroundColor: '#000',
+                borderRadius: 2,
+                height: 400,
+                p: 1.5,
+                '& > div': {
+                  color: '#4caf50',
+                  lineHeight: 1.6,
+                  borderBottom: '1px solid rgba(255,255,255,0.1)',
+                  py: 0.5
+                }
+              }}>
               {terminalData.map((line, index) => (
                 <div key={index}>{`> ${line}`}</div>
               ))}
@@ -411,98 +450,120 @@ export default function Page() {
               结果展示
             </Typography>
 
-            <Box sx={{height: 400}}>
+            <Box sx={{ height: 400 }}>
               {chartData.length > 0 ? (
-              <>
-                <Tabs
-                  value={chartMetric}
-                  onChange={(e, v) => setChartMetric(v)}
-                  sx={{ mb: 2 }}
-                >
-                  <Tab label="性能" value="performance" style={{  fontWeight: 'bold',
-                  color: 'black'}}/>
-                  <Tab label="性能功耗比" value="consumption" style={{  fontWeight: 'bold',
-                  color: 'black'}}/>
-                </Tabs>
-                {chartMetric == 'performance' && (
-                    <BarChart
-                    data={chartData.slice(0, 2).filter(item => item.value !== null)}
-                    margin={{ top: 40, right: 20, left: 20, bottom: 20 }} // 顶部留出40px给标题
-                    width={580}
-                    height={350}
+                <>
+                  <Tabs
+                    value={chartMetric}
+                    onChange={(e, v) => setChartMetric(v)}
+                    sx={{ mb: 2 }}
                   >
-                    {/* 图表标题（居中于BarChart） */}
-                    <text
-                      x="50%"
-                      y={20} // 调整y坐标使其在顶部居中
-                      textAnchor="middle"
-                      style={{ fontSize: '16px', fontWeight: 'bold' }}
-                    >
-                      {`${selectedAlgo}-${selectedDataset} 性能测试结果`}
-                    </text>
-
-                    <XAxis dataKey="key" />
-                    <YAxis
-                      label={{
-                        value: '性能值',
-                        angle: -90,
-                        position: 'insideLeft'
-                      }}
-                    />
-                    <Bar
-                      dataKey="value"
-                      fill="#1976d2"
-                      radius={[4, 4, 0, 0]}
-                      barSize={100}
-                      label={{
-                        position: 'top',
-                        formatter: (value) => value?.toFixed(5)
-                      }}
-                    />
-                  </BarChart>
-                  )
-                }
-                {
-                  chartMetric == 'consumption' && (
+                    <Tab label="性能" value="performance" style={{ fontWeight: 'bold', color: 'black' }} />
+                    <Tab label="性能功耗比" value="consumption" style={{ fontWeight: 'bold', color: 'black' }} />
+                  </Tabs>
+                  {chartMetric === 'performance' && (
                     <BarChart
-                    data={chartData.slice(2, 4)}
-                    margin={{ top: 40, right: 20, left: 20, bottom: 20 }} // 顶部留出40px给标题
-                    width={580}
-                    height={350}
-                  >
-                    {/* 图表标题（居中于BarChart） */}
-                    <text
-                      x="50%"
-                      y={20} // 调整y坐标使其在顶部居中
-                      textAnchor="middle"
-                      style={{ fontSize: '16px', fontWeight: 'bold' }}
+                      data={chartData}
+                      margin={{ top: 40, right: 20, left: 5, bottom: 20 }}
+                      width={650}
+                      height={350}
                     >
-                      {`${selectedAlgo}-${selectedDataset} 功耗比测试结果`}
-                    </text>
-
-                    <XAxis dataKey="key" />
-                    <YAxis
-                      label={{
-                        value: '性能值',
-                        angle: -90,
-                        position: 'insideLeft'
-                      }}
-                    />
-                    <Bar
-                      dataKey="value"
-                      fill="#1976d2"
-                      radius={[4, 4, 0, 0]}
-                      barSize={100}
-                      label={{
-                        position: 'top',
-                        formatter: (value) => value?.toFixed(5)
-                      }}
-                    />
-                  </BarChart>
-                  )
-                }
-
-              </>
+                      <text
+                        x="50%"
+                        y={20}
+                        textAnchor="middle"
+                        style={{ fontSize: '16px', fontWeight: 'bold' }}
+                      >
+                        {`${selectedAlgo} 性能测试结果`}
+                      </text>
+                      <XAxis dataKey="dataset" />
+                      <YAxis
+                        label={{
+                          value: `性能值(${yAxisMap[selectedAlgo][chartMetric]})`,
+                          angle: -90,
+                          position: 'insideLeft'
+                        }}
+                      />
+                      <Legend
+                        verticalAlign="bottom"
+                        height={36} // 固定图例高度
+                        wrapperStyle={{ fontSize: '14px', paddingTop: '10px' }} // 调整字体和间距
+                      />
+                      <Bar
+                        dataKey="performance"
+                        fill="#1976d2"
+                        radius={[4, 4, 0, 0]}
+                        barSize={50}
+                        name={'性能值'}
+                        label={{
+                          position: 'top',
+                          formatter: (value) => value.toFixed(4)
+                        }}
+                      />
+                      <Bar
+                        dataKey="ptarget"
+                        fill="green"
+                        radius={[4, 4, 0, 0]}
+                        barSize={50}
+                        name={'中期指标值'}
+                        label={{
+                          position: 'top',
+                        }}
+                      />
+                    </BarChart>
+                  )}
+                  {chartMetric === 'consumption' && (
+                    <BarChart
+                      data={chartData}
+                      margin={{ top: 40, right: 20, left: 5, bottom: 20 }}
+                      width={650}
+                      height={350}
+                    >
+                      <text
+                        x="50%"
+                        y={20}
+                        textAnchor="middle"
+                        style={{ fontSize: '16px', fontWeight: 'bold' }}
+                      >
+                        {`${selectedAlgo} 功耗比测试结果`}
+                      </text>
+                      <XAxis dataKey="dataset" />
+                      <YAxis
+                        label={{
+                          value: `性能值(${yAxisMap[selectedAlgo][chartMetric]})`,
+                          angle: -90,
+                          position: 'insideLeft'
+                        }}
+                      />
+                      <Legend
+                        verticalAlign="bottom"
+                        height={36} // 固定图例高度
+                        wrapperStyle={{ fontSize: '14px', paddingTop: '10px' }} // 调整字体和间距
+                      />
+                      <Bar
+                        dataKey="consumption"
+                        fill="#1976d2"
+                        name={'性能功耗比'}
+                        radius={[4, 4, 0, 0]}
+                        barSize={50}
+                        label={{
+                          position: 'top',
+                          formatter: (value) => value.toFixed(4)
+                        }}
+                      />
+                      <Bar
+                        dataKey="ctarget"
+                        fill="green"
+                        radius={[4, 4, 0, 0]}
+                        barSize={50}
+                        name={'性能功耗比中期指标值'}
+                        label={{
+                          position: 'top',
+                        }}
+                      />
+                    </BarChart>
+                  )}
+                </>
               ) : (
                 <Box sx={{
                   height: '100%',
