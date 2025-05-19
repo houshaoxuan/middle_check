@@ -7,7 +7,7 @@ export default function EmbeddedPage() {
   return (
     <div
       style={{
-        width: '100vw',
+        width: '1700px',
         height: '100vh',
         transform: 'scale(0.8)', // 可根据需要调整缩放比例
         transformOrigin: 'top left',

@@ -22,21 +22,27 @@ export default function Page() {
     '硬件指令示例': false
   });
   const [currentStep, setCurrentStep] = useState(0);
-
+  const [simulatorResults, setSimulatorResults] = useState('');
+  const [isSimulatorRunning, setIsSimulatorRunning] = useState(false);
+  const [simulatorProgress, setSimulatorProgress] = useState(0);
 
   const resultsBoxRef = React.useRef(null);
+  const simulatorBoxRef = React.useRef(null);
 
   // 自动滚动到底部
   const scrollToBottom = () => {
     if (resultsBoxRef.current) {
       resultsBoxRef.current.scrollTop = resultsBoxRef.current.scrollHeight;
     }
+    if (simulatorBoxRef.current) {
+      simulatorBoxRef.current.scrollTop = simulatorBoxRef.current.scrollHeight;
+    }
   };
 
   // 自动滚动
   React.useEffect(() => {
     scrollToBottom();
-  }, [results]);
+  }, [results, simulatorResults]);
 
 
   const handleAlgoChange = (event) => {
@@ -96,7 +102,7 @@ export default function Page() {
           
           // 3. 获取最终结果
           try {
-            const res = await fetch(`${request.BASE_URL}/part3/result/1/${urlAlgo}/`);
+            const res = await fetch(`${request.BASE_URL}/part3/result/2/${urlAlgo}/`);
             const jsonData = await res.json();
             
             // 4. 显示完成
@@ -148,6 +154,46 @@ export default function Page() {
     }
   };
 
+  const handleSimulatorRun = async () => {
+    if (isSimulatorRunning) {
+      return;
+    }
+
+    setIsSimulatorRunning(true);
+    setSimulatorProgress(0);
+    setSimulatorResults('正在与服务器建立连接...\n');
+
+    try {
+      const eventSource = new EventSource(`${request.BASE_URL}/part3/moni/${selectedAlgo}/`);
+
+      eventSource.onmessage = (event) => {
+        if (event.data === '[done]') {
+          eventSource.close();
+          setSimulatorResults(prev => prev + '模拟器执行完成\n');
+          setSimulatorProgress(100);
+          setIsSimulatorRunning(false);
+        } else if (event.data === '[error]') {
+          eventSource.close();
+          setSimulatorResults(prev => prev + '\n执行出错\n');
+          setIsSimulatorRunning(false);
+        } else {
+          setSimulatorResults(prev => prev + event.data + '\n');
+          setSimulatorProgress(prev => Math.min(prev + 5, 95));
+        }
+      };
+
+      eventSource.onerror = () => {
+        eventSource.close();
+        setSimulatorResults(prev => prev + '\n连接错误\n');
+        setIsSimulatorRunning(false);
+      };
+
+    } catch (error) {
+      console.error('模拟器执行失败:', error);
+      setSimulatorResults(`执行失败: ${error.message}`);
+      setIsSimulatorRunning(false);
+    }
+  };
 
   const exampleTypeMapping = {
     '编程接口示例': 'CGA',
@@ -219,7 +265,8 @@ export default function Page() {
           <Box component="span" display="block">最后，支持Pregel框架向CGA编程模型的转换</Box>
           <Box component="span" display="block">使用SNAP标准动态图数据集进行评测，性能指标计算方法是：动态图更新速率=总更新边数/总更新时间</Box>
           <strong>数据集来源：</strong>
-          <Box component="span" display="block">采用选自斯坦福网络分析平台（SNAP）的标准动态图数据集sx-askubuntu、wiki-talk-temporal和sx-stackoverflow</Box>
+          <Box component="span" display="block">采用选择SNAP的标准图数据集facebook，和图卷积网络标准数据集Cora</Box>
+
         </Typography>
       </Paper>
 
@@ -358,6 +405,42 @@ export default function Page() {
               )}
             </Box>
             <ReadOnlyCodeBox content={results['硬件指令示例'] || ''} height={400} />
+          </Paper>
+        </Grid>
+      </Grid>
+
+      {/* 模拟器执行区域 */}
+      <Grid container spacing={3} mt={2}>
+        <Grid item xs={9}>
+          <Paper elevation={3} sx={{ p: 2, borderRadius: 3, height: 450, display: 'flex', flexDirection: 'column' }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+              <Typography variant="h6" sx={{ fontWeight: 700, color: 'secondary.main' }}>
+                执行模拟器
+              </Typography>
+              <Button 
+                variant="contained" 
+                color="primary" 
+                onClick={handleSimulatorRun} 
+                disabled={isSimulatorRunning}
+              >
+                {isSimulatorRunning ? '运行中...' : '执行模拟器'}
+              </Button>
+            </Box>
+            {isSimulatorRunning && <LinearProgress value={simulatorProgress} sx={{ mb: 2 }} />}
+            <Box sx={{
+              backgroundColor: '#1e1e1e',
+              color: '#d4d4d4',
+              fontFamily: 'Menlo, Monaco, Consolas, "Courier New", monospace',
+              fontSize: '0.875rem',
+              lineHeight: 1.5,
+              overflow: 'auto',
+              padding: '16px',
+              borderRadius: '4px',
+              flex: 1,
+              whiteSpace: 'pre',
+            }} ref={simulatorBoxRef}>
+              {simulatorResults}
+            </Box>
           </Paper>
         </Grid>
       </Grid>

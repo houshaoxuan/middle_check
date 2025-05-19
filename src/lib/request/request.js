@@ -1,6 +1,6 @@
 // 基础配置
-// export const BASE_URL = 'http://10.21.145.217:8000';
-export const BASE_URL = 'http://211.69.197.105:8000';
+export const BASE_URL = 'http://10.21.145.217:8000';
+// export const BASE_URL = 'http://211.69.197.105:8000';
 
 // 通用请求封装
 export default async function request(config) {
