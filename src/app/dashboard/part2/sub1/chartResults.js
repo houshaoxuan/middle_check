@@ -1,5 +1,5 @@
 export const chartResults = {
-  CF: {
+  'k-Clique(k=3)': {
     'rmat-16': [
       { key: '性能(GTSPS)', value: 50.63 },
       { key: '性能指标要求', value: 20 },
@@ -75,7 +75,7 @@ export const chartResults = {
       { key: '性能功耗比指标要求', value: null }
     ]
   },
-  PR: {
+  PageRank: {
     'rmat-16': [
       { key: '性能(GTEPS)', value: 107.03 },
       { key: '性能指标要求', value: 100 },

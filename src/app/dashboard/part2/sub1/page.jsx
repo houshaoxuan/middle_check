@@ -13,15 +13,15 @@ import request from '@/lib/request/request';
 import { algorithmCodeMap } from './algorithmCodeMap';
 import { chartResults } from './chartResults';
 
-const algorithms = ['CF', 'GCN', 'PR'];
+const algorithms = ['k-Clique(k=3)', 'GCN', 'PageRank'];
 const datasets = {
-  CF: ['rmat-16', 'rmat-18', 'rmat-20', 'wiki-vote', 'web-google', 'slashdot08'],
+  'k-Clique(k=3)': ['rmat-16', 'rmat-18', 'rmat-20', 'wiki-vote', 'web-google', 'slashdot08'],
   GCN: ['rmat-16', 'rmat-17', 'rmat-18', 'Cora', 'Citeseer', 'Pubmed'],
-  PR: ['rmat-16', 'rmat-18', 'rmat-20', 'wiki-vote', 'web-google', 'ego-gplus'],
+  PageRank: ['rmat-16', 'rmat-18', 'rmat-20', 'wiki-vote', 'web-google', 'ego-gplus'],
 };
 
 const logFileMap = {
-  CF: {
+  'k-Clique(k=3)': {
     'rmat-16': 'cf_on_rmat_16',
     'rmat-18': 'cf_on_rmat_18',
     'rmat-20': 'cf_on_rmat_20',
@@ -37,7 +37,7 @@ const logFileMap = {
     'Citeseer': 'gcn_on_citeseer_x10',
     'Pubmed': 'gcn_on_pubmed_x10'
   },
-  PR: {
+  'PageRank': {
     'rmat-16': 'pr_on_rmat_16',
     'rmat-18': 'pr_on_rmat_18',
     'rmat-20': 'pr_on_rmat_20',
@@ -48,7 +48,7 @@ const logFileMap = {
 };
 
 const yAxisMap = {
-  CF: {
+'k-Clique(k=3)': {
     performance: 'GTSPS',
     consumption: 'GTSPS/W',
   },
@@ -56,7 +56,7 @@ const yAxisMap = {
     performance: 'GOPS',
     consumption: 'GOPS/W',
   },
-  PR: {
+  PageRank: {
     performance: 'GTEPS',
     consumption: 'GTEPS/W',
   }
@@ -64,16 +64,43 @@ const yAxisMap = {
 
 // Target metrics for reference lines
 const targetMetrics = {
-  CF: { performance: 20, consumption: 0.5 }, // GTSPS, GTSPS/W
+'k-Clique(k=3)': { performance: 20, consumption: 0.5 }, // GTSPS, GTSPS/W
   GCN: { performance: 20, consumption: 0.5 }, // GOPS, GOPS/W
-  PR: { performance: 100, consumption: 2.5 } // GTEPS, GTEPS/W
+  PageRank: { performance: 100, consumption: 2.5 } // GTEPS, GTEPS/W
 };
+
+const datasetInfo = {
+  'k-Clique(k=3)': {
+    'rmat-16': { nodes: 65536, edges: 1048576 },
+    'rmat-18': { nodes: 262144, edges: 8388608 },
+    'rmat-20': { nodes: 1048576, edges: 31399374 },
+    'wiki-vote': { nodes: 7115, edges: 103689 },
+    'web-google': { nodes: 875713, edges: 5105039 },
+    'slashdot08': { nodes: 77360, edges: 905468 }
+  },
+  GCN: {
+    'rmat-16': { nodes: 65536, edges: 1114112 },
+    'rmat-17': { nodes: 131072, edges: 2228224 },
+    'rmat-18': { nodes: 262144, edges: 4456448 },
+    'Cora': { nodes: 2708, edges: 10556 },
+    'Citeseer': { nodes: 3327, edges: 9104 },
+    'Pubmed': { nodes: 19717, edges: 88648 }
+  },
+  PageRank: {
+    'rmat-16': { nodes: 65536, edges: 1048576 },
+    'rmat-18': { nodes: 262144, edges: 8388608 },
+    'rmat-20': { nodes: 1048576, edges: 31399374 },
+    'wiki-vote': { nodes: 7115, edges: 103689 },
+    'web-google': { nodes: 875713, edges: 5105039 },
+    'ego-gplus': { nodes: 107614, edges: 13673453 }
+  }
+}
 
 export default function Page() {
   const [selectedAlgo, setSelectedAlgo] = useState(algorithms[0]);
-  const [selectedDataset, setSelectedDataset] = useState(datasets['CF'][0]);
+  const [selectedDataset, setSelectedDataset] = useState(datasets['k-Clique(k=3)'][0]);
   const [terminalData, setTerminalData] = useState([]);
-  const [savedResults, setSavedResults] = useState({ CF: {}, GCN: {}, PR: {} });
+  const [savedResults, setSavedResults] = useState({ 'k-Clique(k=3)': {}, GCN: {}, PageRank: {} });
   const [chartData, setChartData] = useState([]);
   const [displayCode, setDisplayCode] = useState(algorithmCodeMap[algorithms[0]]);
   const [isRunning, setIsRunning] = useState(false);
@@ -119,13 +146,13 @@ export default function Page() {
     });
     const logLines = data.split('\n');
     let currentIndex = 0;
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise(resolve => setTimeout(resolve, 100));
 
     while (currentIndex < logLines.length) {
       const nextChunk = logLines.slice(currentIndex, currentIndex + 5);
       setTerminalData(prev => [...prev, ...nextChunk]);
       currentIndex += 5;
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise(resolve => setTimeout(resolve, 100));
     }
   };
 
@@ -268,7 +295,9 @@ export default function Page() {
       <Grid container spacing={3}>
         {/* 控制面板 */}
         <Grid item xs={12} md={4}>
-          <Paper elevation={3} sx={{ p: 2, borderRadius: 3 }}>
+          <Grid item xs={12} sx={{ mb: 3 }}>
+
+            <Paper elevation={3} sx={{ p: 2, borderRadius: 3 }}>
             <Typography variant="h6" sx={{
               fontWeight: 700,
               mb: 2,
@@ -351,6 +380,34 @@ export default function Page() {
             )}
           </Paper>
         </Grid>
+
+        {/* 数据集信息卡片 */}
+          <Grid item xs={12}>
+            <Paper elevation={3} sx={{ p: 2, borderRadius: 3 }}>
+              <Typography variant="h6" sx={{
+                fontWeight: 700,
+                mb: 2,
+                color: 'secondary.main',
+                borderBottom: '2px solid',
+                borderColor: 'secondary.main',
+                pb: 1
+              }}>
+                {'数据集信息'}
+              </Typography>
+
+                <Box>
+                  <Box>
+                    <Typography variant="body2" color="text.secondary" paragraph>
+                      <strong>节点规模:</strong> {datasetInfo[selectedAlgo][selectedDataset].nodes.toLocaleString()}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      <strong>边规模:</strong> {datasetInfo[selectedAlgo][selectedDataset].edges.toLocaleString()}
+                    </Typography>
+                  </Box>
+                </Box>
+            </Paper>
+          </Grid>
+      </Grid>
 
         {/* 代码展示 */}
         <Grid item xs={12} md={8}>
