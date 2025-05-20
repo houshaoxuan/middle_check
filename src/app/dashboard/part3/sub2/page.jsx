@@ -8,7 +8,7 @@ import ReadOnlyCodeBox from '../../part2/sub1/CodeContainer';
 import request from '@/lib/request/request';
 
 const frameworks = {
-  'Pregel': ['bfs', 'sssp', 'ppr'],
+  'GraphScope': ['bfs', 'sssp', 'ppr'],
   'DGL': ['gcn'],
 };
 
@@ -21,20 +21,27 @@ export default function FrameworkConversionPage() {
   const [results, setResults] = useState({});
   const [isRunning, setIsRunning] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [simulatorResults, setSimulatorResults] = useState('');
+  const [isSimulatorRunning, setIsSimulatorRunning] = useState(false);
+  const [simulatorProgress, setSimulatorProgress] = useState(0);
 
   const resultsBoxRef = React.useRef(null);
+  const simulatorBoxRef = React.useRef(null);
 
   // 自动滚动到底部
   const scrollToBottom = () => {
     if (resultsBoxRef.current) {
       resultsBoxRef.current.scrollTop = resultsBoxRef.current.scrollHeight;
     }
+    if (simulatorBoxRef.current) {
+      simulatorBoxRef.current.scrollTop = simulatorBoxRef.current.scrollHeight;
+    }
   };
 
   // 自动滚动
   React.useEffect(() => {
     scrollToBottom();
-  }, [results]);
+  }, [results, simulatorResults]);
 
 
 
@@ -93,7 +100,7 @@ export default function FrameworkConversionPage() {
             }));
 
             // 更新原始代码显示
-            const originalCode = selectedFramework === 'Pregel' ? jsonData.data.pregel : jsonData.data.dgl;
+            const originalCode = selectedFramework === 'GraphScope' ? jsonData.data.pregel : jsonData.data.dgl;
             setOriginalCodeDisplay(originalCode ? originalCode.join('\n') : '');
             
             // 更新转换后的代码
@@ -145,6 +152,47 @@ export default function FrameworkConversionPage() {
     }
   };
 
+  const handleSimulatorRun = async () => {
+    if (isSimulatorRunning) {
+      return;
+    }
+
+    setIsSimulatorRunning(true);
+    setSimulatorProgress(0);
+    setSimulatorResults('正在与服务器建立连接...\n');
+
+    try {
+      const eventSource = new EventSource(`${request.BASE_URL}/part3/moni2/${selectedAlgorithm}/`);
+
+      eventSource.onmessage = (event) => {
+        if (event.data === '[done]') {
+          eventSource.close();
+          setSimulatorResults(prev => prev + '模拟器执行完成\n');
+          setSimulatorProgress(100);
+          setIsSimulatorRunning(false);
+        } else if (event.data === '[error]') {
+          eventSource.close();
+          setSimulatorResults(prev => prev + '\n执行出错\n');
+          setIsSimulatorRunning(false);
+        } else {
+          setSimulatorResults(prev => prev + event.data + '\n');
+          setSimulatorProgress(prev => Math.min(prev + 5, 95));
+        }
+      };
+
+      eventSource.onerror = () => {
+        eventSource.close();
+        setSimulatorResults(prev => prev + '\n连接错误\n');
+        setIsSimulatorRunning(false);
+      };
+
+    } catch (error) {
+      console.error('模拟器执行失败:', error);
+      setSimulatorResults(`执行失败: ${error.message}`);
+      setIsSimulatorRunning(false);
+    }
+  };
+
   return (
     <Box sx={{ p: 3, backgroundColor: '#f5f6fa' }}>
       {/* 顶部文字说明模块 */}
@@ -162,7 +210,7 @@ export default function FrameworkConversionPage() {
           <strong>考核方式：</strong>
           <Box component="span" display="block">首先，将图遍历、图学习、图挖掘应用采用CGA编程模型统一化表达</Box>
           <Box component="span" display="block">然后，将CGA编程模型经过多层编译，转换成图计算加速卡（模拟器）上运行的代码</Box>
-          <Box component="span" display="block">最后，支持Pregel框架向CGA编程模型的转换</Box>
+          <Box component="span" display="block">最后，支持GraphScope和DGL框架向CGA编程模型的转换</Box>
           <Box component="span" display="block">使用SNAP标准动态图数据集进行评测，性能指标计算方法是：动态图更新速率=总更新边数/总更新时间</Box>
           <strong>数据集来源：</strong>
           <Box component="span" display="block">采用选择SNAP的标准图数据集facebook，和图卷积网络标准数据集Cora</Box>
@@ -251,7 +299,7 @@ export default function FrameworkConversionPage() {
           {/* 原框架代码 */}
           <Paper elevation={3} sx={{ p: 2, borderRadius: 3, mb: 3, height: 400 }}>
             <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: 'secondary.main' }}>
-              原框架代码
+              GraphScope或DGL框架代码展示
             </Typography>
             <ReadOnlyCodeBox content={originalCodeDisplay} height={300} />
           </Paper>
@@ -260,7 +308,7 @@ export default function FrameworkConversionPage() {
           {/* 现框架代码 */}
           <Paper elevation={3} sx={{ p: 2, borderRadius: 3, mb: 3, height: 400 }}>
             <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: 'secondary.main' }}>
-              现框架代码
+              基于CGA编程模型的代码展示
             </Typography>
             <ReadOnlyCodeBox content={transformedCode} height={300} />
           </Paper>
@@ -272,7 +320,7 @@ export default function FrameworkConversionPage() {
         <Grid item xs={12} md={6}>
           <Paper elevation={3} sx={{ p: 2, borderRadius: 3, height: 450 }}>
             <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: 'secondary.main' }}>
-              graphIR示例
+              GraphIR展示
             </Typography>
             <ReadOnlyCodeBox content={results['graphIR示例'] || ''} height={350} />
           </Paper>
@@ -280,7 +328,7 @@ export default function FrameworkConversionPage() {
         <Grid item xs={12} md={6}>
           <Paper elevation={3} sx={{ p: 2, borderRadius: 3, height: 450 }}>
             <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: 'secondary.main' }}>
-              MatrixIR示例
+              MatrixIR展示
             </Typography>
             <ReadOnlyCodeBox content={results['MatrixIR示例'] || ''} height={350} />
           </Paper>
@@ -288,9 +336,41 @@ export default function FrameworkConversionPage() {
         <Grid item xs={12} md={6}>
           <Paper elevation={3} sx={{ p: 2, borderRadius: 3, height: 450 }}>
             <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: 'secondary.main' }}>
-              硬件指令示例
+              硬件指令展示
             </Typography>
             <ReadOnlyCodeBox content={results['硬件指令示例'] || ''} height={350} />
+          </Paper>
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <Paper elevation={3} sx={{ p: 2, borderRadius: 3, height: 450 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+              <Typography variant="h6" sx={{ fontWeight: 700, color: 'secondary.main' }}>
+                在模拟器上执行硬件指令
+              </Typography>
+              <Button 
+                variant="contained" 
+                color="primary" 
+                onClick={handleSimulatorRun} 
+                disabled={isSimulatorRunning}
+              >
+                {isSimulatorRunning ? '运行中...' : '运行'}
+              </Button>
+            </Box>
+            {isSimulatorRunning && <LinearProgress value={simulatorProgress} sx={{ mb: 2 }} />}
+            <Box sx={{
+              backgroundColor: '#1e1e1e',
+              color: '#d4d4d4',
+              fontFamily: 'Menlo, Monaco, Consolas, "Courier New", monospace',
+              fontSize: '0.875rem',
+              lineHeight: 1.5,
+              overflow: 'auto',
+              padding: '16px',
+              borderRadius: '4px',
+              height: '350px',
+              whiteSpace: 'pre',
+            }} ref={simulatorBoxRef}>
+              {simulatorResults}
+            </Box>
           </Paper>
         </Grid>
       </Grid>

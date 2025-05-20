@@ -18,7 +18,7 @@ import {
   TableRow,
   LinearProgress,
 } from '@mui/material';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ReferenceLine } from 'recharts';
 import request from '@/lib/request/request'; // 假设你有一个请求库
 
 const algorithms = ['PageRank', 'k-Clique', 'GCN'];
@@ -53,6 +53,26 @@ const datasetInfo = {
   'Rmat-20': { nodes: '2^20', edges: '2^24' },
 };
 
+// 添加中期指标常量
+const midtermMetrics = {
+  'PageRank': 6, // GTEPS
+  'k-Clique': 1.5, // GTSPS
+  'GCN': 1, // GOPS
+};
+
+// 获取吞吐量单位
+const getThroughputUnit = (algorithm) => {
+  switch(algorithm) {
+    case 'PageRank':
+      return 'GTEPS';
+    case 'k-Clique':
+      return 'GTSPS';
+    case 'GCN':
+      return 'GOPS';
+    default:
+      return '';
+  }
+};
 
 export default function Page() {
   const [selectedAlgo, setSelectedAlgo] = useState(algorithms[0]);
@@ -63,6 +83,7 @@ export default function Page() {
   const [performanceData, setPerformanceData] = useState([]);
   const [chartMetric, setChartMetric] = useState('time');
   const [progress, setProgress] = useState(0);
+  const [showReferenceLine, setShowReferenceLine] = useState(false);
   const logBoxRef = React.useRef(null);
 
   // 自动滚动到底部
@@ -113,7 +134,11 @@ export default function Page() {
 
   // 生成图表数据
   const getChartData = () => {
-    return getValidData();
+    return getValidData().map(item => ({
+      ...item,
+      displayName: item.dataset, // 用于显示的简化名称
+      fullName: item.combinedKey // 用于tooltip显示的完整名称
+    }));
   };
 
   const handleRun = async () => {
@@ -122,12 +147,20 @@ export default function Page() {
     setRunning(true);
     setProgress(0);
     setLogs(['正在与服务器建立连接...']);
-
+  
     try {
       const targets = selectedDataset === allDatasetsOption
-        ? datasets
+        ? allowedCombinations[selectedAlgo] // 使用算法允许的数据集列表
         : [selectedDataset];
-
+  
+      // 检查是否需要清空之前的数据
+      const shouldClearData = performanceData.length > 0 && 
+        performanceData[0].algorithm !== selectedAlgo;
+  
+      if (shouldClearData) {
+        setPerformanceData([]);
+      }
+  
       // 批量执行任务
       for (const dataset of targets) {
         let urlAlgo, urlData;
@@ -146,7 +179,7 @@ export default function Page() {
           default:
             throw new Error(`不支持的算法: ${selectedAlgo}`);
         }
-
+  
         // 数据集URL映射
         switch(dataset) {
           case 'Rmat-16':
@@ -167,7 +200,7 @@ export default function Page() {
           default:
             throw new Error(`不支持的数据集: ${dataset}`);
         }
-
+  
         // 1. 执行流式命令
         const eventSource = new EventSource(`${request.BASE_URL}/part1/execute/${urlAlgo}/${urlData}/`);
         
@@ -176,17 +209,17 @@ export default function Page() {
             eventSource.close();
             
             // 2. 显示正在拷贝result
-            setLogs(prev => [...prev, '正在拷贝result...']);
+            setLogs(prev => [...prev, `正在拷贝 ${dataset} 的result...`]);
             
             // 3. 获取最终结果
             try {
-              const res = await fetch(`${request.BASE_URL}/part1/result/`);
+              const res = await fetch(`${request.BASE_URL}/part1/result/${urlAlgo}/${urlData}/`);
               const jsonData = await res.json();
               
               // 4. 显示完成
-              setLogs(prev => [...prev, '执行完成']);
-              setProgress(100);
-
+              setLogs(prev => [...prev, `${dataset} 执行完成`]);
+              setProgress(100 * (targets.indexOf(dataset) + 1) / targets.length);
+  
               // 生成新的性能数据
               const newResult = generatePerformanceData(jsonData);
               
@@ -196,27 +229,37 @@ export default function Page() {
                 return [...filtered, newResult]
                   .sort((a, b) => datasets.indexOf(a.dataset) - datasets.indexOf(b.dataset));
               });
-              setRunning(false)
+  
+              // 如果是最后一个数据集，设置运行状态为false
+              if (targets.indexOf(dataset) === targets.length - 1) {
+                setRunning(false);
+              }
             } catch (error) {
-              setLogs(prev => [...prev, `❌ 获取结果失败: ${error.message}`]);
+              setLogs(prev => [...prev, `❌ 获取 ${dataset} 结果失败: ${error.message}`]);
               setProgress(0);
+              setRunning(false);
             }
             
           } else if (event.data === '[error]') {
             eventSource.close();
-            setLogs(prev => [...prev, '❌ 执行出错']);
+            setLogs(prev => [...prev, `❌ ${dataset} 执行出错`]);
             setProgress(0);
+            setRunning(false);
           } else {
-            setLogs(prev => [...prev, event.data]);
+            setLogs(prev => [...prev, `${dataset}: ${event.data}`]);
+            // 更新进度条，基于当前数据集在所有数据集中的位置
+            const currentProgress = (targets.indexOf(dataset) / targets.length) * 100 + 25;
+            setProgress(currentProgress > 100 ? 100 : currentProgress);
           }
         };
-
+  
         eventSource.onerror = () => {
           eventSource.close();
-          setLogs(prev => [...prev, '❌ 连接错误']);
+          setLogs(prev => [...prev, `❌ ${dataset} 连接错误`]);
           setProgress(0);
+          setRunning(false);
         };
-
+  
         // 等待当前数据集处理完成
         await new Promise((resolve) => {
           const checkInterval = setInterval(() => {
@@ -230,8 +273,134 @@ export default function Page() {
     } catch (error) {
       setLogs(prev => [...prev, `❌ 执行失败: ${error.message}`]);
       setProgress(0);
+      setRunning(false);
     }
   };
+
+  // const handleRun = async () => {
+  //   if (running) return;
+    
+  //   setRunning(true);
+  //   setProgress(0);
+  //   setLogs(['正在与服务器建立连接...']);
+
+  //   try {
+  //     const targets = selectedDataset === allDatasetsOption
+  //       ? datasets
+  //       : [selectedDataset];
+
+  //     // 检查是否需要清空之前的数据
+  //     const shouldClearData = performanceData.length > 0 && 
+  //       performanceData[0].algorithm !== selectedAlgo;
+
+  //     if (shouldClearData) {
+  //       setPerformanceData([]);
+  //     }
+
+  //     // 批量执行任务
+  //     for (const dataset of targets) {
+  //       let urlAlgo, urlData;
+        
+  //       // 算法URL
+  //       switch(selectedAlgo) {
+  //         case 'PageRank':
+  //           urlAlgo = 'pagerank';
+  //           break;
+  //         case 'k-Clique':
+  //           urlAlgo = 'kclique';
+  //           break;
+  //         case 'GCN':
+  //           urlAlgo = 'gcn';
+  //           break;
+  //         default:
+  //           throw new Error(`不支持的算法: ${selectedAlgo}`);
+  //       }
+
+  //       // 数据集URL映射
+  //       switch(dataset) {
+  //         case 'Rmat-16':
+  //           urlData = 'rmat16';
+  //           break;
+  //         case 'Rmat-17':
+  //           urlData = 'rmat17';
+  //           break;
+  //         case 'Rmat-18':
+  //           urlData = 'rmat18';
+  //           break;
+  //         case 'Rmat-19':
+  //           urlData = 'rmat19';
+  //           break;
+  //         case 'Rmat-20':
+  //           urlData = 'rmat20';
+  //           break;
+  //         default:
+  //           throw new Error(`不支持的数据集: ${dataset}`);
+  //       }
+
+  //       // 1. 执行流式命令
+  //       const eventSource = new EventSource(`${request.BASE_URL}/part1/execute/${urlAlgo}/${urlData}/`);
+        
+  //       eventSource.onmessage = async (event) => {
+  //         if (event.data === '[done]') {
+  //           eventSource.close();
+            
+  //           // 2. 显示正在拷贝result
+  //           setLogs(prev => [...prev, '正在拷贝result...']);
+            
+  //           // 3. 获取最终结果
+  //           try {
+  //             const res = await fetch(`${request.BASE_URL}/part1/result/`);
+  //             const jsonData = await res.json();
+              
+  //             // 4. 显示完成
+  //             setLogs(prev => [...prev, '执行完成']);
+  //             setProgress(100);
+
+  //             // 生成新的性能数据
+  //             const newResult = generatePerformanceData(jsonData);
+              
+  //             // 更新性能数据
+  //             setPerformanceData(prev => {
+  //               const filtered = prev.filter(item => item.dataset !== dataset);
+  //               return [...filtered, newResult]
+  //                 .sort((a, b) => datasets.indexOf(a.dataset) - datasets.indexOf(b.dataset));
+  //             });
+  //             setRunning(false)
+  //           } catch (error) {
+  //             setLogs(prev => [...prev, `❌ 获取结果失败: ${error.message}`]);
+  //             setProgress(0);
+  //           }
+            
+  //         } else if (event.data === '[error]') {
+  //           eventSource.close();
+  //           setLogs(prev => [...prev, '❌ 执行出错']);
+  //           setProgress(0);
+  //         } else {
+  //           setLogs(prev => [...prev, event.data]);
+  //         }
+  //       };
+
+  //       eventSource.onerror = () => {
+  //         eventSource.close();
+  //         setLogs(prev => [...prev, '❌ 连接错误']);
+  //         setProgress(0);
+  //       };
+
+  //       // 等待当前数据集处理完成
+  //       await new Promise((resolve) => {
+  //         const checkInterval = setInterval(() => {
+  //           if (!eventSource.readyState || eventSource.readyState === 2) {
+  //             clearInterval(checkInterval);
+  //             resolve();
+  //           }
+  //         }, 100);
+  //       });
+  //     }
+  //   } catch (error) {
+  //     setLogs(prev => [...prev, `❌ 执行失败: ${error.message}`]);
+  //     setProgress(0);
+  //   }
+  // };
 
   return (
     <Box sx={{ p: 3, backgroundColor: '#f5f6fa' }}>
@@ -503,7 +672,7 @@ export default function Page() {
                         <TableCell>CPU时间(s)</TableCell>
                         <TableCell>加速器时间(s)</TableCell>
                         <TableCell>加速比</TableCell>
-                        <TableCell>吞吐量(GTEPS)</TableCell>
+                        <TableCell>吞吐量</TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
@@ -513,10 +682,10 @@ export default function Page() {
                           <TableCell>{row.dataset}</TableCell>
                           <TableCell>{row.nodes.toLocaleString()}</TableCell>
                           <TableCell>{row.edges.toLocaleString()}</TableCell>
-                          <TableCell>{row.cpu.toFixed(2)}</TableCell>
-                          <TableCell>{row.accelerator.toFixed(2)}</TableCell>
+                          <TableCell>{row.cpu.toFixed(3)}</TableCell>
+                          <TableCell>{row.accelerator.toFixed(3)}</TableCell>
                           <TableCell>{row.speedUp}</TableCell>
-                          <TableCell>{row.throughput}</TableCell>
+                          <TableCell>{`${row.throughput.toFixed(3)} ${getThroughputUnit(row.algorithm)}`}</TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
@@ -539,11 +708,26 @@ export default function Page() {
             height={300}
             data={getChartData()}
             margin={{ top: 20, right: 30, left: 20, bottom: 10 }}
+            onMouseEnter={() => setShowReferenceLine(true)}
+            onMouseLeave={() => setShowReferenceLine(false)}
         >
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="combinedKey" />
+            <XAxis dataKey="displayName" />
             <YAxis />
-            <Tooltip />
+            <Tooltip 
+              formatter={(value, name, props) => {
+                if (chartMetric === 'throughput') {
+                  return [`${value.toFixed(3)} ${getThroughputUnit(props.payload.algorithm)}`, name];
+                }
+                return [value, name];
+              }}
+              labelFormatter={(label, payload) => {
+                if (payload && payload[0] && payload[0].payload) {
+                  return payload[0].payload.fullName;
+                }
+                return label;
+              }}
+            />
             <Legend />
 
             {chartMetric === 'time' && (
@@ -573,13 +757,37 @@ export default function Page() {
             )}
 
             {chartMetric === 'throughput' && (
+              <>
                 <Bar
-                    dataKey="throughput"
-                    fill="#26a69a"
-                    name="吞吐量"
-                    barSize={50}
+                  dataKey="throughput"
+                  fill="#26a69a"
+                  name="吞吐量"
+                  barSize={50}
+                  onMouseEnter={() => setShowReferenceLine(true)}
+                  onMouseLeave={() => setShowReferenceLine(false)}
                 />
+                <ReferenceLine
+                  y={midtermMetrics[selectedAlgo]}
+                  stroke="red"
+                  strokeDasharray="3 3"
+                  strokeOpacity={showReferenceLine ? 1 : 0}
+                  style={{
+                    opacity: showReferenceLine ? 1 : 0,
+                    transition: 'opacity 0.3s ease-in-out'
+                  }}
+                  label={{
+                    value: `中期指标\n(${midtermMetrics[selectedAlgo]} ${getThroughputUnit(selectedAlgo)})`,
+                    position: 'insideRight',
+                    fill: 'red',
+                    fontSize: 12,
+                    dy: -10,
+                    opacity: showReferenceLine ? 1 : 0,
+                    transition: 'opacity 0.3s'
+                  }}
+                />
+              </>
             )}
+
         </BarChart>
                 </Box>
               )}

@@ -102,7 +102,7 @@ export default function Page() {
           
           // 3. 获取最终结果
           try {
-            const res = await fetch(`${request.BASE_URL}/part3/result/2/${urlAlgo}/`);
+            const res = await fetch(`${request.BASE_URL}/part3/result/1/${urlAlgo}/`);
             const jsonData = await res.json();
             
             // 4. 显示完成
@@ -262,7 +262,7 @@ export default function Page() {
           <strong>考核方式：</strong>
           <Box component="span" display="block">首先，将图遍历、图学习、图挖掘应用采用CGA编程模型统一化表达</Box>
           <Box component="span" display="block">然后，将CGA编程模型经过多层编译，转换成图计算加速卡（模拟器）上运行的代码</Box>
-          <Box component="span" display="block">最后，支持Pregel框架向CGA编程模型的转换</Box>
+          <Box component="span" display="block">最后，支持GraphScope和DGL框架向CGA编程模型的转换</Box>
           <Box component="span" display="block">使用SNAP标准动态图数据集进行评测，性能指标计算方法是：动态图更新速率=总更新边数/总更新时间</Box>
           <strong>数据集来源：</strong>
           <Box component="span" display="block">采用选择SNAP的标准图数据集facebook，和图卷积网络标准数据集Cora</Box>
@@ -335,15 +335,15 @@ export default function Page() {
           <Paper elevation={3} sx={{ p: 2, borderRadius: 3, height: 500 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
               <Typography variant="h6" sx={{ fontWeight: 700, color: 'secondary.main' }}>
-                编程接口示例
+                基于CGA编程模型的代码展示
               </Typography>
               {showButtons['编程接口示例'] && (
                 <Button 
                   variant="contained" 
-                  color="secondary" 
+                  color="primary" 
                   onClick={() => handleShowExample('编程接口示例')}
                 >
-                  显示示例
+                  运行
                 </Button>
               )}
             </Box>
@@ -354,15 +354,15 @@ export default function Page() {
           <Paper elevation={3} sx={{ p: 2, borderRadius: 3, height: 500 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
               <Typography variant="h6" sx={{ fontWeight: 700, color: 'secondary.main' }}>
-                graphIR示例
+                GraphIR展示
               </Typography>
               {showButtons['graphIR示例'] && (
                 <Button 
                   variant="contained" 
-                  color="secondary" 
+                  color="primary" 
                   onClick={() => handleShowExample('graphIR示例')}
                 >
-                  显示示例
+                  运行
                 </Button>
               )}
             </Box>
@@ -373,15 +373,15 @@ export default function Page() {
           <Paper elevation={3} sx={{ p: 2, borderRadius: 3, height: 500 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
               <Typography variant="h6" sx={{ fontWeight: 700, color: 'secondary.main' }}>
-                MatrixIR示例
+                MatrixIR展示
               </Typography>
               {showButtons['MatrixIR示例'] && (
                 <Button 
                   variant="contained" 
-                  color="secondary" 
+                  color="primary" 
                   onClick={() => handleShowExample('MatrixIR示例')}
                 >
-                  显示示例
+                  运行
                 </Button>
               )}
             </Box>
@@ -392,15 +392,15 @@ export default function Page() {
           <Paper elevation={3} sx={{ p: 2, borderRadius: 3, height: 500 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
               <Typography variant="h6" sx={{ fontWeight: 700, color: 'secondary.main' }}>
-                硬件指令示例
+                硬件指令展示
               </Typography>
               {showButtons['硬件指令示例'] && (
                 <Button 
                   variant="contained" 
-                  color="secondary" 
+                  color="primary" 
                   onClick={() => handleShowExample('硬件指令示例')}
                 >
-                  显示示例
+                  运行
                 </Button>
               )}
             </Box>
@@ -415,7 +415,7 @@ export default function Page() {
           <Paper elevation={3} sx={{ p: 2, borderRadius: 3, height: 450, display: 'flex', flexDirection: 'column' }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
               <Typography variant="h6" sx={{ fontWeight: 700, color: 'secondary.main' }}>
-                执行模拟器
+                在模拟器上执行硬件指令
               </Typography>
               <Button 
                 variant="contained" 
@@ -423,7 +423,7 @@ export default function Page() {
                 onClick={handleSimulatorRun} 
                 disabled={isSimulatorRunning}
               >
-                {isSimulatorRunning ? '运行中...' : '执行模拟器'}
+                {isSimulatorRunning ? '运行中...' : '运行'}
               </Button>
             </Box>
             {isSimulatorRunning && <LinearProgress value={simulatorProgress} sx={{ mb: 2 }} />}

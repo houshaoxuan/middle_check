@@ -31,7 +31,9 @@ export default function DataProcessingPage() {
   const [terminalOutput, setTerminalOutput] = useState('');
   const [isRunning, setIsRunning] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [performanceData, setPerformanceData] = useState(initialPerformanceData);
+  const [performanceData, setPerformanceData] = useState([]);
+  const [showReferenceLine, setShowReferenceLine] = useState(false);
+
 
   const handleDatasetChange = (event) => {
     setSelectedDataset(event.target.value);
@@ -76,9 +78,15 @@ export default function DataProcessingPage() {
                 if (index !== -1) {
                   newData[index] = {
                     ...newData[index],
-                    duration: parseFloat(avgDuration.toFixed(2)),
-                    speed: parseFloat(avgSpeed.toFixed(2))
+                    duration: parseFloat(avgDuration.toFixed(3)),
+                    speed: parseFloat(avgSpeed.toFixed(3))
                   };
+                } else {
+                  newData.push({
+                    name: selectedDataset,
+                    duration: parseFloat(avgDuration.toFixed(3)),
+                    speed: parseFloat(avgSpeed.toFixed(3))
+                  });
                 }
                 return newData;
               });
@@ -88,8 +96,8 @@ export default function DataProcessingPage() {
                 prev + 
                 `> 数据集: ${jsonData.data}\n` +
                 `> 框架: ${jsonData.framework}\n` +
-                `> 平均执行时间: ${avgDuration.toFixed(2)}ms\n` +
-                `> 平均更新速度: ${avgSpeed.toFixed(2)} MEPS\n` +
+                `> 平均执行时间: ${avgDuration.toFixed(3)}ms\n` +
+                `> 平均更新速度: ${avgSpeed.toFixed(3)} MEPS\n` +
                 `> 运行次数: ${jsonData.runs.length}\n` +
                 `> 状态: 成功\n`
               );
@@ -138,7 +146,7 @@ export default function DataProcessingPage() {
           <strong>考核方式：</strong>
           <Box component="span" display="block">首先，将图遍历、图学习、图挖掘应用采用CGA编程模型统一化表达</Box>
           <Box component="span" display="block">然后，将CGA编程模型经过多层编译，转换成图计算加速卡（模拟器）上运行的代码</Box>
-          <Box component="span" display="block">最后，支持Pregel框架向CGA编程模型的转换</Box>
+          <Box component="span" display="block">最后，支持GraphScope和DGL框架向CGA编程模型的转换</Box>
           <Box component="span" display="block">使用SNAP标准动态图数据集进行评测，性能指标计算方法是：动态图更新速率=总更新边数/总更新时间</Box>
           <strong>数据集来源：</strong>
           <Box component="span" display="block">采用选自斯坦福网络分析平台（SNAP）的标准动态图数据集sx-askubuntu、wiki-talk-temporal和sx-stackoverflow</Box>
@@ -240,7 +248,7 @@ export default function DataProcessingPage() {
       {/* 性能数据展示 */}
       <Grid container spacing={3}>
         {/* 性能表格 */}
-        <Grid item xs={12} md={7}>
+        <Grid item xs={12} md={6}>
           <Paper elevation={3} sx={{ p: 2, borderRadius: 3 }}>
             <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: 'secondary.main' }}>
               性能测试结果
@@ -258,13 +266,13 @@ export default function DataProcessingPage() {
                   {performanceData.map((row) => (
                     <TableRow key={row.name}>
                       <TableCell component="th" scope="row">
-                        {row.name}
+                        {datasets[row.name]}
                       </TableCell>
                       <TableCell align="right">
-                        {row.duration || '-'}
+                        {row.duration ? row.duration.toFixed(3) : '-'}
                       </TableCell>
                       <TableCell align="right">
-                        {row.speed || '-'}
+                        {row.speed ? row.speed.toFixed(3) : '-'}
                       </TableCell>
                     </TableRow>
                   ))}
@@ -275,7 +283,7 @@ export default function DataProcessingPage() {
         </Grid>
 
         {/* 性能图表 */}
-        <Grid item xs={12} md={5}>
+        <Grid item xs={12} md={6}>
           <Paper elevation={3} sx={{ p: 2, borderRadius: 3 }}>
             <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: 'secondary.main' }}>
               性能对比图表
@@ -290,37 +298,38 @@ export default function DataProcessingPage() {
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" />
                 <YAxis label={{ value: '更新速度 (MEPS)', angle: -90, position: 'insideLeft' }} />
-                <Tooltip />
+                <Tooltip 
+                  formatter={(value) => [`${value.toFixed(3)} MEPS`, '更新速度']}
+                />
                 <Legend />
-                <ReferenceLine 
-                  y={0.5} 
-                  stroke="#4CAF50" 
-                  strokeWidth={2}
-                  strokeDasharray="5 5"  
-                  label={{ 
-                    value: '中期指标', 
-                    position: 'right',
-                    fill: '#4CAF50',
-                    fontSize: 12
-                  }}
-                />
-                <ReferenceLine 
-                  y={1.0} 
-                  stroke="#F44336" 
-                  strokeWidth={2}
-                  strokeDasharray="5 5"  
-                  label={{ 
-                    value: '完成时指标', 
-                    position: 'right',
-                    fill: '#F44336',
-                    fontSize: 12
-                  }}
-                />
                 <Bar 
                   dataKey="speed" 
                   name="平均更新速度" 
                   fill="#8884d8" 
-                  barSize={30}
+                  barSize={50}
+                  onMouseEnter={() => setShowReferenceLine(true)}
+                  onMouseLeave={() => setShowReferenceLine(false)}                
+                />
+                <ReferenceLine 
+                  y={0.5} 
+                  stroke="#F44336" 
+                  strokeWidth={2}
+                  strokeDasharray="5 5"
+                  strokeOpacity={showReferenceLine ? 1 : 0}
+                  style={{
+                    opacity: showReferenceLine ? 1 : 0,
+                    transition: 'opacity 0.3s ease-in-out'
+                  }}
+                  label={{ 
+                    value: '中期指标\n(0.5 MEPS)', 
+                    whiteSpace: 'normal',
+                    position: 'insideRight',
+                    fill: '#F44336',
+                    fontSize: 12,
+                    dy: -10,
+                    opacity: showReferenceLine ? 1 : 0,
+                    transition: 'opacity 0.3s'
+                  }}
                 />
               </BarChart>
             </Box>
