@@ -411,7 +411,7 @@ export default function Page() {
 
       {/* 模拟器执行区域 */}
       <Grid container spacing={3} mt={2}>
-        <Grid item xs={9}>
+        <Grid item xs={12}>
           <Paper elevation={3} sx={{ p: 2, borderRadius: 3, height: 450, display: 'flex', flexDirection: 'column' }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
               <Typography variant="h6" sx={{ fontWeight: 700, color: 'secondary.main' }}>
