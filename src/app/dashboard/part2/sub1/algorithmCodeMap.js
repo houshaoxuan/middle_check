@@ -1,5 +1,5 @@
 export const algorithmCodeMap = {
-  CF: `// CF测试的图点小于1M个，st和ed占用内存小于4MB
+  'k-Clique(k=3)': `// CF测试的图点小于1M个，st和ed占用内存小于4MB
 // CF时图单元输出SIMD_WIDTH个int数，0: ans(结果有多少个三角形), 1: ans2(一共遍历了多少个三角形), 2: ans3(final performance)
 // [0 4MB)              [4MB 12MB)           [12MB  20MB)        [20MB  ---)
 // config, rsv          old_v, new_v(结果)    st, ed              edge_id
@@ -440,7 +440,7 @@ SNOP
 SNOP
 SNOP
 `,
-  PR: `// dela-pr测试的图点小于1M个，st和ed占用内存小于4MB
+  PageRank: `// dela-pr测试的图点小于1M个，st和ed占用内存小于4MB
 // [0 4MB)              [4MB 16MB)              [16MB  24MB)        [24MB  ---)
 // config, rsv          old_v, new_v(结果), pr   st, ed              edge_id
 // [0    4MB)

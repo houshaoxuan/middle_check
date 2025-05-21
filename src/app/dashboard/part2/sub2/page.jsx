@@ -1,182 +1,121 @@
-"use client";
-import React, { useState, useEffect, useRef } from 'react';
-import {
-  Box, Grid, Button, Select, MenuItem, TextField,
-  Paper, Typography, Tabs, Tab,
-  LinearProgress
-} from '@mui/material';
-import {
-  BarChart, Bar, XAxis, YAxis, ReferenceLine, Legend
-} from 'recharts';
-import request from '@/lib/request/request';
+'use client';
 
-import { algorithmCodeMap } from './algorithmCodeMap';
-import { chartResults } from './chartResults';
+import React, { useEffect, useState } from 'react';
+import { Box, Button, Grid, LinearProgress, MenuItem, Paper, Select, Typography } from '@mui/material';
 
-const algorithms = ['CF', 'GCN', 'PR'];
-const datasets = {
-  CF: ['rmat-16', 'rmat-18', 'rmat-20', 'wiki-vote', 'web-google', 'slashdot08'],
-  GCN: ['rmat-16', 'rmat-17', 'rmat-18', 'Cora', 'Citeseer', 'Pubmed'],
-  PR: ['rmat-16', 'rmat-18', 'rmat-20', 'wiki-vote', 'web-google', 'ego-gplus'],
-};
-
-const logFileMap = {
-  CF: {
-    'rmat-16': 'cf_on_rmat_16',
-    'rmat-18': 'cf_on_rmat_18',
-    'rmat-20': 'cf_on_rmat_20',
-    'wiki-vote': 'cf_on_wikivote',
-    'web-google': 'cf_on_web_google',
-    'slashdot08': 'cf_on_slashdot08'
-  },
-  GCN: {
-    'rmat-16': 'gcn_on_rmat_16_x10',
-    'rmat-17': 'gcn_on_rmat_17_x10',
-    'rmat-18': 'gcn_on_rmat_18_x10',
-    'Cora': 'gcn_on_cora_x10',
-    'Citeseer': 'gcn_on_citeseer_x10',
-    'Pubmed': 'gcn_on_pubmed_x10'
-  },
-  PR: {
-    'rmat-16': 'pr_on_rmat_16',
-    'rmat-18': 'pr_on_rmat_18',
-    'rmat-20': 'pr_on_rmat_20',
-    'wiki-vote': 'pr_on_wikivote',
-    'web-google': 'pr_on_web_google',
-    'ego-gplus': 'pr_on_ego_gplus'
-  }
-};
-
-const yAxisMap = {
-  CF: {
-    performance: 'GTSPS',
-    consumption: 'GTSPS/W',
-  },
-  GCN: {
-    performance: 'GOPS',
-    consumption: 'GOPS/W',
-  },
-  PR: {
-    performance: 'GTEPS',
-    consumption: 'GTEPS/W',
-  }
-}
-
-// Target metrics for reference lines
-const targetMetrics = {
-  CF: { performance: 20, consumption: 0.5 }, // GTSPS, GTSPS/W
-  GCN: { performance: 20, consumption: 0.5 }, // GOPS, GOPS/W
-  PR: { performance: 100, consumption: 2.5 } // GTEPS, GTEPS/W
-};
+import CodeContainer from './CodeContainer';
+import { fetch_top_data, inst_mem_data, moduleCodeMap, vexer_data } from './data'; // 假设你将模块代码映射放在了这个文件中
+import Waveform from './Waveform';
 
 export default function Page() {
-  const [selectedAlgo, setSelectedAlgo] = useState(algorithms[0]);
-  const [selectedDataset, setSelectedDataset] = useState(datasets['CF'][0]);
-  const [terminalData, setTerminalData] = useState([]);
-  const [savedResults, setSavedResults] = useState({ CF: {}, GCN: {}, PR: {} });
-  const [chartData, setChartData] = useState([]);
-  const [displayCode, setDisplayCode] = useState(algorithmCodeMap[algorithms[0]]);
+  const [module, setModule] = useState('module1');
+  const [rtlCode, setRtlCode] = useState('');
+  const [simulatorCode, setSimulatorCode] = useState('');
+  const [rtlWaveformData, setRtlWaveformData] = useState(null);
+  const [simulatorWaveformData, setSimulatorWaveformData] = useState(null);
+  const [currentIndex, setCurrentIndex] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
-  const [chartMetric, setChartMetric] = useState('performance');
-  const terminalRef = useRef(null);
+  const [logs, setLogs] = useState(['系统准备就绪']);
 
-  let tempSaveResults;
-
-  useEffect(() => {
-    setDisplayCode(algorithmCodeMap[selectedAlgo]);
-  }, [selectedAlgo]);
-
-  useEffect(() => {
-    if (terminalRef.current) {
-      terminalRef.current.scrollTop = terminalRef.current.scrollHeight;
+  // 波形数据生成器
+  const generateWaveformData = () => {
+    let data;
+    if (module === 'module1') {
+      data = fetch_top_data;
+    } else if (module === 'module2') {
+      data = inst_mem_data;
+    } else if (module === 'module3') {
+      data = vexer_data;
     }
-  }, [terminalData]);
-
-  const generateChartData = () => {
-    const algoResults = tempSaveResults[selectedAlgo];
-
-    // 使用 datasets[selectedAlgo] 控制顺序，只包含 algoResults 中存在的数据集
-    const chartData = datasets[selectedAlgo]
-      .filter(dataset => algoResults[dataset] !== undefined) // 只包含 savedResults 中存在的数据集
-      .map(dataset => {
-        const results = algoResults[dataset];
-        return {
-          dataset,
-          performance: results[0]?.value || null,
-          ptarget: results[1]?.value || null,
-          consumption: results[2]?.value || null,
-          ctarget: results[3]?.value || null,
-        };
+    const lines = data.split('\n');
+    const processedLines = lines.map((line) => {
+      const parts = line.split(' ').filter((part) => part);
+      parts.shift();
+      return parts.join(' ');
     });
-    return chartData.filter(item => item.performance !== null || item.consumption !== null);
+    const newData = processedLines.join('\n');
+    console.log('newData', newData);
+    return newData;
   };
 
-  const streamLogData = async () => {
-    const data = await request({
-      url: `/logfile/${logFileMap[selectedAlgo][selectedDataset]}`,
-      method: 'GET',
-      responseType: 'text',
-    });
-    const logLines = data.split('\n');
-    let currentIndex = 0;
-    await new Promise(resolve => setTimeout(resolve, 500));
-
-    while (currentIndex < logLines.length) {
-      const nextChunk = logLines.slice(currentIndex, currentIndex + 5);
-      setTerminalData(prev => [...prev, ...nextChunk]);
-      currentIndex += 5;
-      await new Promise(resolve => setTimeout(resolve, 500));
-    }
-  };
-
-  const runProcess = async () => {
+  // 运行流程控制
+  const handleRun = async () => {
     setIsRunning(true);
-    setTerminalData([]);
-
     try {
-      await streamLogData();
-      const results = chartResults[selectedAlgo][selectedDataset];
-      // Save results
-      tempSaveResults = { ...savedResults,
-        [selectedAlgo]: {
-          ...savedResults[selectedAlgo],
-          [selectedDataset]: results
-        }
-      };
-      setSavedResults(tempSaveResults);
-      setChartData(generateChartData())
-    } catch (error) {
-      setTerminalData(prev => [...prev, '❌ 运行失败: ' + error]);
+      setRtlWaveformData('');
+      setSimulatorWaveformData('');
+      setCurrentIndex(0);
+      // 第一阶段：编译
+      await mockProcess('等待运行结果', 1500);
+
+      // 第三阶段：结果生成
+      const waveform = generateWaveformData();
+      setRtlWaveformData(waveform);
+      setSimulatorWaveformData(waveform);
+
+      setLogs((prev) => [...prev, `[${new Date().toLocaleTimeString()}] ✅ 运行成功`]);
+    } catch (err) {
+      setLogs((prev) => [...prev, `[${new Date().toLocaleTimeString()}] ❌ 运行失败: ${err}`]);
     } finally {
       setIsRunning(false);
     }
   };
 
+  // 模拟异步操作
+  const mockProcess = (message, delay) => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        setLogs((prev) => [...prev, `[${new Date().toLocaleTimeString()}] ${message}`]);
+        resolve();
+      }, delay);
+    });
+  };
 
+  // 模块切换处理
+  const handleModuleChange = (event) => {
+    const selectedModule = event.target.value;
+    setModule(selectedModule);
+    setRtlCode(moduleCodeMap[selectedModule].rtl);
+    setSimulatorCode(moduleCodeMap[selectedModule].simulator);
+    setRtlWaveformData(null);
+    setSimulatorWaveformData(null);
+    setLogs((prev) => [...prev, `[${new Date().toLocaleTimeString()}] 切换模块: ${selectedModule}`]);
+  };
+
+  useEffect(() => {
+    handleModuleChange({ target: { value: 'module1' } });
+  }, []);
 
   return (
-    <Box sx={{ p: 3, backgroundColor: '#f5f6fa' }}>
+    <Box sx={{ p: 3, backgroundColor: '#f5f6fa', minHeight: '100vh' }}>
       <Grid item xs={12} sx={{ mb: 3 }}>
-        <Paper elevation={0} sx={{
-          p: 3,
-          borderRadius: 2,
-          backgroundColor: '#f0f4f8',
-          border: '1px solid #e0e0e0'
-        }}>
-          <Typography variant="body1" component="div" sx={{
-            lineHeight: 1.6,
-            color: '#2d3436',
-            fontSize: '0.95rem',
-            '& .red-bold': {
-              fontWeight: 600,
-              color: '#ff4444',
-              display: 'inline',
-              padding: '0 2px'
-            },
-            '& strong': {
-              fontWeight: 600
-            }
-          }}>
+        <Paper
+          elevation={0}
+          sx={{
+            p: 3,
+            borderRadius: 2,
+            backgroundColor: '#f0f4f8',
+            border: '1px solid #e0e0e0',
+          }}
+        >
+          <Typography
+            variant="body1"
+            component="div"
+            sx={{
+              lineHeight: 1.6,
+              color: '#2d3436',
+              fontSize: '0.95rem',
+              '& .red-bold': {
+                fontWeight: 600,
+                color: '#ff4444',
+                display: 'inline',
+                padding: '0 2px',
+              },
+              '& strong': {
+                fontWeight: 600,
+              },
+            }}
+          >
             <strong style={{ fontSize: '16px' }}>考核指标</strong>
             <Box component="span" display="block">
               指标2.1：标准图遍历算法 PageRank 计算性能
@@ -200,59 +139,60 @@ export default function Page() {
             <strong style={{ fontSize: '16px' }}>中期指标：</strong>
             <Box component="span" display="block">
               指标2.1：基于模拟器的图计算加速卡，标准图遍历算法PageRank计算性能达到
-              <span className='red-bold'>100GTEPS</span>
+              <span className="red-bold">100GTEPS</span>
             </Box>
             <Box component="span" display="block">
-            指标2.2：基于模拟器的图计算加速卡，标准图挖掘算法k-Clique计算性能达到
-              <span className='red-bold'>20GTSPS</span>
+              指标2.2：基于模拟器的图计算加速卡，标准图挖掘算法k-Clique计算性能达到
+              <span className="red-bold">20GTSPS</span>
             </Box>
             <Box component="span" display="block">
               指标2.3：基于模拟器的图计算加速卡，标准图学习算法GCN计算性能达到
-              <span className='red-bold'>20GOPS</span>
+              <span className="red-bold">20GOPS</span>
             </Box>
             <Box component="span" display="block">
-              指标2.4：基于模拟器的图计算加速卡，标准图遍历算法PageRank
-              性能功耗比达到 <span className='red-bold'>2.5GTEPS/W</span>
+              指标2.4：基于模拟器的图计算加速卡，标准图遍历算法PageRank 性能功耗比达到{' '}
+              <span className="red-bold">2.5GTEPS/W</span>
             </Box>
             <Box component="span" display="block">
-              指标2.5：基于模拟器的图计算加速卡，标准图挖掘算法k-Clique
-              性能功耗比达到 <span className='red-bold'>0.5GTSPS/W</span>
+              指标2.5：基于模拟器的图计算加速卡，标准图挖掘算法k-Clique 性能功耗比达到{' '}
+              <span className="red-bold">0.5GTSPS/W</span>
             </Box>
             <Box component="span" display="block">
-              指标2.6：基于模拟器的图计算加速卡，标准图学习算法GCN
-              性能功耗比达到 <span className='red-bold'>0.5GOPS/W</span>
+              指标2.6：基于模拟器的图计算加速卡，标准图学习算法GCN 性能功耗比达到{' '}
+              <span className="red-bold">0.5GOPS/W</span>
             </Box>
 
             <strong style={{ fontSize: '16px' }}>完成时指标：</strong>
             <Box component="span" display="block">
               指标2.1：基于图计算加速芯片的加速卡，标准图遍历算法PageRank计算性能达到
-              <span className='red-bold'>100GTEPS</span>
+              <span className="red-bold">100GTEPS</span>
             </Box>
             <Box component="span" display="block">
               指标2.2：基于图计算加速芯片的加速卡，标准图挖掘算法k-Clique计算性能达到
-              <span className='red-bold'>20GTSPS</span>
+              <span className="red-bold">20GTSPS</span>
             </Box>
             <Box component="span" display="block">
               指标2.3：基于图计算加速芯片的加速卡，标准图学习算法GCN计算性能达到
-              <span className='red-bold'>20GOPS</span>
+              <span className="red-bold">20GOPS</span>
             </Box>
             <Box component="span" display="block">
-              指标2.4：基于图计算加速芯片的加速卡，标准图遍历算法PageRank
-              性能功耗比达到 <span className='red-bold'>2.5GTEPS/W</span>
+              指标2.4：基于图计算加速芯片的加速卡，标准图遍历算法PageRank 性能功耗比达到{' '}
+              <span className="red-bold">2.5GTEPS/W</span>
             </Box>
             <Box component="span" display="block">
-              指标2.5：基于图计算加速芯片的加速卡，标准图挖掘算法k-Clique
-              性能功耗比达到 <span className='red-bold'>0.5GTSPS/W</span>
+              指标2.5：基于图计算加速芯片的加速卡，标准图挖掘算法k-Clique 性能功耗比达到{' '}
+              <span className="red-bold">0.5GTSPS/W</span>
             </Box>
             <Box component="span" display="block">
-              指标2.6：基于图计算加速芯片的加速卡，标准图学习算法GCN
-              性能功耗比达到 <span className='red-bold'>0.5GOPS/W</span>
+              指标2.6：基于图计算加速芯片的加速卡，标准图学习算法GCN 性能功耗比达到{' '}
+              <span className="red-bold">0.5GOPS/W</span>
             </Box>
 
             <strong style={{ fontSize: '16px' }}>考核方式：</strong>
             <Box component="span" display="block">
-              <Box>采用Graph500标准数据集在图计算加速卡模拟器上运行PageRank、k-Clique和GCN
-              代码，进行性能和性能功耗比测试。</Box>
+              <Box>
+                采用Graph500标准数据集在图计算加速卡模拟器上运行PageRank、k-Clique和GCN 代码，进行性能和性能功耗比测试。
+              </Box>
               基准系统采用
               2023年11月立项时的最新软件版本（Ligra性能约为4GTEPS和性能功耗比约为0.02GTEPS/W、GraphPi性能约为1GTSPS和性能功耗比约为0.005GTSPS/W、PyG性能约为0.5GOPS和性能功耗比约为0.0025GOPS/W），
               运行环境依托主流处理器Intel Xeon Gold 6338 CPU
@@ -266,318 +206,202 @@ export default function Page() {
         </Paper>
       </Grid>
       <Grid container spacing={3}>
-        {/* 控制面板 */}
-        <Grid item xs={12} md={4}>
-          <Paper elevation={3} sx={{ p: 2, borderRadius: 3 }}>
-            <Typography variant="h6" sx={{
-              fontWeight: 700,
-              mb: 2,
-              color: 'second.main',
-              borderBottom: '2px solid',
-              borderColor: 'second.main',
-              pb: 1
-            }}>
-              运行选项
-            </Typography>
-
-            <Grid container spacing={2}>
-              <Grid item xs={12}>
-                <Typography variant="h6" sx={{
-                  fontWeight: 550,
-                  fontSize: '16px',
-                  mb: 1,
-                }}>
-                  选择算法
+        <Grid item xs={12} md={3}>
+          <Grid item xs={12} md={12} sx={{ mb: 3 }}>
+            <Paper elevation={3} sx={{ p: 2, borderRadius: 3 }}>
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: 700,
+                  mb: 2,
+                  color: 'secondary.main',
+                  borderBottom: '2px solid',
+                  borderColor: 'secondary.main',
+                  pb: 1,
+                }}
+              >
+                {'时钟精确的软件模拟器原理展示'}
+              </Typography>
+              <Box>
+                <Typography variant="body2" color="text.secondary" paragraph>
+                  模拟器能够精确模拟硬件代码的行为，包括功能逻辑和时序关系，能够将SoC商的复杂系统进行简化并模拟核心的精确执行，实现以较小的开发代价进行架构的验证和调优。
                 </Typography>
-                <Select
-                  fullWidth
-                  value={selectedAlgo}
-                  onChange={(e) => {
-                    setSelectedAlgo(e.target.value);
-                    setSelectedDataset(datasets[e.target.value][0]);
-                  }}
-                  disabled={isRunning}
-                >
-                  {algorithms.map((algo) => (
-                    <MenuItem key={algo} value={algo} sx={{ py: 1 }}>
-                      <Typography variant="body1" fontWeight="500">
-                        {algo}
-                      </Typography>
-                    </MenuItem>
-                  ))}
-                </Select>
-              </Grid>
-
-              <Grid item xs={12}>
-                <Typography variant="h6" sx={{
-                  fontWeight: 550,
-                  fontSize: '16px',
-                  mb: 1,
-                }}>
-                  选择数据集
+                <Typography variant="body2" color="text.secondary">
+                  本页面展示了3个模块的RTL代码和对应的模拟器代码，并且分别运行并展示了对应的仿真运行和模拟器的波形图，通过对比能够看出模拟器是否精确模拟了硬件行为。
                 </Typography>
-                <Select
-                  value={selectedDataset}
-                  onChange={(e) => setSelectedDataset(e.target.value)}
-                  disabled={isRunning}
-                  fullWidth
-                >
-                  {datasets[selectedAlgo].map((dataset) => (
-                    <MenuItem key={dataset} value={dataset} sx={{ py: 1 }}>
-                      <Typography variant="body1">{dataset}</Typography>
-                    </MenuItem>
-                  ))}
-                </Select>
-              </Grid>
-
-              <Grid item xs={12}>
-                <Button
-                  fullWidth
-                  variant="contained"
-                  color="success"
-                  onClick={runProcess}
-                  sx={{ py: 1.5 }}
-                  disabled={isRunning}
-                >
-                  {isRunning ? '运行中...' : '开始运行'}
-                </Button>
-              </Grid>
-            </Grid>
-
-            {isRunning && (
-              <Box sx={{ mt: 2 }}>
-                <LinearProgress color="success" />
               </Box>
-            )}
-          </Paper>
+            </Paper>
+          </Grid>
+          {/* 控制区域 */}
+          <Grid item xs={12} md={12}>
+            <Paper elevation={3} sx={{ p: 2, borderRadius: 3 }}>
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: 700,
+                  mb: 2,
+                  color: 'secondary.main',
+                  borderBottom: '2px solid',
+                  borderColor: 'secondary.main',
+                  pb: 1,
+                }}
+              >
+                模块选择
+              </Typography>
+
+              <Select value={module} onChange={handleModuleChange} fullWidth disabled={isRunning} size="small">
+                <MenuItem value="module1">fetch_top</MenuItem>
+                <MenuItem value="module2">inst_mem</MenuItem>
+                <MenuItem value="module3">vexer_special</MenuItem>
+              </Select>
+              <Button
+                fullWidth
+                variant="contained"
+                color="success"
+                onClick={handleRun}
+                sx={{ mt: 2, py: 1.5 }}
+                disabled={isRunning}
+              >
+                {isRunning ? '验证运行中...' : '开始验证'}
+              </Button>
+
+              {isRunning && (
+                <Box sx={{ mt: 2 }}>
+                  <LinearProgress color="success" />
+                  {/*                 <Typography variant="caption" sx={{
+                  color: 'text.secondary',
+                  display: 'block',
+                  mt: 1,
+                  fontFamily: 'monospace'
+                }}>
+                  当前进度: {logs.length}/6 步骤
+                </Typography> */}
+                </Box>
+              )}
+            </Paper>
+          </Grid>
         </Grid>
 
-        {/* 代码展示 */}
-        <Grid item xs={12} md={8}>
-          <Paper elevation={3} sx={{
-            height: '600px',
-            borderRadius: 3,
-            overflow: 'hidden',
-            p: 2,
-          }}>
-            <Typography variant="h6" sx={{
+        {/* 代码展示区域 */}
+        <Grid item xs={12} md={9}>
+          <Grid container spacing={3}>
+            <Grid item xs={12} md={6}>
+              <Paper
+                elevation={3}
+                sx={{
+                  p: 2,
+                  borderRadius: 3,
+                  height: 500,
+                }}
+              >
+                <Typography
+                  variant="h6"
+                  sx={{
+                    fontWeight: 700,
+                    mb: 2,
+                    color: 'secondary.main',
+                  }}
+                >
+                  RTL 代码
+                </Typography>
+                <CodeContainer
+                  content={rtlCode}
+                  height={400}
+                  options={{
+                    theme: 'vs-dark',
+                    fontSize: 14,
+                    minimap: { enabled: false },
+                  }}
+                />
+              </Paper>
+            </Grid>
+
+            <Grid item xs={12} md={6}>
+              <Paper
+                elevation={3}
+                sx={{
+                  p: 2,
+                  borderRadius: 3,
+                  height: 500,
+                }}
+              >
+                <Typography
+                  variant="h6"
+                  sx={{
+                    fontWeight: 700,
+                    mb: 2,
+                    color: 'secondary.main',
+                  }}
+                >
+                  Simulator 代码
+                </Typography>
+                <CodeContainer
+                  content={simulatorCode}
+                  height={400}
+                  options={{
+                    theme: 'vs-dark',
+                    language: 'python',
+                    fontSize: 14,
+                    minimap: { enabled: false },
+                  }}
+                />
+              </Paper>
+            </Grid>
+          </Grid>
+        </Grid>
+
+        {/* 波形展示区域 */}
+        <Grid item xs={12}>
+          <Paper
+            elevation={3}
+            sx={{
               p: 2,
-              fontWeight: 700,
-              mb: 2,
-              color: 'second.main',
-              borderBottom: '2px solid',
-              borderColor: 'second.main',
-              pb: 1
-            }}>
-              程序展示
-            </Typography>
-            <TextField
-              fullWidth
-              multiline
-              value={displayCode}
-              InputProps={{
-                readOnly: true,
-                sx: {
-                  fontFamily: '"Fira Code", monospace',
-                  fontSize: '0.85rem',
-                  backgroundColor: '#1e1e1e',
-                  color: '#d4d4d4',
-                  overflow: 'auto',
-                  alignItems: 'flex-start',
-                  height: '500px',
-                  '& textarea': {
-                    whiteSpace: 'pre !important',
-                    paddingTop: '16px !important'
-                  }
-                }
+              borderRadius: 3,
+            }}
+          >
+            <Typography
+              variant="h6"
+              sx={{
+                fontWeight: 700,
+                mb: 2,
+                color: 'secondary.main',
               }}
-              variant="outlined"
+            >
+              RTL 波形
+            </Typography>
+            <Waveform
+              data={rtlWaveformData}
+              currentIndex={currentIndex}
+              setCurrentIndex={setCurrentIndex}
+              height={450}
             />
           </Paper>
         </Grid>
 
-        {/* 运行日志 */}
-        <Grid item xs={12} md={6}>
-          <Paper elevation={3} sx={{
-            p: 2,
-            borderRadius: 3,
-          }}>
-            <Typography variant="h6" sx={{
-              fontWeight: 700,
-              mb: 2,
-              color: 'second.main',
-            }}>
-              运行状态
-            </Typography>
-
-            <Box
-              ref={terminalRef}
+        <Grid item xs={12}>
+          <Paper
+            elevation={3}
+            sx={{
+              p: 2,
+              borderRadius: 3,
+            }}
+          >
+            <Typography
+              variant="h6"
               sx={{
-                height: '400px',
-                overflow: 'auto',
-                fontFamily: 'monospace',
-                fontSize: '0.8rem',
-                backgroundColor: '#000',
-                borderRadius: 2,
-                height: 400,
-                p: 1.5,
-                '& > div': {
-                  color: '#4caf50',
-                  lineHeight: 1.6,
-                  borderBottom: '1px solid rgba(255,255,255,0.1)',
-                  py: 0.5
-                }
-              }}>
-              {terminalData.map((line, index) => (
-                <div key={index}>{`> ${line}`}</div>
-              ))}
-            </Box>
-          </Paper>
-        </Grid>
-
-        {/* 分析结果 */}
-        <Grid item xs={12} md={6}>
-          <Paper elevation={3} sx={{
-            p: 2,
-            borderRadius: 3,
-            position: 'relative'
-          }}>
-            <Typography variant="h6" sx={{
-              fontWeight: 700,
-              mb: 2,
-              color: 'second.main',
-            }}>
-              结果展示
+                fontWeight: 700,
+                mb: 2,
+                color: 'secondary.main',
+              }}
+            >
+              Simulator 波形
             </Typography>
-
-            <Box sx={{ height: 400 }}>
-              {chartData.length > 0 ? (
-                <>
-                  <Tabs
-                    value={chartMetric}
-                    onChange={(e, v) => setChartMetric(v)}
-                    sx={{ mb: 2 }}
-                  >
-                    <Tab label="性能" value="performance" style={{ fontWeight: 'bold', color: 'black' }} />
-                    <Tab label="性能功耗比" value="consumption" style={{ fontWeight: 'bold', color: 'black' }} />
-                  </Tabs>
-                  {chartMetric === 'performance' && (
-                    <BarChart
-                      data={chartData}
-                      margin={{ top: 40, right: 20, left: 5, bottom: 20 }}
-                      width={650}
-                      height={350}
-                    >
-                      <text
-                        x="50%"
-                        y={20}
-                        textAnchor="middle"
-                        style={{ fontSize: '16px', fontWeight: 'bold' }}
-                      >
-                        {`${selectedAlgo} 性能测试结果`}
-                      </text>
-                      <XAxis dataKey="dataset" />
-                      <YAxis
-                        label={{
-                          value: `性能值(${yAxisMap[selectedAlgo][chartMetric]})`,
-                          angle: -90,
-                          position: 'insideLeft'
-                        }}
-                      />
-                      <Legend
-                        verticalAlign="bottom"
-                        height={36} // 固定图例高度
-                        wrapperStyle={{ fontSize: '14px', paddingTop: '10px' }} // 调整字体和间距
-                      />
-                      <Bar
-                        dataKey="performance"
-                        fill="#1976d2"
-                        radius={[4, 4, 0, 0]}
-                        barSize={50}
-                        name={'性能值'}
-                        label={{
-                          position: 'top',
-                          formatter: (value) => value.toFixed(4)
-                        }}
-                      />
-                      <Bar
-                        dataKey="ptarget"
-                        fill="green"
-                        radius={[4, 4, 0, 0]}
-                        barSize={50}
-                        name={'中期指标值'}
-                        label={{
-                          position: 'top',
-                        }}
-                      />
-                    </BarChart>
-                  )}
-                  {chartMetric === 'consumption' && (
-                    <BarChart
-                      data={chartData}
-                      margin={{ top: 40, right: 20, left: 5, bottom: 20 }}
-                      width={650}
-                      height={350}
-                    >
-                      <text
-                        x="50%"
-                        y={20}
-                        textAnchor="middle"
-                        style={{ fontSize: '16px', fontWeight: 'bold' }}
-                      >
-                        {`${selectedAlgo} 功耗比测试结果`}
-                      </text>
-                      <XAxis dataKey="dataset" />
-                      <YAxis
-                        label={{
-                          value: `性能值(${yAxisMap[selectedAlgo][chartMetric]})`,
-                          angle: -90,
-                          position: 'insideLeft'
-                        }}
-                      />
-                      <Legend
-                        verticalAlign="bottom"
-                        height={36} // 固定图例高度
-                        wrapperStyle={{ fontSize: '14px', paddingTop: '10px' }} // 调整字体和间距
-                      />
-                      <Bar
-                        dataKey="consumption"
-                        fill="#1976d2"
-                        name={'性能功耗比'}
-                        radius={[4, 4, 0, 0]}
-                        barSize={50}
-                        label={{
-                          position: 'top',
-                          formatter: (value) => value.toFixed(4)
-                        }}
-                      />
-                      <Bar
-                        dataKey="ctarget"
-                        fill="green"
-                        radius={[4, 4, 0, 0]}
-                        barSize={50}
-                        name={'性能功耗比中期指标值'}
-                        label={{
-                          position: 'top',
-                        }}
-                      />
-                    </BarChart>
-                  )}
-                </>
-              ) : (
-                <Box sx={{
-                  height: '100%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: 'text.secondary'
-                }}>
-                  <Typography variant="h6">
-                    {isRunning ? '数据生成中...' : '等待运行结果'}
-                  </Typography>
-                </Box>
-              )}
-            </Box>
+            <Waveform
+              data={simulatorWaveformData}
+              currentIndex={currentIndex}
+              setCurrentIndex={setCurrentIndex}
+              height={450}
+            />
           </Paper>
         </Grid>
       </Grid>

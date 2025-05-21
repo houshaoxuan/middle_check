@@ -8,8 +8,8 @@ export const navItems = [
     ]},
   { key: '课题二', title: '图计算加速卡', href: paths.dashboard.part2, icon: 'users',
     subItems: [
-      {key: '内容一', title: '模拟器基本原理展示', href: paths.dashboard.part2_sub1},
-      {key: '内容二', title: '模拟器数据集运行展示', href: paths.dashboard.part2_sub2}
+      {key: '内容一', title: '模拟器数据集运行展示', href: paths.dashboard.part2_sub1},
+      {key: '内容二', title: '模拟器基本原理展示', href: paths.dashboard.part2_sub2}
     ]
   },
   { key: '课题三', title: '图计算编程环境', href: paths.dashboard.part3, icon: 'plugs-connected',
@@ -27,7 +27,8 @@ export const navItems = [
   { key: '课题五', title: '泛图计算典型应用', href: paths.dashboard.part5, icon: 'user',
     subItems: [
       {key: '内容一', title: '面向不同场景的数据清洗', href: paths.dashboard.part5_sub1},
-      {key: '内容二', title: '数据清洗中间结果', href: paths.dashboard.part5_sub2}
+      {key: '内容二', title: '数据清洗中间结果', href: paths.dashboard.part5_sub2},
+      {key: '内容三', title: '金融应用示例展示', href: paths.dashboard.part5_sub3}
     ]
   },
 ] satisfies NavItemConfig[];
