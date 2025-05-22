@@ -16,7 +16,7 @@ const datasets = {
 
 const imageSrcMap = {
   金融风控: '/financial.png',
-  电力潮流计算: '/financial.png',
+  电力潮流计算: '/electric.png',
 }
 
 let financial_data = {
@@ -156,7 +156,7 @@ export default function Page() {
 
   const [selectedSecne, setSelectedScene] = useState(scene[0]);
   const [selectedDataset, setSelectedDataset] = useState(datasets[scene[0]][0]);
-    const [imageSrc, setImageSrc] = useState(imageSrcMap['金融风控']); // 新增状态存储图片路径
+  const [imageSrc, setImageSrc] = useState(imageSrcMap['金融风控']); // 新增状态存储图片路径
 
 
   // 不同场景的最大step

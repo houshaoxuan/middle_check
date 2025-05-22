@@ -1,267 +1,386 @@
-"use client";
+'use client';
 
-import { useState, useCallback } from 'react';
-import ReactFlow, { Background, Controls, MiniMap } from 'reactflow';
-import 'reactflow/dist/style.css';
+import { useEffect, useRef, useState } from 'react';
+import { Box, Grid, Paper, Typography } from '@mui/material';
 
-// 自定义分组节点组件
-const GroupNode = ({ data }) => {
-  const borderColor = data.color || '#3B82F6';
-  return (
-    <div style={{
-      width: '100%',
-      height: '100%',
-      background: 'transparent',
-      border: `2px dashed ${borderColor}`,
-      borderRadius: '8px',
-      padding: '20px 10px 10px 10px',
-      boxSizing: 'border-box',
-      position: 'relative',
-    }}>
-      <div style={{
-        position: 'absolute',
-        top: '0',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        background: 'transparent',
-        padding: '0 10px',
-        fontWeight: 'bold',
-        fontSize: '14px',
-        color: borderColor,
-      }}>
-        {data.label}
-      </div>
-    </div>
-  );
+import { washLog, subGraphLog, localComputeLog } from './log';
+import NetworkGraph from './NetworkGraph';
+import { getVisNetworkData, getVisNetworkDataInput } from './utils';
+import { resultVertex, inputGraphCsr, vertexLabel } from './data'
+
+const logDataMap = {
+  泛图数据: '泛图数据日志',
+  数据清洗: washLog,
+  子图划分: subGraphLog,
+  本地子图计算: localComputeLog,
+  应用: '应用日志',
 };
 
-// 流程图模块数据
-const modules = [
-  { id: '1', name: '运客数据', description: '运客数据模块负责收集和管理运输相关的客户数据，包括乘客信息、行程记录等。' },
-  { id: '2', name: '数据清洗', description: '数据清洗模块对原始数据进行预处理，去除噪声、填补缺失值，确保数据质量。' },
-  { id: '3', name: '简单客户', description: '简单客户模块存储基本客户信息，用于快速访问和查询。' },
-  { id: '4', name: '子客划分', description: '子客划分模块根据特定规则将客户群体进行细分，便于后续分析。' },
-  { id: '5', name: '子客', description: '子客模块管理细分后的客户群体，提供详细的子客信息和特征。' },
-  { id: '6', name: '计算节点', description: '计算节点模块负责执行数据处理和计算任务，是系统的核心计算单元。' },
-  { id: '7', name: '输出', description: '输出模块将处理后的数据以合适的形式输出，供其他系统或用户使用。' },
-  { id: '8', name: '结果聚类', description: '结果聚类模块对计算结果进行聚类分析，识别数据中的模式和趋势。' },
-  { id: '9', name: '原始数据型及编码器群', description: '此模块负责管理原始数据的类型定义及编码器群，用于数据标准化。' },
-  { id: '10', name: '算法', description: '算法模块包含多种数据处理和分析算法，用于支持计算任务。' },
-  { id: '11', name: '本地子客计算', description: '本地子客计算模块在本地环境中对子客数据进行计算和分析。' },
-  { id: '12', name: '基于规则的运计算加速度卡', description: '此模块基于规则加速运输计算，提升系统性能。' },
-  { id: '13', name: '运计算的加速度卡', description: '运计算的加速度卡模块进一步优化计算速度，减少延迟。' },
-];
+const subCsr = {
+  graph: [
+    `Master vertex count: 20
+Vertex Index (CSR row pointers):
+4 4 6 9 11 11 13 13 13 13 13 13 13 13 13 17 17 17 20 20 20 20 20 20 20
+Adjacency List (CSR column indices):
+24 21 23 17 3 20 22 3 14 2 3 17 18 23 4 2 14 20 18 11
+`,
+    `Master vertex count: 10
+Vertex Index (CSR row pointers):
+1 2 2 2 2 2 4 4 5 9 9 9 9 9 9 9
+Adjacency List (CSR column indices):
+12 2 12 6 11 14 13 10 15
+`,
+    `Master vertex count: 16
+Vertex Index (CSR row pointers):
+0 2 6 6 6 6 18 19 19 23 23 24 38 38 38 47 47 47 47 47 47 47 47 47 47 47 47 47 47 47 47 47 47 47
+Adjacency List (CSR column indices):
+32 18 9 27 16 25 30 17 33 22 24 8 2 25 14 19 12 31 29 24 27 26 0 28 3 9 19 21 12 2 27 18 25 16 31 33 26 10 10 0 3 20 16 9 23 26 27
+`,
+  ],
+};
 
-// 流程图节点（包括分组节点）
-const initialNodes = [
-  // 分组节点 1
-  {
-    id: 'group-1',
-    type: 'group',
-    data: { label: '模块 1', color: '#3B82F6' },
-    position: { x: 30, y: 30 },
-    style: {
-      width: 150,
-      height: 300,
-      background: 'transparent',
-    },
-  },
-  { id: '1', parentNode: 'group-1', data: { label: '运客数据' }, position: { x: 20, y: 40 }, style: { background: '#3B82F6', color: 'white', padding: '10px', borderRadius: '8px' } },
-  { id: '2', parentNode: 'group-1', data: { label: '数据清洗' }, position: { x: 20, y: 120 }, style: { background: '#3B82F6', color: 'white', padding: '10px', borderRadius: '8px' } },
-  { id: '3', parentNode: 'group-1', data: { label: '简单客户' }, position: { x: 20, y: 200 }, style: { background: '#3B82F6', color: 'white', padding: '10px', borderRadius: '8px' } },
+const Page = () => {
+  const [hoveredModule, setHoveredModule] = useState(null);
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const terminalRef = useRef(null); // 添加 ref 用于终端容器
+  const [terminalData, setTerminalData] = useState([]);
+  const [isShowMap, setIsShowMap] = useState({
+    泛图数据: false,
+    数据清洗: false,
+    子图划分: false,
+    本地子图计算: false,
+    应用: false,
+  });
+  const [subCsrData, setSubCsrData] = useState([]);
+  const [inputCsrData, setInputCsrData] = useState({});
+  const [resultCsrData, setResultCsrData] = useState({});
 
-  // 分组节点 2
-  {
-    id: 'group-2',
-    type: 'group',
-    data: { label: '模块 2', color: '#3B82F6' },
-    position: { x: 280, y: 30 },
-    style: {
-      width: 150,
-      height: 300,
-      background: 'transparent',
-    },
-  },
-  { id: '4', parentNode: 'group-2', data: { label: '子客划分' }, position: { x: 20, y: 40 }, style: { background: '#3B82F6', color: 'white', padding: '10px', borderRadius: '8px' } },
-  { id: '5', parentNode: 'group-2', data: { label: '子客' }, position: { x: 20, y: 120 }, style: { background: '#3B82F6', color: 'white', padding: '10px', borderRadius: '8px' } },
-  { id: '6', parentNode: 'group-2', data: { label: '计算节点' }, position: { x: 20, y: 200 }, style: { background: '#3B82F6', color: 'white', padding: '10px', borderRadius: '8px' } },
+  // Define coordinates for each module (approximate based on image)
+  const modules = {
+    泛图数据: { x: 40, y: 45, width: 93, height: 45 },
+    数据清洗: { x: 40, y: 130, width: 93, height: 45 },
+    子图划分: { x: 200, y: 125, width: 95, height: 55 },
+    本地子图计算: { x: 450, y: 325, width: 100, height: 55 },
+    应用: { x: 40, y: 325, width: 95, height: 50 },
+  };
 
-  // 单独节点
-  { id: '7', data: { label: '输出' }, position: { x: 530, y: 150 }, style: { background: '#FBBF24', color: 'black', padding: '10px', borderRadius: '8px' } },
+  const handleMouseMove = (event) => {
+    const rect = event.target.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
 
-  // 分组节点 3
-  {
-    id: 'group-3',
-    type: 'group',
-    data: { label: '模块 3', color: '#10B981' },
-    position: { x: 30, y: 380 },
-    style: {
-      width: 550,
-      height: 150,
-      background: 'transparent',
-    },
-  },
-  { id: '8', parentNode: 'group-3', data: { label: '结果聚类' }, position: { x: 20, y: 40 }, style: { background: '#10B981', color: 'white', padding: '10px', borderRadius: '8px' } },
-  { id: '9', parentNode: 'group-3', data: { label: '原始数据型及编码器群' }, position: { x: 150, y: 40 }, style: { background: '#10B981', color: 'white', padding: '10px', borderRadius: '8px' } },
-  { id: '10', parentNode: 'group-3', data: { label: '算法' }, position: { x: 300, y: 40 }, style: { background: '#10B981', color: 'white', padding: '10px', borderRadius: '8px' } },
-  { id: '11', parentNode: 'group-3', data: { label: '本地子客计算' }, position: { x: 450, y: 40 }, style: { background: '#10B981', color: 'white', padding: '10px', borderRadius: '8px' } },
+    setMousePosition({ x, y });
 
-  // 分组节点 4
-  {
-    id: 'group-4',
-    type: 'group',
-    data: { label: '模块 4', color: '#6B7280' },
-    position: { x: 180, y: 560 },
-    style: {
-      width: 300,
-      height: 100,
-      background: 'transparent',
-    },
-  },
-  { id: '12', parentNode: 'group-4', data: { label: '基于规则的运计算加速度卡' }, position: { x: 20, y: 40 }, style: { background: '#6B7280', color: 'white', padding: '10px', borderRadius: '8px' } },
-  { id: '13', parentNode: 'group-4', data: { label: '运计算的加速度卡' }, position: { x: 220, y: 40 }, style: { background: '#6B7280', color: 'white', padding: '10px', borderRadius: '8px' } },
-];
+    let foundModule = null;
+    for (const [module, coords] of Object.entries(modules)) {
+      if (x >= coords.x && x <= coords.x + coords.width && y >= coords.y && y <= coords.y + coords.height) {
+        foundModule = module;
+        break;
+      }
+    }
+    setHoveredModule(foundModule);
+  };
 
-// 流程图边（箭头）
-const initialEdges = [
-  { id: 'e1-4', source: '1', target: '4', animated: true, style: { stroke: '#3B82F6' }, label: '数据流', labelStyle: { fill: '#3B82F6', fontSize: '12px' }, labelBgStyle: { fill: '#fff', fillOpacity: 0.8 }, labelBgPadding: [4, 2], markerEnd: 'url(#arrow-blue)' },
-  { id: 'e2-5', source: '2', target: '5', animated: true, style: { stroke: '#3B82F6' }, label: '清洗后数据', labelStyle: { fill: '#3B82F6', fontSize: '12px' }, labelBgStyle: { fill: '#fff', fillOpacity: 0.8 }, labelBgPadding: [4, 2], markerEnd: 'url(#arrow-blue)' },
-  { id: 'e3-6', source: '3', target: '6', animated: true, style: { stroke: '#3B82F6' }, label: '客户信息', labelStyle: { fill: '#3B82F6', fontSize: '12px' }, labelBgStyle: { fill: '#fff', fillOpacity: 0.8 }, labelBgPadding: [4, 2], markerEnd: 'url(#arrow-blue)' },
-  { id: 'e4-5', source: '4', target: '5', animated: true, style: { stroke: '#3B82F6' }, label: '划分结果', labelStyle: { fill: '#3B82F6', fontSize: '12px' }, labelBgStyle: { fill: '#fff', fillOpacity: 0.8 }, labelBgPadding: [4, 2], markerEnd: 'url(#arrow-blue)' },
-  { id: 'e5-6', source: '5', target: '6', animated: true, style: { stroke: '#3B82F6' }, label: '双向计算', labelStyle: { fill: '#3B82F6', fontSize: '12px' }, labelBgStyle: { fill: '#fff', fillOpacity: 0.8 }, labelBgPadding: [4, 2], markerStart: 'url(#arrow-blue)', markerEnd: 'url(#arrow-blue)' },
-  { id: 'e5-7', source: '5', target: '7', animated: true, style: { stroke: '#FBBF24' }, label: '最终输出', labelStyle: { fill: '#FBBF24', fontSize: '12px' }, labelBgStyle: { fill: '#fff', fillOpacity: 0.8 }, labelBgPadding: [4, 2], markerEnd: 'url(#arrow-yellow)' },
-  { id: 'e6-11', source: '6', target: '11', animated: true, style: { stroke: '#10B981' }, label: '计算结果', labelStyle: { fill: '#10B981', fontSize: '12px' }, labelBgStyle: { fill: '#fff', fillOpacity: 0.8 }, labelBgPadding: [4, 2], markerEnd: 'url(#arrow-green)' },
-  { id: 'e8-9', source: '8', target: '9', animated: true, style: { stroke: '#10B981' }, label: '聚类数据', labelStyle: { fill: '#10B981', fontSize: '12px' }, labelBgStyle: { fill: '#fff', fillOpacity: 0.8 }, labelBgPadding: [4, 2], markerEnd: 'url(#arrow-green)' },
-  { id: 'e9-10', source: '9', target: '10', animated: true, style: { stroke: '#10B981' }, label: '数据编码', labelStyle: { fill: '#10B981', fontSize: '12px' }, labelBgStyle: { fill: '#fff', fillOpacity: 0.8 }, labelBgPadding: [4, 2], markerEnd: 'url(#arrow-green)' },
-  { id: 'e10-11', source: '10', target: '11', animated: true, style: { stroke: '#10B981' }, label: '算法交互', labelStyle: { fill: '#10B981', fontSize: '12px' }, labelBgStyle: { fill: '#fff', fillOpacity: 0.8 }, labelBgPadding: [4, 2], markerStart: 'url(#arrow-green)', markerEnd: 'url(#arrow-green)' },
-  { id: 'e11-12', source: '11', target: '12', animated: true, style: { stroke: '#6B7280' }, label: '加速规则', labelStyle: { fill: '#6B7280', fontSize: '12px' }, labelBgStyle: { fill: '#fff', fillOpacity: 0.8 }, labelBgPadding: [4, 2], markerEnd: 'url(#arrow-gray)' },
-  { id: 'e11-13', source: '11', target: '13', animated: true, style: { stroke: '#6B7280' }, label: '加速优化', labelStyle: { fill: '#6B7280', fontSize: '12px' }, labelBgStyle: { fill: '#fff', fillOpacity: '0.8' }, labelBgPadding: [4, 2], markerEnd: 'url(#arrow-gray)' },
-];
+  const handleMouseLeave = () => {
+    setHoveredModule(null);
+    setMousePosition({ x: 0, y: 0 });
+  };
 
-// 定义箭头标记（按颜色区分）
-const arrowHeads = (
-  <defs>
-    <marker id="arrow-blue" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
-      <path d="M0,0 L0,6 L9,3 z" fill="#3B82F6" />
-    </marker>
-    <marker id="arrow-yellow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
-      <path d="M0,0 L0,6 L9,3 z" fill="#FBBF24" />
-    </marker>
-    <marker id="arrow-green" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
-      <path d="M0,0 L0,6 L9,3 z" fill="#10B981" />
-    </marker>
-    <marker id="arrow-gray" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
-      <path d="M0,0 L0,6 L9,3 z" fill="#6B7280" />
-    </marker>
-  </defs>
-);
+  const handleImageClick = (event) => {
+    const rect = event.target.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
 
-export default function FlowChartPage() {
-  const [selectedModule, setSelectedModule] = useState(null);
+    for (const [module, coords] of Object.entries(modules)) {
+      if (x >= coords.x && x <= coords.x + coords.width && y >= coords.y && y <= coords.y + coords.height) {
+        scrollToSection(module);
+        runProcess(module);
+        break;
+      }
+    }
+  };
 
-  const onNodeClick = useCallback((event, node) => {
-    if (node.type === 'group') return;
-    const module = modules.find(m => m.id === node.id);
-    setSelectedModule(module);
-    document.getElementById('module-details').scrollIntoView({ behavior: 'smooth' });
+  const scrollToSection = (module) => {
+    const section = document.getElementById(module);
+    if (section) {
+      section.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const getLog = (module) => {
+    return logDataMap[module];
+  };
+
+  const streamLogData = async (module) => {
+    const data = getLog(module);
+    const logLines = data.split('\n');
+    let currentIndex = 0;
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
+    while (currentIndex < logLines.length) {
+      const nextChunk = logLines.slice(currentIndex, currentIndex + 5);
+      setTerminalData((prev) => [...prev, ...nextChunk]);
+      currentIndex += 5;
+      await new Promise((resolve) => setTimeout(resolve, 500));
+    }
+  };
+
+  const runProcess = async (module) => {
+    setTerminalData([]);
+
+    try {
+      if (module === '泛图数据') {
+        setIsShowMap((prev) => ({
+          ...prev,
+          [module]: true,
+        }));
+      } else {
+        await streamLogData(module);
+        setIsShowMap((prev) => ({
+          ...prev,
+          [module]: true,
+        }));
+      }
+    } catch (error) {
+      setTerminalData((prev) => [...prev, '❌ 运行失败: ' + error]);
+    }
+  };
+
+  // 添加 useEffect 监听 terminalData 变化并滚动到底部
+  useEffect(() => {
+    if (terminalRef.current) {
+      terminalRef.current.scrollTop = terminalRef.current.scrollHeight;
+    }
+  }, [terminalData]);
+
+  useEffect(() => {
+    let temp = []
+    for (let i = 0; i < subCsr.graph.length; i++) {
+      const csrString = subCsr.graph[i];
+      const result = getVisNetworkData(csrString);
+      temp.push(result);
+    }
+    setSubCsrData(temp);
+
+    // 初始化输入图
+    setInputCsrData(getVisNetworkDataInput(inputGraphCsr.rowPtr, inputGraphCsr.colId, vertexLabel));
+    setResultCsrData(getVisNetworkDataInput(inputGraphCsr.rowPtr, inputGraphCsr.colId, resultVertex));
   }, []);
 
   return (
-    <>
-      <style>
-        {`
-          body {
-            margin: 0;
-            padding: 0;
-            font-family: Arial, sans-serif;
-          }
-          .container {
-            min-height: 100vh;
-            background-color: #1F2937;
-            color: white;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px;
-          }
-          .wrapper {
-            width: 100%;
-            max-width: 1200px;
-          }
-          .title {
-            font-size: 2rem;
-            font-weight: bold;
-            text-align: center;
-            margin-bottom: 2rem;
-          }
-          .flowchart-container {
-            width: 100%;
-            height: 700px;
-            background-color: #374151;
-            border-radius: 8px;
-            margin-bottom: 2rem;
-            overflow: hidden;
-          }
-          .module-details {
-            background-color: #374151;
-            padding: 1.5rem;
-            border-radius: 8px;
-          }
-          .module-details h2 {
-            font-size: 1.5rem;
-            font-weight: bold;
-            margin-bottom: 1rem;
-          }
-          .module-details p {
-            font-size: 1rem;
-            color: #D1D5DB;
-          }
-          .placeholder-text {
-            color: #9CA3AF;
-            font-style: italic;
-          }
-          .react-flow__attribution {
-            display: none !important;
-          }
-        `}
-      </style>
+    <Grid container spacing={2}>
+      <Grid item xs={12} md={12}>
+        <Paper
+          elevation={3}
+          sx={{
+            p: 2,
+            borderRadius: 3,
+            position: 'relative',
+          }}
+        >
+          <Typography
+            variant="h6"
+            sx={{
+              fontWeight: 700,
+              mb: 2,
+              color: 'second.main',
+            }}
+          >
+            流程展示
+          </Typography>
 
-      <div className="container">
-        <div className="wrapper">
-          {/* 标题 */}
-          <h1 className="title">流程图展示</h1>
-
-          {/* 流程图区域 */}
-          <div className="flowchart-container">
-            <ReactFlow
-              nodes={initialNodes}
-              edges={initialEdges}
-              onNodeClick={onNodeClick}
-              fitView
-              nodeTypes={{
-                group: GroupNode,
-              }}
-            >
-              {arrowHeads}
-              <Background />
-              <Controls />
-              <MiniMap />
-            </ReactFlow>
-          </div>
-
-          {/* 模块展示区域 */}
-          <div id="module-details" className="module-details">
-            {selectedModule ? (
-              <div>
-                <h2>{selectedModule.name}</h2>
-                <p>{selectedModule.description}</p>
-              </div>
-            ) : (
-              <p className="placeholder-text">请点击流程图中的节点查看模块详情。</p>
+          <Box sx={{ textAlign: 'center', mt: 4, height: '600px' }}>
+            <img
+              src="/all_in_one.png" // Replace with your flowchart image path
+              alt="Flowchart"
+              onClick={handleImageClick}
+              onMouseMove={handleMouseMove}
+              onMouseLeave={handleMouseLeave}
+              style={{ cursor: 'pointer', maxWidth: '100%', height: '500px' }}
+            />
+            <Typography variant="h6" sx={{ mt: 2 }}>
+              鼠标位置: (x: {mousePosition.x.toFixed(2)}, y: {mousePosition.y.toFixed(2)})
+            </Typography>
+            {hoveredModule && (
+              <Typography variant="h6" color="primary" sx={{ mt: 2 }}>
+                悬停: {hoveredModule}
+              </Typography>
             )}
-          </div>
-        </div>
-      </div>
-    </>
+          </Box>
+        </Paper>
+      </Grid>
+      <Grid item xs={12} md={9}>
+        <Paper
+          elevation={3}
+          sx={{
+            p: 2,
+            borderRadius: 3,
+          }}
+        >
+          <Typography
+            variant="h6"
+            sx={{
+              fontWeight: 700,
+              mb: 2,
+              color: 'second.main',
+            }}
+          >
+            运行日志
+          </Typography>
+
+          <Box
+            ref={terminalRef}
+            sx={{
+              height: '85%',
+              overflow: 'auto',
+              fontFamily: 'monospace',
+              fontSize: '0.8rem',
+              backgroundColor: '#000',
+              borderRadius: 2,
+              height: 400,
+              p: 1.5,
+              '& > div': {
+                color: '#4caf50',
+                lineHeight: 1.6,
+                borderBottom: '1px solid rgba(255,255,255,0.1)',
+                py: 0.5,
+              },
+            }}
+          >
+            {terminalData.map((line, index) => (
+              <div key={index}>{`> ${line}`}</div>
+            ))}
+          </Box>
+        </Paper>
+      </Grid>
+      <Grid item xs={12} md={6} id="泛图数据">
+        <Paper
+          elevation={3}
+          sx={{
+            p: 2,
+            borderRadius: 3,
+            color: 'black',
+            height: 500,
+          }}
+        >
+          <Typography variant="h6" sx={{ fontWeight: 700, marginBottom: 2 }}>
+            泛图数据展示
+          </Typography>
+          {isShowMap['泛图数据'] && (
+            <Box sx={{ textAlign: 'center' }}>
+              <img
+                src="/application_excel.png" // Replace with your flowchart image path
+                style={{ cursor: 'pointer', maxWidth: '100%', height: '450px' }}
+              />
+            </Box>
+          )}
+        </Paper>
+      </Grid>
+      <Grid item xs={12} md={6} id="数据清洗">
+        <Paper
+          elevation={3}
+          sx={{
+            p: 2,
+            borderRadius: 3,
+            color: 'black',
+            height: 500,
+          }}
+        >
+          <Typography variant="h6" sx={{ fontWeight: 700, marginBottom: 2 }}>
+            输入图展示
+          </Typography>
+          {isShowMap['数据清洗'] && (
+            <NetworkGraph nodes={inputCsrData.nodes} edges={inputCsrData.edges} height="420px" />
+          )}
+
+        </Paper>
+      </Grid>
+      <Grid item xs={12} md={6} id="子图划分">
+        <Paper
+          elevation={3}
+          sx={{
+            p: 2,
+            borderRadius: 3,
+            color: 'black',
+            height: 500,
+          }}
+        >
+          <Typography variant="h6" sx={{ fontWeight: 700, marginBottom: 2 }}>
+            子图展示
+          </Typography>
+          {isShowMap['子图划分'] && (
+            <Grid container spacing={2}>
+              {subCsrData.map((data, index) => (
+                <Grid item xs={6} key={index}>
+                  <NetworkGraph nodes={data.nodes} edges={data.edges} height="200px" />
+                </Grid>
+              ))}
+            </Grid>
+          )}
+        </Paper>
+      </Grid>
+
+      <Grid item xs={12} md={6} id="应用">
+        <Paper
+          elevation={3}
+          sx={{
+            p: 2,
+            borderRadius: 3,
+            color: 'black',
+            height: 500,
+          }}
+        >
+          <Typography variant="h6" sx={{ fontWeight: 700, marginBottom: 2 }}>
+            应用流程图
+          </Typography>
+          {isShowMap['应用'] && (
+            <Box sx={{ textAlign: 'center' }}>
+              <img
+                src="/application.png" // Replace with your flowchart image path
+                style={{ cursor: 'pointer', maxWidth: '100%', height: '420px' }}
+              />
+            </Box>
+          )}
+        </Paper>
+      </Grid>
+      <Grid item xs={12} md={6} id="本地子图计算">
+        <Paper
+          elevation={3}
+          sx={{
+            p: 2,
+            borderRadius: 3,
+            color: 'black',
+            height: 500,
+          }}
+        >
+          <Typography variant="h6" sx={{ fontWeight: 700, marginBottom: 2 }}>
+            结果图展示
+          </Typography>
+          {isShowMap['本地子图计算'] && (
+            <NetworkGraph nodes={resultCsrData.nodes} edges={resultCsrData.edges} height="420px" />
+          )}
+        </Paper>
+      </Grid>
+      <Grid item xs={12} md={6}>
+        <Paper
+          elevation={3}
+          sx={{
+            p: 2,
+            borderRadius: 3,
+            color: 'black',
+            height: 500,
+          }}
+        >
+          <Typography variant="h6" sx={{ fontWeight: 700, marginBottom: 2 }}>
+            运行结果展示
+          </Typography>
+          <Typography variant="body1" sx={{ mt: 2 }}>
+            CSR图
+          </Typography>
+        </Paper>
+      </Grid>
+    </Grid>
   );
-}
+};
+
+export default Page;

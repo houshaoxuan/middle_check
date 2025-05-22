@@ -4,7 +4,9 @@ import {
   Box, Grid, Button, Select, MenuItem,
   Paper, Typography, LinearProgress
 } from '@mui/material';
-import ReadOnlyCodeBox from '../../part2/sub1/CodeContainer';
+
+import ReadOnlyCodeBox from '@/components/common/CodeContainer';
+
 import request from '@/lib/request/request';
 
 const frameworks = {
@@ -83,17 +85,17 @@ export default function FrameworkConversionPage() {
       eventSource.onmessage = async (event) => {
         if (event.data === '[done]') {
           eventSource.close();
-          
+
           // 2. 显示正在拷贝result
           setResults(prev => ({
             'Terminal执行结果': prev['Terminal执行结果'] + '正在拷贝result\n'
           }));
-          
+
           // 3. 获取最终结果
           try {
             const res = await fetch(`${request.BASE_URL}/part3/result/2/${selectedAlgorithm}/`);
             const jsonData = await res.json();
-            
+
             // 4. 显示完成
             setResults(prev => ({
               'Terminal执行结果': prev['Terminal执行结果'] + '完成\n'
@@ -102,10 +104,10 @@ export default function FrameworkConversionPage() {
             // 更新原始代码显示
             const originalCode = selectedFramework === 'GraphScope' ? jsonData.data.pregel : jsonData.data.dgl;
             setOriginalCodeDisplay(originalCode ? originalCode.join('\n') : '');
-            
+
             // 更新转换后的代码
             setTransformedCode(jsonData.data.CGA ? jsonData.data.CGA.join('\n') : '');
-            
+
             // 更新其他结果
             setResults(prev => ({
               ...prev,
@@ -113,7 +115,7 @@ export default function FrameworkConversionPage() {
               'MatrixIR示例': jsonData.data.MatrixIR ? jsonData.data.MatrixIR.join('\n') : '',
               '硬件指令示例': jsonData.data.asm ? jsonData.data.asm.join('\n') : ''
             }));
-            
+
             setProgress(100);
           } catch (error) {
             setResults(prev => ({
@@ -122,7 +124,7 @@ export default function FrameworkConversionPage() {
           } finally {
             setIsRunning(false);
           }
-          
+
         } else if (event.data === '[error]') {
           eventSource.close();
           setResults(prev => ({
@@ -258,11 +260,11 @@ export default function FrameworkConversionPage() {
                 ))}
               </Select>
             </Box>
-            <Button 
-              variant="contained" 
-              color="primary" 
-              onClick={handleRun} 
-              disabled={isRunning || !selectedAlgorithm} 
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleRun}
+              disabled={isRunning || !selectedAlgorithm}
               sx={{ marginBottom: 2 }}
             >
               {isRunning ? '运行中...' : '运行'}
@@ -347,10 +349,10 @@ export default function FrameworkConversionPage() {
               <Typography variant="h6" sx={{ fontWeight: 700, color: 'secondary.main' }}>
                 在模拟器上执行硬件指令
               </Typography>
-              <Button 
-                variant="contained" 
-                color="primary" 
-                onClick={handleSimulatorRun} 
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleSimulatorRun}
                 disabled={isSimulatorRunning}
               >
                 {isSimulatorRunning ? '运行中...' : '运行'}

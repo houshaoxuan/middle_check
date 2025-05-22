@@ -12,12 +12,12 @@ const datasets = {
 
 const resultImages = {
   金融风控: {
-    financial_data_test: '/image_1.png',
-    atec_task3_seq: '/image_1.png',
+    financial_data_test: '/financial_test.png',
+    atec_task3_seq: '/financial_real.png',
   },
   电力潮流计算: {
-    electric_data_test: '/image_2.png',
-    origin_power_data: '/image_2.png',
+    electric_data_test: '/electric_test.png',
+    origin_power_data: '/electric_real.png',
   },
 };
 

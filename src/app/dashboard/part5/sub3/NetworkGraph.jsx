@@ -1,6 +1,5 @@
 import React, { useEffect, useRef } from 'react';
 import { Network } from 'vis-network/standalone';
-import PropTypes from 'prop-types';
 
 const NetworkGraph = ({ nodes, edges, options, height = '750px', width = '100%' }) => {
   const containerRef = useRef(null);
@@ -9,37 +8,41 @@ const NetworkGraph = ({ nodes, edges, options, height = '750px', width = '100%' 
   useEffect(() => {
     if (!containerRef.current) return;
 
-    // 默认配置，确保节点为圆形
+    // 默认配置，优化大规模图，减少节点重叠
     const defaultOptions = {
       nodes: {
-        shape: 'dot', // 使用圆形节点
-        size: 20, // 统一节点大小
+        shape: 'dot',
+        size: 10, // 小节点，降低渲染开销
         font: {
-          size: 12,
+          size: 8, // 小字体
           color: 'black',
         },
-        borderWidth: 2,
+        borderWidth: 1, // 细边框
       },
       edges: {
-        width: 2,
-        smooth: { type: 'dynamic' },
+        width: 1, // 细边
+        smooth: { enabled: false }, // 禁用平滑边
       },
       physics: {
-        forceAtlas2Based: {
-          gravitationalConstant: -50,
-          centralGravity: 0.01,
-          springLength: 100,
-          springConstant: 0.08,
+        enabled: true, // 初始启用物理仿真
+        barnesHut: {
+          gravitationalConstant: -5000, // 强排斥力，分散节点
+          centralGravity: 0.1, // 弱聚拢，保持分散
+          springLength: 150, // 长边长度，减少重叠
+          springConstant: 0.02, // 低弹性，松散布局
+          avoidOverlap: 1, // 最大避免重叠
         },
-        maxVelocity: 50,
-        solver: 'forceAtlas2Based',
-        stabilization: { iterations: 100 },
+        solver: 'barnesHut', // 高效 solver
+        stabilization: {
+          enabled: true,
+          iterations: 100, // 增加迭代，优化布局
+          updateInterval: 20, // 加快更新
+          fit: true, // 适应画布
+        },
       },
-      interaction: {
-        hover: true,
-        zoomView: true,
-        dragView: true,
-        dragNodes: true,
+      layout: {
+        improvedLayout: false, // 禁用复杂布局
+        randomSeed: 42, // 固定种子
       },
     };
 
@@ -49,6 +52,17 @@ const NetworkGraph = ({ nodes, edges, options, height = '750px', width = '100%' 
     // 创建 Vis.js 网络
     const data = { nodes, edges };
     networkRef.current = new Network(containerRef.current, data, mergedOptions);
+
+    // 稳定化完成后静态化
+    networkRef.current.on('stabilizationIterationsDone', () => {
+      networkRef.current.setOptions({ physics: { enabled: false } });
+      console.log('稳定化完成，图已静态');
+    });
+
+    // 监控稳定化进度（调试用）
+    networkRef.current.on('stabilizationProgress', (params) => {
+      console.log(`稳定化进度: ${params.iterations}/${params.total}`);
+    });
 
     return () => {
       if (networkRef.current) {
@@ -69,26 +83,6 @@ const NetworkGraph = ({ nodes, edges, options, height = '750px', width = '100%' 
       }}
     />
   );
-};
-
-NetworkGraph.propTypes = {
-  nodes: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
-      label: PropTypes.string,
-      color: PropTypes.string,
-      title: PropTypes.string,
-    })
-  ).isRequired,
-  edges: PropTypes.arrayOf(
-    PropTypes.shape({
-      from: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
-      to: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
-    })
-  ).isRequired,
-  options: PropTypes.object,
-  height: PropTypes.string,
-  width: PropTypes.string,
 };
 
 export default NetworkGraph;
