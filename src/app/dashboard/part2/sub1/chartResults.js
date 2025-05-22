@@ -1,5 +1,5 @@
 export const chartResults = {
-  'k-Clique(k=3)': {
+  'k-Clique': {
     'rmat-16': [
       { key: '性能(GTSPS)', value: 50.63 },
       { key: '性能指标要求', value: 20 },

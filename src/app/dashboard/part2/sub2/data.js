@@ -250,11 +250,20 @@ void inst_mem_top::BackProcess () {
     module3: {
       rtl: `\`timescale 1ns / 1ps
 \`include "core.vh"
-//@todo, 特殊的向量执行器, softmax, exp, normalization
-// softmax = exp + fsum
-// normalization 需要增加sqrt，这个功能本身可以集成到fdiv中
+/*
+ * 模块名：vfexp_exer, 向量指数计算模块
+ * 模块功能：计算向量x的e^x值
+ * 1. 当front_vexer_id_valid有效时，激活该计算单元
+ * 2. 模块计算出SIMD_WIDTH个e^front_vexer_rt_data[i]的值
+ * 3. 计算结果输出由vexer_rd指示写入的寄存器位置，vexer_rd_data指示输出的值
+ * 4. 输入掩码由front_vexer_rt_data_valid指示，输出掩码由vexer_rd_data_valid指示
+ * 正常条件测试：
+ * 1. front_vexer_id_valid有效时才有输出
+ * 2. front_vexer_rt_data_valid中掩码有效时才进行计算输出，掩码无效则不输出
+ * 3. vexer_valid有效时才进行有效输出
+ * 异常条件测试：
+ */
 
-// @todo, fexp是否需要接受mask？
 module vfexp_exer #(parameter
     DATA_WIDTH=\`DATA_WIDTH,
     SIMD_WIDTH=\`SIMD_WIDTH,
@@ -302,8 +311,7 @@ module vfexp_exer #(parameter
         .out({vexer_rd, vexer_rd_valid, vexer_valid})
     );
 
-endmodule
-`,
+endmodule`,
       simulator: `#include <bits/stdc++.h>
 #include "backend.h"
 

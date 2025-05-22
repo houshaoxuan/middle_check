@@ -193,9 +193,6 @@ export default function Page() {
               <Box>
                 采用Graph500标准数据集在图计算加速卡模拟器上运行PageRank、k-Clique和GCN 代码，进行性能和性能功耗比测试。
               </Box>
-              基准系统采用
-              2023年11月立项时的最新软件版本（Ligra性能约为4GTEPS和性能功耗比约为0.02GTEPS/W、GraphPi性能约为1GTSPS和性能功耗比约为0.005GTSPS/W、PyG性能约为0.5GOPS和性能功耗比约为0.0025GOPS/W），
-              运行环境依托主流处理器Intel Xeon Gold 6338 CPU
             </Box>
 
             <strong style={{ fontSize: '16px' }}>数据集来源：</strong>
@@ -224,10 +221,11 @@ export default function Page() {
               </Typography>
               <Box>
                 <Typography variant="body2" color="text.secondary" paragraph>
-                  模拟器能够精确模拟硬件代码的行为，包括功能逻辑和时序关系，能够将SoC商的复杂系统进行简化并模拟核心的精确执行，实现以较小的开发代价进行架构的验证和调优。
+                  时钟精确的软件模拟器原理展示
+                  模拟器能够精确模拟硬件代码的行为，包括模块、子系统和系统等多层次的功能逻辑和时序关系，实现以较小的开发代价进行架构的验证和调优。
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  本页面展示了3个模块的RTL代码和对应的模拟器代码，并且分别运行并展示了对应的仿真运行和模拟器的波形图，通过对比能够看出模拟器是否精确模拟了硬件行为。
+                  本页面展示了3个模块的RTL代码和对应的模拟器代码，并且分别运行并展示了对应的仿真运行和模拟器的波形图，通过对比能够看出模拟器精确模拟了硬件行为。
                 </Typography>
               </Box>
             </Paper>
@@ -250,9 +248,9 @@ export default function Page() {
               </Typography>
 
               <Select value={module} onChange={handleModuleChange} fullWidth disabled={isRunning} size="small">
-                <MenuItem value="module1">fetch_top</MenuItem>
-                <MenuItem value="module2">inst_mem</MenuItem>
-                <MenuItem value="module3">vexer_special</MenuItem>
+                <MenuItem value="module1">取指模块</MenuItem>
+                <MenuItem value="module2">指令缓存区模块</MenuItem>
+                <MenuItem value="module3">向量指数计算模块</MenuItem>
               </Select>
               <Button
                 fullWidth
