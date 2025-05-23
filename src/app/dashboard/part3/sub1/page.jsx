@@ -7,7 +7,7 @@ import {
 import ReadOnlyCodeBox from './CodeContainer';
 import request from '@/lib/request/request';
 
-const algorithms = ['bfs', 'sssp', 'wcc', 'kcore', 'cf', 'ppr', 'gcn'];
+const algorithms = ['bfs', 'sssp', 'wcc', 'kcore', 'k-Clique', 'ppr', 'gcn'];
 
 export default function Page() {
   const [selectedAlgo, setSelectedAlgo] = useState(algorithms[0]);
@@ -82,7 +82,7 @@ export default function Page() {
         case 'sssp': urlAlgo = 'sssp'; break;
         case 'wcc': urlAlgo = 'wcc'; break;
         case 'kcore': urlAlgo = 'kcore'; break;
-        case 'cf': urlAlgo = 'cf'; break;
+        case 'k-Clique': urlAlgo = 'cf'; break;
         case 'ppr': urlAlgo = 'ppr'; break;
         case 'gcn': urlAlgo = 'gcn'; break;
         default: throw new Error(`不支持的算法: ${selectedAlgo}`);
@@ -137,7 +137,6 @@ export default function Page() {
         }
       };
       
-      
       eventSource.onerror = () => {
         eventSource.close();
         setResults(prev => ({
@@ -164,7 +163,18 @@ export default function Page() {
     setSimulatorResults('正在与服务器建立连接...\n');
 
     try {
-      const eventSource = new EventSource(`${request.BASE_URL}/part3/moni/${selectedAlgo}/`);
+      let urlAlgo;
+      switch(selectedAlgo) {
+        case 'bfs': urlAlgo = 'bfs'; break;
+        case 'sssp': urlAlgo = 'sssp'; break;
+        case 'wcc': urlAlgo = 'wcc'; break;
+        case 'kcore': urlAlgo = 'kcore'; break;
+        case 'k-Clique': urlAlgo = 'cf'; break;
+        case 'ppr': urlAlgo = 'ppr'; break;
+        case 'gcn': urlAlgo = 'gcn'; break;
+        default: throw new Error(`不支持的算法: ${selectedAlgo}`);
+      }
+      const eventSource = new EventSource(`${request.BASE_URL}/part3/moni/${urlAlgo}/`);
 
       eventSource.onmessage = (event) => {
         if (event.data === '[done]') {
@@ -203,11 +213,23 @@ export default function Page() {
   };
 
   const handleShowExample = async (exampleName) => {
+    let urlAlgo;
+    switch(selectedAlgo) {
+      case 'bfs': urlAlgo = 'bfs'; break;
+      case 'sssp': urlAlgo = 'sssp'; break;
+      case 'wcc': urlAlgo = 'wcc'; break;
+      case 'kcore': urlAlgo = 'kcore'; break;
+      case 'k-Clique': urlAlgo = 'cf'; break;
+      case 'ppr': urlAlgo = 'ppr'; break;
+      case 'gcn': urlAlgo = 'gcn'; break;
+      default: throw new Error(`不支持的算法: ${selectedAlgo}`);
+    }
+    
     try {
       const backendIdentifier = exampleTypeMapping[exampleName];
       
       const res = await request({
-        url: `/part3data/1/${selectedAlgo}/${backendIdentifier}`,
+        url: `/part3data/1/${urlAlgo}/${backendIdentifier}/`,
         method: 'GET',
       });
   
