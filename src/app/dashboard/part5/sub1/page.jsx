@@ -689,7 +689,7 @@ only showing top 10 rows
               }}
             >
               {showResultImage ? (
-                <Image src={imageSrc} alt="处理结果示意图" width={600} height={300} />
+                <Image src={imageSrc} alt="处理结果示意图" width={600} height={350} />
               ) : (
                 <Box
                   sx={{
