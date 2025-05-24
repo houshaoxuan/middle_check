@@ -325,7 +325,8 @@ export default function DataProcessingPage() {
                     whiteSpace: 'normal',
                     position: 'insideRight',
                     fill: '#F44336',
-                    fontSize: 12,
+                    fontSize: 14,
+                    fontWeight: 'bold', 
                     dy: -10,
                     opacity: showReferenceLine ? 1 : 0,
                     transition: 'opacity 0.3s'

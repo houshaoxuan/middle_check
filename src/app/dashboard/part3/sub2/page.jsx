@@ -4,22 +4,30 @@ import {
   Box, Grid, Button, Select, MenuItem,
   Paper, Typography, LinearProgress
 } from '@mui/material';
-
 import ReadOnlyCodeBox from '@/components/common/CodeContainer';
-
 import request from '@/lib/request/request';
+import {sampleCodes} from './constCode';
 
 const frameworks = {
   'GraphScope': ['bfs', 'sssp', 'ppr'],
   'DGL': ['gcn'],
 };
 
+// 算法对应的数据集选项
+const datasetOptions = {
+  'bfs': ['smallgraph', 'physics', 'facebook'],
+  'sssp': ['smallgraph', 'physics', 'facebook'],
+  'ppr': ['smallgraph', 'physics', 'facebook'],
+  'gcn': ['cora'],
+};
+
 
 export default function FrameworkConversionPage() {
   const [selectedFramework, setSelectedFramework] = useState(Object.keys(frameworks)[0]);
   const [selectedAlgorithm, setSelectedAlgorithm] = useState(frameworks[Object.keys(frameworks)[0]][0]);
-  const [originalCodeDisplay, setOriginalCodeDisplay] = useState('');
-  const [transformedCode, setTransformedCode] = useState('');
+  const [selectedDataset, setSelectedDataset] = useState(datasetOptions[frameworks[Object.keys(frameworks)[0]][0]][0]);
+  const [originalCodeDisplay, setOriginalCodeDisplay] = useState(sampleCodes[frameworks[Object.keys(frameworks)[0]][0]].frameworkCode);
+  const [transformedCode, setTransformedCode] = useState(sampleCodes[frameworks[Object.keys(frameworks)[0]][0]].cgaCode);
   const [results, setResults] = useState({});
   const [isRunning, setIsRunning] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -40,32 +48,38 @@ export default function FrameworkConversionPage() {
     }
   };
 
-  // 自动滚动
   React.useEffect(() => {
     scrollToBottom();
   }, [results, simulatorResults]);
-
-
 
   const handleFrameworkChange = (event) => {
     const framework = event.target.value;
     setSelectedFramework(framework);
     if (frameworks[framework].length > 0) {
-      setSelectedAlgorithm(frameworks[framework][0]);
+      const newAlgorithm = frameworks[framework][0];
+      setSelectedAlgorithm(newAlgorithm);
+      setSelectedDataset(datasetOptions[newAlgorithm][0]);
+      setOriginalCodeDisplay(sampleCodes[newAlgorithm].frameworkCode);
+      setTransformedCode(sampleCodes[newAlgorithm].cgaCode);
     } else {
       setSelectedAlgorithm('');
+      setOriginalCodeDisplay('');
+      setTransformedCode('');
     }
-    setOriginalCodeDisplay('');
-    setTransformedCode('');
     setResults({});
   };
 
   const handleAlgorithmChange = (event) => {
     const algorithm = event.target.value;
     setSelectedAlgorithm(algorithm);
-    setOriginalCodeDisplay('');
-    setTransformedCode('');
+    setSelectedDataset(datasetOptions[algorithm][0]);
+    setOriginalCodeDisplay(sampleCodes[algorithm].frameworkCode);
+    setTransformedCode(sampleCodes[algorithm].cgaCode);
     setResults({});
+  };
+
+  const handleDatasetChange = (event) => {
+    setSelectedDataset(event.target.value);
   };
 
   const handleRun = async () => {
@@ -75,51 +89,46 @@ export default function FrameworkConversionPage() {
 
     setIsRunning(true);
     setProgress(0);
-    setResults({ 'Terminal执行结果': '正在与服务器建立连接...\n' });
+    setResults({ terminalOutput: 'Connecting to server...\n' });
 
     try {
-      // 1. 执行流式命令
-      const eventSource = new EventSource(`${request.BASE_URL}/part3/execute/2/${selectedAlgorithm}/`);
+      const eventSource = new EventSource(`${request.BASE_URL}/part3/execute/2/${selectedAlgorithm}/${selectedDataset}/`);
       let terminalOutput = '';
 
       eventSource.onmessage = async (event) => {
         if (event.data === '[done]') {
           eventSource.close();
-
-          // 2. 显示正在拷贝result
           setResults(prev => ({
-            'Terminal执行结果': prev['Terminal执行结果'] + '正在拷贝result\n'
+            ...prev,
+            terminalOutput: prev.terminalOutput + 'Copying results...\n'
           }));
 
-          // 3. 获取最终结果
           try {
             const res = await fetch(`${request.BASE_URL}/part3/result/2/${selectedAlgorithm}/`);
             const jsonData = await res.json();
 
-            // 4. 显示完成
-            setResults(prev => ({
-              'Terminal执行结果': prev['Terminal执行结果'] + '完成\n'
-            }));
-
-            // 更新原始代码显示
-            const originalCode = selectedFramework === 'GraphScope' ? jsonData.data.pregel : jsonData.data.dgl;
-            setOriginalCodeDisplay(originalCode ? originalCode.join('\n') : '');
-
-            // 更新转换后的代码
-            setTransformedCode(jsonData.data.CGA ? jsonData.data.CGA.join('\n') : '');
-
-            // 更新其他结果
             setResults(prev => ({
               ...prev,
-              'graphIR示例': jsonData.data.GraphIR ? jsonData.data.GraphIR.join('\n') : '',
-              'MatrixIR示例': jsonData.data.MatrixIR ? jsonData.data.MatrixIR.join('\n') : '',
-              '硬件指令示例': jsonData.data.asm ? jsonData.data.asm.join('\n') : ''
+              terminalOutput: prev.terminalOutput + 'Completed\n'
+            }));
+
+            const originalCode = selectedFramework === 'GraphScope' ? jsonData.data.pregel : jsonData.data.dgl;
+            setOriginalCodeDisplay(originalCode ? originalCode.join('\n') : sampleCodes[selectedAlgorithm].frameworkCode);
+
+            setTransformedCode(jsonData.data.CGA ? jsonData.data.CGA.join('\n') : sampleCodes[selectedAlgorithm].cgaCode);
+
+            setResults(prev => ({
+              ...prev,
+              graphIR: jsonData.data.GraphIR ? jsonData.data.GraphIR.join('\n') : '',
+              matrixIR: jsonData.data.MatrixIR ? jsonData.data.MatrixIR.join('\n') : '',
+              hardwareInstructions: jsonData.data.asm ? jsonData.data.asm.join('\n') : ''
             }));
 
             setProgress(100);
           } catch (error) {
             setResults(prev => ({
-              'Terminal执行结果': prev['Terminal执行结果'] + `获取结果失败: ${error.message}\n`
+              ...prev,
+              terminalOutput: prev.terminalOutput + `Failed to get results: ${error.message}\n`
             }));
           } finally {
             setIsRunning(false);
@@ -128,12 +137,14 @@ export default function FrameworkConversionPage() {
         } else if (event.data === '[error]') {
           eventSource.close();
           setResults(prev => ({
-            'Terminal执行结果': prev['Terminal执行结果'] + '\n执行出错\n'
+            ...prev,
+            terminalOutput: prev.terminalOutput + '\nExecution error\n'
           }));
           setIsRunning(false);
         } else {
           setResults(prev => ({
-            'Terminal执行结果': prev['Terminal执行结果'] + event.data + '\n'
+            ...prev,
+            terminalOutput: prev.terminalOutput + event.data + '\n'
           }));
         }
       };
@@ -141,14 +152,15 @@ export default function FrameworkConversionPage() {
       eventSource.onerror = () => {
         eventSource.close();
         setResults(prev => ({
-          'Terminal执行结果': prev['Terminal执行结果'] + '\n连接错误\n'
+          ...prev,
+          terminalOutput: prev.terminalOutput + '\nConnection error\n'
         }));
         setIsRunning(false);
       };
 
     } catch (error) {
       setResults({
-        'Terminal执行结果': `执行失败: ${error.message}`
+        terminalOutput: `Execution failed: ${error.message}`
       });
       setIsRunning(false);
     }
@@ -161,20 +173,20 @@ export default function FrameworkConversionPage() {
 
     setIsSimulatorRunning(true);
     setSimulatorProgress(0);
-    setSimulatorResults('正在与服务器建立连接...\n');
+    setSimulatorResults('Connecting to server...\n');
 
     try {
-      const eventSource = new EventSource(`${request.BASE_URL}/part3/moni2/${selectedAlgorithm}/`);
+      const eventSource = new EventSource(`${request.BASE_URL}/part3/moni2/${selectedAlgorithm}/${selectedDataset}/`);
 
       eventSource.onmessage = (event) => {
         if (event.data === '[done]') {
           eventSource.close();
-          setSimulatorResults(prev => prev + '模拟器执行完成\n');
+          setSimulatorResults(prev => prev + 'Simulator execution completed\n');
           setSimulatorProgress(100);
           setIsSimulatorRunning(false);
         } else if (event.data === '[error]') {
           eventSource.close();
-          setSimulatorResults(prev => prev + '\n执行出错\n');
+          setSimulatorResults(prev => prev + '\nExecution error\n');
           setIsSimulatorRunning(false);
         } else {
           setSimulatorResults(prev => prev + event.data + '\n');
@@ -184,13 +196,13 @@ export default function FrameworkConversionPage() {
 
       eventSource.onerror = () => {
         eventSource.close();
-        setSimulatorResults(prev => prev + '\n连接错误\n');
+        setSimulatorResults(prev => prev + '\nConnection error\n');
         setIsSimulatorRunning(false);
       };
 
     } catch (error) {
-      console.error('模拟器执行失败:', error);
-      setSimulatorResults(`执行失败: ${error.message}`);
+      console.error('Simulator execution failed:', error);
+      setSimulatorResults(`Execution failed: ${error.message}`);
       setIsSimulatorRunning(false);
     }
   };
@@ -215,7 +227,7 @@ export default function FrameworkConversionPage() {
           <Box component="span" display="block">最后，支持GraphScope和DGL框架向CGA编程模型的转换</Box>
           <Box component="span" display="block">使用SNAP标准动态图数据集进行评测，性能指标计算方法是：动态图更新速率=总更新边数/总更新时间</Box>
           <strong>数据集来源：</strong>
-          <Box component="span" display="block">采用选择SNAP的标准图数据集facebook，和图卷积网络标准数据集Cora</Box>
+          <Box component="span" display="block">采用选自斯坦福网络分析平台（SNAP）的自然图数据集ego-Facebook，大型网络数据集KONECT的自然图数据集Physicians，图卷积网络自然图数据集Cora</Box>
         </Typography>
       </Paper>
 
@@ -275,7 +287,7 @@ export default function FrameworkConversionPage() {
         <Grid item xs={12} md={8}>
           <Paper elevation={3} sx={{ p: 2, borderRadius: 3, height: 350, display: 'flex', flexDirection: 'column' }}>
             <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: 'secondary.main' }}>
-              Terminal执行结果
+              Terminal输出
             </Typography>
             <Box sx={{
               backgroundColor: '#1e1e1e',
@@ -289,7 +301,7 @@ export default function FrameworkConversionPage() {
               flex: 1,
               whiteSpace: 'pre',
             }} ref={resultsBoxRef}>
-              {results['Terminal执行结果'] || ''}
+              {results.terminalOutput || ''}
             </Box>
           </Paper>
         </Grid>
@@ -301,7 +313,7 @@ export default function FrameworkConversionPage() {
           {/* 原框架代码 */}
           <Paper elevation={3} sx={{ p: 2, borderRadius: 3, mb: 3, height: 400 }}>
             <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: 'secondary.main' }}>
-              GraphScope或DGL框架代码展示
+              {selectedFramework}框架代码展示
             </Typography>
             <ReadOnlyCodeBox content={originalCodeDisplay} height={300} />
           </Paper>
@@ -324,7 +336,7 @@ export default function FrameworkConversionPage() {
             <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: 'secondary.main' }}>
               GraphIR展示
             </Typography>
-            <ReadOnlyCodeBox content={results['graphIR示例'] || ''} height={350} />
+            <ReadOnlyCodeBox content={results.graphIR || ''} height={350} />
           </Paper>
         </Grid>
         <Grid item xs={12} md={6}>
@@ -332,7 +344,7 @@ export default function FrameworkConversionPage() {
             <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: 'secondary.main' }}>
               MatrixIR展示
             </Typography>
-            <ReadOnlyCodeBox content={results['MatrixIR示例'] || ''} height={350} />
+            <ReadOnlyCodeBox content={results.matrixIR || ''} height={350} />
           </Paper>
         </Grid>
         <Grid item xs={12} md={6}>
@@ -340,25 +352,57 @@ export default function FrameworkConversionPage() {
             <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: 'secondary.main' }}>
               硬件指令展示
             </Typography>
-            <ReadOnlyCodeBox content={results['硬件指令示例'] || ''} height={350} />
+            <ReadOnlyCodeBox content={results.hardwareInstructions || ''} height={350} />
           </Paper>
         </Grid>
-        <Grid item xs={12} md={6}>
-          <Paper elevation={3} sx={{ p: 2, borderRadius: 3, height: 450 }}>
+      </Grid>
+
+      {/* 模拟器执行区域 */}
+      <Grid container spacing={3} mt={2}>
+        {/* 模拟器控制模块 */}
+        <Grid item xs={12} md={4}>
+          <Paper elevation={3} sx={{ p: 2, borderRadius: 3, height: 250, display: 'flex', flexDirection: 'column' }}>
+            <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: 'secondary.main', borderBottom: '2px solid', borderColor: 'secondary.main', pb: 1 }}>
+              模拟器控制
+            </Typography>
+            <Box sx={{ mb: 2 }}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 550, fontSize: '16px', mb: 1 }}>
+                选择数据集
+              </Typography>
+              <Select
+                fullWidth
+                value={selectedDataset}
+                onChange={(e) => setSelectedDataset(e.target.value)}
+                disabled={isSimulatorRunning}
+              >
+                {selectedAlgorithm && datasetOptions[selectedAlgorithm]?.map((dataset) => (
+                  <MenuItem key={dataset} value={dataset}>
+                    {dataset}
+                  </MenuItem>
+                ))}
+              </Select>
+            </Box>
+            <Button 
+              variant="contained" 
+              color="primary" 
+              onClick={handleSimulatorRun} 
+              disabled={isSimulatorRunning} 
+              sx={{ marginBottom: 2 }}
+            >
+              {isSimulatorRunning ? '运行中...' : '运行模拟器'}
+            </Button>
+            {isSimulatorRunning && <LinearProgress value={simulatorProgress} />}
+          </Paper>
+        </Grid>
+
+        {/* 模拟器执行结果显示 */}
+        <Grid item xs={12} md={8}>
+          <Paper elevation={3} sx={{ p: 2, borderRadius: 3, height: 450, display: 'flex', flexDirection: 'column' }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
               <Typography variant="h6" sx={{ fontWeight: 700, color: 'secondary.main' }}>
                 在模拟器上执行硬件指令
               </Typography>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handleSimulatorRun}
-                disabled={isSimulatorRunning}
-              >
-                {isSimulatorRunning ? '运行中...' : '运行'}
-              </Button>
             </Box>
-            {isSimulatorRunning && <LinearProgress value={simulatorProgress} sx={{ mb: 2 }} />}
             <Box sx={{
               backgroundColor: '#1e1e1e',
               color: '#d4d4d4',
@@ -368,7 +412,7 @@ export default function FrameworkConversionPage() {
               overflow: 'auto',
               padding: '16px',
               borderRadius: '4px',
-              height: '350px',
+              flex: 1,
               whiteSpace: 'pre',
             }} ref={simulatorBoxRef}>
               {simulatorResults}
