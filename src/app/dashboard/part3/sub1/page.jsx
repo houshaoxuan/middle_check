@@ -66,12 +66,12 @@ const getDatasetUrl = (dataset) => {
 const EXAMPLE_TYPES = {
   cgafile: { label: '基于CGA编程模型的代码展示' },
   graphIR: { label: 'GraphIR展示' },
-  gcbefore: { label: '后端算子接口' },
-  gcafter: { label: '算子汇编生成' },
-  outdegbefore: { label: '后端算子接口2' },
-  outdegafter: { label: '算子汇编生成2' },
+  gcbefore: { label: '后端算子接口展示' },
+  gcafter: { label: '算子汇编生成展示' },
+  outdegbefore: { label: '后端算子接口2展示' },
+  outdegafter: { label: '算子汇编生成2展示' },
   matrixIR: { label: 'MatrixIR展示' },
-  asmfile: { label: '汇编代码展示' }
+  asmfile: { label: '硬件指令展示' }
 };
 
 export default function Page() {
@@ -318,17 +318,19 @@ export default function Page() {
       'matrixIR': 'asmfile',
       'asmfile': null
     },
-    'kclique': {
+    'k-Clique': {
       'graphIR': 'matrixIR',
       'matrixIR': 'asmfile',
       'asmfile': null
     },
+    
     // 其他算法可以在这里添加特殊流程
   };
 
 
   const handleShowExample = async (exampleKey) => {
     try {
+      await new Promise(resolve => setTimeout(resolve, 200));
       const urlAlgo = getAlgorithmUrl(selectedAlgo);
       console.log('selectedAlgo', selectedAlgo)
       
@@ -391,7 +393,7 @@ export default function Page() {
           <Box component="span" display="block">指标3.1：抽象出图遍历、图挖掘、图学习所具有的共性计算特征</Box>
           <Box component="span" display="block">指标3.2：使用SNAP标准动态图数据集进行评测，动态图更新速率达到每秒五十万条边</Box>
           <strong>完成时指标：</strong>
-          <Box component="span" display="block">指标3.1：提出对图计算、图挖掘、图学习算法统一化表达的编程模型和编译工具</Box>
+          <Box component="span" display="block">指标3.1：提出对图遍历、图挖掘、图学习算法统一化表达的编程模型和编译工具</Box>
           <Box component="span" display="block">指标3.2：使用SNAP标准动态图数据集进行评测，动态图更新速率达到每秒百万条边</Box>
           <strong>考核方式：</strong>
           <Box component="span" display="block">首先，将图遍历、图学习、图挖掘应用采用CGA编程模型统一化表达</Box>
@@ -399,14 +401,14 @@ export default function Page() {
           <Box component="span" display="block">最后，支持GraphScope和DGL框架向CGA编程模型的转换</Box>
           <Box component="span" display="block">使用SNAP标准动态图数据集进行评测，性能指标计算方法是：动态图更新速率=总更新边数/总更新时间</Box>
           <strong>数据集来源：</strong>
-          <Box component="span" display="block">采用选择SNAP的标准图数据集facebook，和图卷积网络标准数据集Cora</Box>
+          <Box component="span" display="block">采用选自斯坦福网络分析平台（SNAP）的自然图数据集ego-Facebook，大型网络数据集KONECT的自然图数据集Euroroads、PDZBase、Physicians，和图卷积网络自然图数据集Cora</Box>
         </Typography>
       </Paper>
 
       {/* 运行控制模块和Terminal执行结果并排 */}
       <Grid container spacing={3} mb={2} alignItems="stretch">
         <Grid item xs={12} md={4}>
-          <Paper elevation={3} sx={{ p: 2, borderRadius: 3, height: 350, display: 'flex', flexDirection: 'column' }}>
+          <Paper elevation={3} sx={{ p: 2, borderRadius: 3, height: 250, display: 'flex', flexDirection: 'column' }}>
             <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: 'secondary.main', borderBottom: '2px solid', borderColor: 'secondary.main', pb: 1 }}>
               运行控制
             </Typography>
@@ -423,23 +425,6 @@ export default function Page() {
                 {algorithms.map((algo) => (
                   <MenuItem key={algo} value={algo}>
                     {algo}
-                  </MenuItem>
-                ))}
-              </Select>
-            </Box>
-            <Box sx={{ mb: 2 }}>
-              <Typography variant="subtitle1" sx={{ fontWeight: 550, fontSize: '16px', mb: 1 }}>
-                选择数据集
-              </Typography>
-              <Select
-                fullWidth
-                value={selectedDataset}
-                onChange={(e) => setSelectedDataset(e.target.value)}
-                disabled={isRunning}
-              >
-                {algorithmMappings[selectedAlgo].datasets.map((dataset) => (
-                  <MenuItem key={dataset} value={dataset}>
-                    {dataset}
                   </MenuItem>
                 ))}
               </Select>
@@ -529,22 +514,50 @@ export default function Page() {
 
       {/* 模拟器执行区域 */}
       <Grid container spacing={3} mt={2}>
-        <Grid item xs={12}>
+        {/* 模拟器控制模块 */}
+        <Grid item xs={12} md={4}>
+          <Paper elevation={3} sx={{ p: 2, borderRadius: 3, height: 250, display: 'flex', flexDirection: 'column' }}>
+            <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: 'secondary.main', borderBottom: '2px solid', borderColor: 'secondary.main', pb: 1 }}>
+              模拟器控制
+            </Typography>
+            <Box sx={{ mb: 2 }}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 550, fontSize: '16px', mb: 1 }}>
+                选择数据集
+              </Typography>
+              <Select
+                fullWidth
+                value={selectedDataset}
+                onChange={(e) => setSelectedDataset(e.target.value)}
+                disabled={isSimulatorRunning}
+              >
+                {algorithmMappings[selectedAlgo].datasets.map((dataset) => (
+                  <MenuItem key={dataset} value={dataset}>
+                    {dataset}
+                  </MenuItem>
+                ))}
+              </Select>
+            </Box>
+            <Button 
+              variant="contained" 
+              color="primary" 
+              onClick={handleSimulatorRun} 
+              disabled={isSimulatorRunning} 
+              sx={{ marginBottom: 2 }}
+            >
+              {isSimulatorRunning ? '运行中...' : '运行模拟器'}
+            </Button>
+            {isSimulatorRunning && <LinearProgress value={simulatorProgress} />}
+          </Paper>
+        </Grid>
+
+        {/*模拟器执行结果显示*/}
+        <Grid item xs={8}>
           <Paper elevation={3} sx={{ p: 2, borderRadius: 3, height: 450, display: 'flex', flexDirection: 'column' }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
               <Typography variant="h6" sx={{ fontWeight: 700, color: 'secondary.main' }}>
                 在模拟器上执行硬件指令
               </Typography>
-              <Button 
-                variant="contained" 
-                color="primary" 
-                onClick={handleSimulatorRun} 
-                disabled={isSimulatorRunning}
-              >
-                {isSimulatorRunning ? '运行中...' : '运行'}
-              </Button>
             </Box>
-            {isSimulatorRunning && <LinearProgress value={simulatorProgress} sx={{ mb: 2 }} />}
             <Box sx={{
               backgroundColor: '#1e1e1e',
               color: '#d4d4d4',
