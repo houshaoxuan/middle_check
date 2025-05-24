@@ -14,50 +14,55 @@ export const PERFORMANCE_DATA = {
       Dataset: 'Rmat-16',
       Vertices: Math.pow(2, 16),
       Edges: Math.pow(2, 20),
-      'CPU-Time(s)': 12.345,
-      'ACC-Time(s)': 3.456,
-      'Speedup': 3.57,
-      'GTSPS': 7.234
+      'CPU-Time(s)': 0.182,
+      // 'CPU-Time(s)': 0.028,
+      'ACC-Time(s)': 0.004,
+      'Speedup': 7.47603,
+      'GTSPS': 7.47603
     },
     {
       Algorithm: 'PageRank',
       Dataset: 'Rmat-17',
       Vertices: Math.pow(2, 17),
       Edges: Math.pow(2, 21),
-      'CPU-Time(s)': 24.567,
-      'ACC-Time(s)': 6.789,
-      'Speedup': 3.62,
-      'GTSPS': 7.456
+      'CPU-Time(s)': 0.394,
+      // 'CPU-Time(s)': 0.057,
+      'ACC-Time(s)': 0.009,
+      'Speedup': 6.65543,
+      'GTSPS': 6.65543
     },
     {
       Algorithm: 'PageRank',
       Dataset: 'Rmat-18',
       Vertices: Math.pow(2, 18),
       Edges: Math.pow(2, 22),
-      'CPU-Time(s)': 48.901,
-      'ACC-Time(s)': 13.456,
-      'Speedup': 3.63,
-      'GTSPS': 7.567
+      'CPU-Time(s)': 0.531,
+      // 'CPU-Time(s)': 0.057,
+      'ACC-Time(s)': 0.009,
+      'Speedup': 6.617,
+      'GTSPS': 6.617
     },
     {
       Algorithm: 'PageRank',
       Dataset: 'Rmat-19',
       Vertices: Math.pow(2, 19),
       Edges: Math.pow(2, 23),
-      'CPU-Time(s)': 97.654,
-      'ACC-Time(s)': 26.789,
-      'Speedup': 3.65,
-      'GTSPS': 7.678
+      'CPU-Time(s)': 2.16,
+      // 'CPU-Time(s)': 0.218,
+      'ACC-Time(s)': 0.036,
+      'Speedup': 6.102,
+      'GTSPS': 6.102
     },
     {
       Algorithm: 'PageRank',
       Dataset: 'Rmat-20',
       Vertices: Math.pow(2, 20),
       Edges: Math.pow(2, 24),
-      'CPU-Time(s)': 195.432,
-      'ACC-Time(s)': 53.456,
-      'Speedup': 3.66,
-      'GTSPS': 7.789
+      'CPU-Time(s)': 3.84,
+      // 'CPU-Time(s)': 0.210,
+      'ACC-Time(s)': 0.034,
+      'Speedup': 6.141,
+      'GTSPS': 6.141
     }
   ],
   'k-Clique': [
@@ -66,50 +71,55 @@ export const PERFORMANCE_DATA = {
       Dataset: 'Rmat-16',
       Vertices: Math.pow(2, 16),
       Edges: Math.pow(2, 20),
-      'CPU-Time(s)': 15.678,
-      'ACC-Time(s)': 5.432,
-      'Speedup': 2.89,
-      'GTSPS': 1.876
+      'CPU-Time(s)': 0.256,
+      // 'CPU-Time(s)': 0.122,
+      'ACC-Time(s)': 0.048,
+      'Speedup': 2.525,
+      'GTSPS': 2.525
     },
     {
       Algorithm: 'k-Clique',
       Dataset: 'Rmat-17',
       Vertices: Math.pow(2, 17),
       Edges: Math.pow(2, 21),
-      'CPU-Time(s)': 31.234,
-      'ACC-Time(s)': 10.876,
-      'Speedup': 2.87,
-      'GTSPS': 1.890
+      'CPU-Time(s)': 0.639,
+      // 'CPU-Time(s)': 0.32,
+      'ACC-Time(s)': 0.127,
+      'Speedup': 2.531,
+      'GTSPS': 2.531
     },
     {
       Algorithm: 'k-Clique',
       Dataset: 'Rmat-18',
       Vertices: Math.pow(2, 18),
       Edges: Math.pow(2, 22),
-      'CPU-Time(s)': 62.345,
-      'ACC-Time(s)': 21.654,
-      'Speedup': 2.88,
-      'GTSPS': 1.901
+      'CPU-Time(s)': 0.512,
+      // 'CPU-Time(s)': 0.273,
+      'ACC-Time(s)': 0.118,
+      'Speedup': 2.308,
+      'GTSPS': 2.308
     },
     {
       Algorithm: 'k-Clique',
       Dataset: 'Rmat-19',
       Vertices: Math.pow(2, 19),
       Edges: Math.pow(2, 23),
-      'CPU-Time(s)': 124.567,
-      'ACC-Time(s)': 43.210,
-      'Speedup': 2.88,
-      'GTSPS': 1.912
+      'CPU-Time(s)': 1.275,
+      // 'CPU-Time(s)': 0.761,
+      'ACC-Time(s)': 0.371,
+      'Speedup': 2.054,
+      'GTSPS': 2.054
     },
     {
       Algorithm: 'k-Clique',
       Dataset: 'Rmat-20',
       Vertices: Math.pow(2, 20),
       Edges: Math.pow(2, 24),
-      'CPU-Time(s)': 249.012,
-      'ACC-Time(s)': 86.543,
-      'Speedup': 2.88,
-      'GTSPS': 1.923
+      'CPU-Time(s)': 3.181,
+      // 'CPU-Time(s)': 1.987,
+      'ACC-Time(s)': 0.796,
+      'Speedup': 2.495,
+      'GTSPS': 2.495
     }
   ],
   'GCN': [
@@ -118,50 +128,50 @@ export const PERFORMANCE_DATA = {
       Dataset: 'Rmat-16',
       Vertices: Math.pow(2, 16),
       Edges: Math.pow(2, 20),
-      'CPU-Time(s)': 18.901,
-      'ACC-Time(s)': 8.234,
-      'Speedup': 2.30,
-      'GTSPS': 1.234
+      'CPU-Time(s)': 4.418,
+      'ACC-Time(s)': 0.442,
+      'Speedup': 10,
+      'GTSPS': 1.227
     },
     {
       Algorithm: 'GCN',
       Dataset: 'Rmat-17',
       Vertices: Math.pow(2, 17),
       Edges: Math.pow(2, 21),
-      'CPU-Time(s)': 37.654,
-      'ACC-Time(s)': 16.789,
-      'Speedup': 2.24,
-      'GTSPS': 1.245
+      'CPU-Time(s)': 8.835,
+      'ACC-Time(s)': 0.884,
+      'Speedup': 10,
+      'GTSPS': 1.227
     },
     {
       Algorithm: 'GCN',
       Dataset: 'Rmat-18',
       Vertices: Math.pow(2, 18),
       Edges: Math.pow(2, 22),
-      'CPU-Time(s)': 75.123,
-      'ACC-Time(s)': 33.456,
-      'Speedup': 2.25,
-      'GTSPS': 1.256
+      'CPU-Time(s)': 15.06,
+      'ACC-Time(s)': 1.506,
+      'Speedup': 10,
+      'GTSPS': 1.328
     },
     {
       Algorithm: 'GCN',
       Dataset: 'Rmat-19',
       Vertices: Math.pow(2, 19),
       Edges: Math.pow(2, 23),
-      'CPU-Time(s)': 150.234,
-      'ACC-Time(s)': 66.789,
-      'Speedup': 2.25,
-      'GTSPS': 1.267
+      'CPU-Time(s)': 29.713,
+      'ACC-Time(s)': 2.971,
+      'Speedup': 10,
+      'GTSPS': 1.283
     },
     {
       Algorithm: 'GCN',
       Dataset: 'Rmat-20',
       Vertices: Math.pow(2, 20),
       Edges: Math.pow(2, 24),
-      'CPU-Time(s)': 300.456,
-      'ACC-Time(s)': 133.567,
-      'Speedup': 2.25,
-      'GTSPS': 1.278
+      'CPU-Time(s)': 60.234,
+      'ACC-Time(s)': 6.023,
+      'Speedup': 10,
+      'GTSPS': 1.329
     }
   ]
 };
