@@ -335,7 +335,7 @@ export default function Page() {
             </Typography>
             <Box sx={{
               backgroundColor: '#1e1e1e',
-              color: '#d4d4d4',
+              color: '#4caf50',
               fontFamily: 'Menlo, Monaco, Consolas, "Courier New", monospace',
               fontSize: '0.875rem',
               lineHeight: 1.5,
@@ -344,8 +344,24 @@ export default function Page() {
               borderRadius: '4px',
               flex: 1,
               whiteSpace: 'pre',
+              p: 1.5,
+
+              '& > div': {
+                color: '#4caf50 !important',
+                lineHeight: 1.6,
+                borderBottom: '1px solid rgba(255,255,255,0.1)',
+                py: 0.5
+              }
             }} ref={resultsBoxRef}>
-              {results['Terminal执行结果'] || ''}
+                {/* {results['Terminal执行结果'] ? (<div>{`> ${results['Terminal执行结果']}`}</div>) : null} */}
+                
+                {/* {(typeof results['Terminal执行结果'] === 'string'
+                  ? results['Terminal执行结果'].split('\n')
+                  : []
+                ).map((line, index) => (
+                  <div key={index}>{`> ${line}`}</div>
+                ))} */}
+              <div>{results['Terminal执行结果'] || ''}</div>
             </Box>
           </Paper>
         </Grid>

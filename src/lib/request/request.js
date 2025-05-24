@@ -1,6 +1,8 @@
 // 基础配置
 // 公网穿透映射后端（用于公网展示时）
-export const BASE_URL = 'http://115.29.241.134:8000'
+// export const BASE_URL = 'http://115.29.241.134:8000'
+// jinjm pc 后端
+export const BASE_URL = 'http://10.21.147.145:8000';
 // jinjm linux 后端
 // export const BASE_URL = 'http://10.21.145.217:8000';
 // 台式后端（总出现问题）

@@ -229,7 +229,7 @@ export default function DataProcessingPage() {
             </Typography>
             <Box sx={{
               backgroundColor: '#1e1e1e',
-              color: '#d4d4d4',
+              color: '#4caf50',
               fontFamily: 'Menlo, Monaco, Consolas, "Courier New", monospace',
               fontSize: '0.875rem',
               lineHeight: 1.5,
