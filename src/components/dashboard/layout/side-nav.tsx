@@ -171,8 +171,7 @@ function NavItem({ disabled, external, href, pathname, title, subItems }: NavIte
       {subItems && subItems.length > 0 ? <Collapse in={open}>
           <Box sx={{ pl: 3 }}>
             {subItems.map((subItem) => (
-              // @ts-expect-error subItem won't have the same key with the parent item
-              <NavItem key={subItem.key} pathname={pathname} {...subItem} />
+              <NavItem key={subItem.key} pathname={pathname} title={subItem.title} href={subItem.href} />
             ))}
           </Box>
         </Collapse> : null}

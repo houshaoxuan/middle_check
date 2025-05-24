@@ -6,7 +6,7 @@ import { Box, Grid, Paper, Typography } from '@mui/material';
 import { washLog, subGraphLog, localComputeLog } from './log';
 import NetworkGraph from './NetworkGraph';
 import { getVisNetworkData, getVisNetworkDataInput } from './utils';
-import { resultVertex, inputGraphCsr, vertexLabel } from './data'
+import { resultVertex, inputGraphCsr, vertexLabel, subCsr, subVertexLabel } from './data'
 
 const logDataMap = {
   泛图数据: '泛图数据日志',
@@ -14,29 +14,6 @@ const logDataMap = {
   子图划分: subGraphLog,
   本地子图计算: localComputeLog,
   应用: '应用日志',
-};
-
-const subCsr = {
-  graph: [
-    `Master vertex count: 20
-Vertex Index (CSR row pointers):
-4 4 6 9 11 11 13 13 13 13 13 13 13 13 13 17 17 17 20 20 20 20 20 20 20
-Adjacency List (CSR column indices):
-24 21 23 17 3 20 22 3 14 2 3 17 18 23 4 2 14 20 18 11
-`,
-    `Master vertex count: 10
-Vertex Index (CSR row pointers):
-1 2 2 2 2 2 4 4 5 9 9 9 9 9 9 9
-Adjacency List (CSR column indices):
-12 2 12 6 11 14 13 10 15
-`,
-    `Master vertex count: 16
-Vertex Index (CSR row pointers):
-0 2 6 6 6 6 18 19 19 23 23 24 38 38 38 47 47 47 47 47 47 47 47 47 47 47 47 47 47 47 47 47 47 47
-Adjacency List (CSR column indices):
-32 18 9 27 16 25 30 17 33 22 24 8 2 25 14 19 12 31 29 24 27 26 0 28 3 9 19 21 12 2 27 18 25 16 31 33 26 10 10 0 3 20 16 9 23 26 27
-`,
-  ],
 };
 
 const Page = () => {
@@ -157,7 +134,7 @@ const Page = () => {
     let temp = []
     for (let i = 0; i < subCsr.graph.length; i++) {
       const csrString = subCsr.graph[i];
-      const result = getVisNetworkData(csrString);
+      const result = getVisNetworkData(csrString, subVertexLabel);
       temp.push(result);
     }
     setSubCsrData(temp);

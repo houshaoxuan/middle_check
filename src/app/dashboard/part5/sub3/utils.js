@@ -50,44 +50,8 @@ function parseCSRString(csrString) {
     throw new Error('No valid colIndices found');
   }
 
-  return { numNodes, rowPtr, colIndices };
+  return { rowPtr, colIndices };
 }
-
-function csrToVisNetwork(numNodes, rowPtr, colIndices, defaultColor = 'blue') {
-  // Validate input
-  if (rowPtr.length !== numNodes) {
-    throw new Error(`rowPtr length (${rowPtr.length}) must equal numNodes (${numNodes})`);
-  }
-
-  // Generate nodes
-  const nodes = Array.from({ length: numNodes }, (_, i) => ({
-    id: i,
-    label: i.toString(),
-    color: defaultColor,
-  }));
-
-  // Generate edges
-  const edges = [];
-  for (let i = 0; i < numNodes; i++) {
-    const start = i === 0 ? 0 : rowPtr[i - 1];
-    const end = rowPtr[i];
-    for (let j = start; j < end; j++) {
-      const dest = colIndices[j];
-      if (dest >= 0 && dest < numNodes) { // Filter invalid vertices
-        edges.push({ from: i, to: dest });
-      }
-    }
-  }
-
-  return { nodes, edges };
-}
-
-// Parse and convert the CSR string to vis-network data
-export function getVisNetworkData(csrString, defaultColor = 'blue') {
-  const { numNodes, rowPtr, colIndices } = parseCSRString(csrString);
-  return csrToVisNetwork(numNodes, rowPtr, colIndices, defaultColor);
-}
-
 
 function parseVertexLabels(labelString, numNodes, baseId) {
   const lines = labelString.split('\n').map(line => line.trim()).filter(line => line);
@@ -120,7 +84,7 @@ function parseVertexLabels(labelString, numNodes, baseId) {
   return labels;
 }
 
-function csrToVisNetworkInput(rowPtr, colId, labelString) {
+function csrToVisNetwork(rowPtr, colId, labelString) {
   const numNodes = rowPtr.length;
   if (numNodes === 0) {
     throw new Error('rowPtr 数组为空');
@@ -159,6 +123,17 @@ function csrToVisNetworkInput(rowPtr, colId, labelString) {
   return { nodes, edges };
 }
 
+
+
+// Parse and convert the CSR string to vis-network data
+export function getVisNetworkData(csrString, labelString) {
+  const { rowPtr, colIndices } = parseCSRString(csrString);
+  return csrToVisNetwork(rowPtr, colIndices, labelString);
+}
+
+
+
+
 export function getVisNetworkDataInput(rowPtr, colId, labelString) {
-  return csrToVisNetworkInput(rowPtr, colId, labelString);
+  return csrToVisNetwork(rowPtr, colId, labelString);
 }
