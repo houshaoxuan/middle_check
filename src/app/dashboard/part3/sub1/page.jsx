@@ -6,22 +6,92 @@ import {
 } from '@mui/material';
 import ReadOnlyCodeBox from './CodeContainer';
 import request from '@/lib/request/request';
+import { CGA_CODE_MAP } from './constCGACode';
 
-const algorithms = ['bfs', 'sssp', 'wcc', 'kcore', 'k-Clique', 'ppr', 'gcn'];
+// 算法和数据集映射
+export const algorithmMappings = {
+  'bfs': {
+    url: 'bfs',
+    datasets: ['smallgraph', 'facebook', 'physics', ],
+  },
+  'sssp': {
+    url: 'sssp',
+    datasets: ['smallgraph', 'facebook', 'physics', ],
+  },
+  'wcc': {
+    url: 'wcc',
+    datasets: ['euroroad', 'pdzbase', 'facebook'],
+  },
+  'kcore': {
+    url: 'kcore',
+    datasets: ['physics', 'facebook'],
+  },
+  'k-Clique': {
+    url: 'cf',
+    datasets: ['euroroad', 'physics'],
+  },
+  'ppr': {
+    url: 'ppr',
+    datasets: ['smallgraph', 'physics', 'facebook'],
+  },
+  'gcn': {
+    url: 'gcn',
+    datasets: ['cora'],
+  }
+};
+
+// 数据集到URL的映射
+const datasetMappings = {
+  'facebook': 'facebook',
+  'euroroad': 'euroroad',
+  'physics': 'physics',
+  'pdzbase': 'pdzbase',
+  'smallgraph':'smallgraph',
+  'cora':'cora',
+};
+
+const algorithms = Object.keys(algorithmMappings);
+
+// 工具函数：获取算法的URL
+const getAlgorithmUrl = (algorithm) => {
+  return algorithmMappings[algorithm]?.url || algorithm;
+};
+
+// 工具函数：获取数据集的URL
+const getDatasetUrl = (dataset) => {
+  return datasetMappings[dataset] || dataset;
+};
+
+// 示例类型映射
+const EXAMPLE_TYPES = {
+  cgafile: { label: '基于CGA编程模型的代码展示' },
+  graphIR: { label: 'GraphIR展示' },
+  gcbefore: { label: '后端算子接口' },
+  gcafter: { label: '算子汇编生成' },
+  outdegbefore: { label: '后端算子接口2' },
+  outdegafter: { label: '算子汇编生成2' },
+  matrixIR: { label: 'MatrixIR展示' },
+  asmfile: { label: '汇编代码展示' }
+};
 
 export default function Page() {
   const [selectedAlgo, setSelectedAlgo] = useState(algorithms[0]);
-  // const [step, setStep] = useState(0);
-  const [results, setResults] = useState({});
+  const [selectedDataset, setSelectedDataset] = useState(algorithmMappings[algorithms[0]].datasets[0]);
+  const [results, setResults] = useState({
+    cgafile: CGA_CODE_MAP[algorithms[0]]
+  });
   const [isRunning, setIsRunning] = useState(false);
   const [progress, setProgress] = useState(0);
   const [showButtons, setShowButtons] = useState({
-    '编程接口示例': false,
-    'graphIR示例': false,
-    'MatrixIR示例': false,
-    '硬件指令示例': false
+    cgafile: false,
+    graphIR: false,
+    gcbefore: false,
+    gcafter: false,
+    outdegbefore: false,
+    outdegafter: false,
+    matrixIR: false,
+    asmfile: false,
   });
-  const [currentStep, setCurrentStep] = useState(0);
   const [simulatorResults, setSimulatorResults] = useState('');
   const [isSimulatorRunning, setIsSimulatorRunning] = useState(false);
   const [simulatorProgress, setSimulatorProgress] = useState(0);
@@ -39,86 +109,109 @@ export default function Page() {
     }
   };
 
-  // 自动滚动
   React.useEffect(() => {
     scrollToBottom();
   }, [results, simulatorResults]);
 
-
-  const handleAlgoChange = (event) => {
-    setSelectedAlgo(event.target.value);
-    setResults({});
-    setProgress(0);
-    setShowButtons({
-      '编程接口示例': false,
-      'graphIR示例': false,
-      'MatrixIR示例': false,
-      '硬件指令示例': false
-    });
-    setCurrentStep(0);
+  // 根据算法类型获取可见示例
+  const getVisibleExamples = (algorithm) => {
+    const baseExamples = ['cgafile', 'graphIR', 'matrixIR', 'asmfile'];
+    
+    if (['ppr'].includes(algorithm)) {
+      return ['cgafile', 'graphIR', 'gcbefore', 'gcafter', 'outdegbefore', 'outdegafter', 'matrixIR', 'asmfile', ];
+    } else if (['wcc', 'bfs', 'kcore', 'sssp'].includes(algorithm)) {
+      return ['cgafile', 'graphIR', 'gcbefore', 'gcafter', 'matrixIR', 'asmfile', ];
+    } else {
+      return ['cgafile', 'graphIR', 'matrixIR', 'asmfile'];
+    }
   };
 
+  // 当算法改变时
+  const handleAlgoChange = (event) => {
+    console.log('handlealgochange')
+    const newAlgo = event.target.value;
+    console.log(newAlgo)
+    setSelectedAlgo(newAlgo);
+    setSelectedDataset(algorithmMappings[newAlgo].datasets[0]);
+    setResults({ cgafile: CGA_CODE_MAP[getAlgorithmUrl(newAlgo)] });
+    setProgress(0);
+    
+    // 重置按钮显示状态
+    const initialButtons = {
+      cgafile: false,
+      graphIR: false,
+      gcbefore: false,
+      gcafter: false,
+      outdegbefore: false,
+      outdegafter: false,
+      matrixIR: false,
+      asmfile: false,
+    };
+    setShowButtons(initialButtons);
+
+  };
+
+  // 加载CGA编程模型代码（弃用）
+  // const loadCGAExample = async (algorithm) => {
+  //   try {
+  //     const urlAlgo = getAlgorithmUrl(algorithm);
+  //     const res = await request({
+  //       url: `/part3/cgafile/1/${urlAlgo}/r/`,
+  //       method: 'GET',
+  //     });
+
+  //     if (res && res.content) {
+  //       setResults(prev => ({
+  //         ...prev,
+  //         cgafile: res.content.join('\n')
+  //       }));
+  //     }
+  //   } catch (error) {
+  //     console.error('获取CGA示例失败:', error);
+  //     setResults(prev => ({
+  //       ...prev,
+  //       cgafile: `获取示例失败: ${error.message}`
+  //     }));
+  //   }
+  // };
+
+
   const handleRun = async () => {
-    if (isRunning) {
-      return;
-    }
+    if (isRunning) return;
 
     setIsRunning(true);
-    
     setProgress(0);
-    setResults({ 'Terminal执行结果': '正在与服务器建立连接...\n' });
-    setShowButtons({
-      '编程接口示例': false,
-      'graphIR示例': false,
-      'MatrixIR示例': false,
-      '硬件指令示例': false
-    });
-    setCurrentStep(0);
-
+    setResults(prev => ({ ...prev, terminal: '正在与服务器建立连接...\n' }));
+    
     try {
-      let urlAlgo;
-      switch(selectedAlgo) {
-        case 'bfs': urlAlgo = 'bfs'; break;
-        case 'sssp': urlAlgo = 'sssp'; break;
-        case 'wcc': urlAlgo = 'wcc'; break;
-        case 'kcore': urlAlgo = 'kcore'; break;
-        case 'k-Clique': urlAlgo = 'cf'; break;
-        case 'ppr': urlAlgo = 'ppr'; break;
-        case 'gcn': urlAlgo = 'gcn'; break;
-        default: throw new Error(`不支持的算法: ${selectedAlgo}`);
-      }
-
-      // 1. 执行流式命令
-      const eventSource = new EventSource(`${request.BASE_URL}/part3/execute/1/${urlAlgo}/`);
+      const urlAlgo = getAlgorithmUrl(selectedAlgo);
+      const urlDataset = getDatasetUrl(selectedDataset);
+      const eventSource = new EventSource(`${request.BASE_URL}/part3/execute/1/${urlAlgo}/${urlDataset}/`);
 
       eventSource.onmessage = async (event) => {
         if (event.data === '[done]') {
           eventSource.close();
-          
-          // 2. 显示正在拷贝result
           setResults(prev => ({
-            'Terminal执行结果': prev['Terminal执行结果'] + '正在拷贝result\n'
+            ...prev,
+            terminal: prev.terminal + '正在拷贝result\n'
           }));
           
-          // 3. 获取最终结果
           try {
             const res = await fetch(`${request.BASE_URL}/part3/result/1/${urlAlgo}/`);
             const jsonData = await res.json();
-            
-            // 4. 显示完成
             setResults(prev => ({
-              'Terminal执行结果': prev['Terminal执行结果'] + '完成\n'
-            }));
-            
-            setProgress(100);
-            setShowButtons(prev => ({
               ...prev,
-              '编程接口示例': true
+              terminal: prev.terminal + '完成\n'
             }));
-            
+            setProgress(100);
+
+            // 运行完成后自动加载GraphIR
+            await handleShowExample('graphIR');
+
           } catch (error) {
             setResults(prev => ({
-              'Terminal执行结果': prev['Terminal执行结果'] + `获取结果失败: ${error.message}\n`
+              ...prev,
+              terminal: prev.terminal + `获取结果失败: ${error.message}\n`
             }));
           } finally {
             setIsRunning(false);
@@ -127,12 +220,14 @@ export default function Page() {
         } else if (event.data === '[error]') {
           eventSource.close();
           setResults(prev => ({
-            'Terminal执行结果': prev['Terminal执行结果'] + '\n执行出错\n'
+            ...prev,
+            terminal: prev.terminal + '\n执行出错\n'
           }));
           setIsRunning(false);
         } else {
           setResults(prev => ({
-            'Terminal执行结果': prev['Terminal执行结果'] + event.data + '\n'
+            ...prev,
+            terminal: prev.terminal + event.data + '\n'
           }));
         }
       };
@@ -140,41 +235,33 @@ export default function Page() {
       eventSource.onerror = () => {
         eventSource.close();
         setResults(prev => ({
-          'Terminal执行结果': prev['Terminal执行结果'] + '\n连接错误\n'
+          terminal: prev.terminal + '\n连接错误\n'
         }));
         setIsRunning(false);
       };
 
     } catch (error) {
       console.error('执行失败:', error);
-      setResults({
-        'Terminal执行结果': `执行失败: ${error.message}`
-      });
+      setResults(prev => ({
+        ...prev,
+        terminal: `执行失败: ${error.message}`
+      }));
     }
   };
 
   const handleSimulatorRun = async () => {
-    if (isSimulatorRunning) {
-      return;
-    }
+    if (isSimulatorRunning) return;
 
     setIsSimulatorRunning(true);
     setSimulatorProgress(0);
     setSimulatorResults('正在与服务器建立连接...\n');
 
     try {
-      let urlAlgo;
-      switch(selectedAlgo) {
-        case 'bfs': urlAlgo = 'bfs'; break;
-        case 'sssp': urlAlgo = 'sssp'; break;
-        case 'wcc': urlAlgo = 'wcc'; break;
-        case 'kcore': urlAlgo = 'kcore'; break;
-        case 'k-Clique': urlAlgo = 'cf'; break;
-        case 'ppr': urlAlgo = 'ppr'; break;
-        case 'gcn': urlAlgo = 'gcn'; break;
-        default: throw new Error(`不支持的算法: ${selectedAlgo}`);
-      }
-      const eventSource = new EventSource(`${request.BASE_URL}/part3/moni/${urlAlgo}/`);
+      const urlAlgo = getAlgorithmUrl(selectedAlgo);
+      const urlDataset = getDatasetUrl(selectedDataset);
+
+
+      const eventSource = new EventSource(`${request.BASE_URL}/part3/moni/1/${urlAlgo}/${urlDataset}/`);
 
       eventSource.onmessage = (event) => {
         if (event.data === '[done]') {
@@ -205,67 +292,92 @@ export default function Page() {
     }
   };
 
-  const exampleTypeMapping = {
-    '编程接口示例': 'CGA',
-    'graphIR示例': 'GraphIR',
-    'MatrixIR示例': 'MatrixIR',
-    '硬件指令示例': 'asm'
+  // 阶段流转映射表
+  const NEXT_STAGE_MAP = {
+    // 通用流程
+    '*': {
+      'graphIR': 'gcbefore',
+      'gcbefore': 'gcafter',
+      'gcafter': 'matrixIR',
+      'matrixIR': 'asmfile',
+      'asmfile': null
+    },
+    // PPR特殊流程
+    'ppr': {
+      'graphIR': 'gcbefore',
+      'gcbefore': 'gcafter',
+      'gcafter': 'outdegbefore',
+      'outdegbefore': 'outdegafter',
+      'outdegafter': 'matrixIR',
+      'matrixIR': 'asmfile',
+      'asmfile': null
+    },
+    // 不需要GC流程的算法
+    'gcn': {
+      'graphIR': 'matrixIR',
+      'matrixIR': 'asmfile',
+      'asmfile': null
+    },
+    'kclique': {
+      'graphIR': 'matrixIR',
+      'matrixIR': 'asmfile',
+      'asmfile': null
+    },
+    // 其他算法可以在这里添加特殊流程
   };
 
-  const handleShowExample = async (exampleName) => {
-    let urlAlgo;
-    switch(selectedAlgo) {
-      case 'bfs': urlAlgo = 'bfs'; break;
-      case 'sssp': urlAlgo = 'sssp'; break;
-      case 'wcc': urlAlgo = 'wcc'; break;
-      case 'kcore': urlAlgo = 'kcore'; break;
-      case 'k-Clique': urlAlgo = 'cf'; break;
-      case 'ppr': urlAlgo = 'ppr'; break;
-      case 'gcn': urlAlgo = 'gcn'; break;
-      default: throw new Error(`不支持的算法: ${selectedAlgo}`);
-    }
-    
+
+  const handleShowExample = async (exampleKey) => {
     try {
-      const backendIdentifier = exampleTypeMapping[exampleName];
+      const urlAlgo = getAlgorithmUrl(selectedAlgo);
+      console.log('selectedAlgo', selectedAlgo)
+      
+      // 获取当前算法的阶段映射，如果没有则使用通用映射；确定下一个阶段
+      const stageMap = NEXT_STAGE_MAP[selectedAlgo] || NEXT_STAGE_MAP['*'];
+      const nextExampleKey = stageMap[exampleKey];
+      
+      // API路径映射
+      const apiPathMap = {
+        'graphIR': 'GraphIR',
+        'gcbefore': 'GCBefore',
+        'gcafter': 'GCAfter',
+        'outdegbefore': 'OUTDEGBefore',
+        'outdegafter': 'OUTDEGAfter',
+        'matrixIR': 'MatrixIR',
+        'asmfile': 'asm'
+      };
+      
+      const apiPath = apiPathMap[exampleKey];
+      if (!apiPath) {
+        throw new Error(`未知的阶段: ${exampleKey}`);
+      }
       
       const res = await request({
-        url: `/part3data/1/${urlAlgo}/${backendIdentifier}/`,
+        url: `/part3data/1/${urlAlgo}/${apiPath}/`,
         method: 'GET',
       });
-  
+      
       if (res && res.data) {
-        const displayContent = res.data.join('\n');
-        
         setResults(prev => ({
           ...prev,
-          [exampleName]: displayContent
+          [exampleKey]: res.data.join('\n')
+        }));
+        
+        setShowButtons(prev => ({ // todo 修改
+          ...prev,
+          [exampleKey]: true
         }));
       }
-  
-      // 更新按钮显示状态
-  // 更新按钮显示状态
-      const nextStep = currentStep + 1;
-      setCurrentStep(nextStep);
-      const steps = ['编程接口示例', 'graphIR示例', 'MatrixIR示例', '硬件指令示例'];
       
-      // 创建新的按钮状态对象
-      const newButtonStates = {};
-      steps.forEach((step, index) => {
-        // 当前步骤的按钮设置为true，之前的设置为false
-        newButtonStates[step] = index === nextStep;
-      });
-
-      setShowButtons(newButtonStates);
-
-
     } catch (error) {
-      console.error('获取示例失败:', error);
+      console.error(`获取${exampleKey}示例失败:`, error);
       setResults(prev => ({
         ...prev,
-        [exampleName]: `获取示例失败: ${error.message}`
+        [exampleKey]: `获取示例失败: ${error.message}`
       }));
     }
   };
+
 
   return (
     <Box sx={{ p: 3, backgroundColor: '#f5f6fa' }}>
@@ -288,14 +400,13 @@ export default function Page() {
           <Box component="span" display="block">使用SNAP标准动态图数据集进行评测，性能指标计算方法是：动态图更新速率=总更新边数/总更新时间</Box>
           <strong>数据集来源：</strong>
           <Box component="span" display="block">采用选择SNAP的标准图数据集facebook，和图卷积网络标准数据集Cora</Box>
-
         </Typography>
       </Paper>
 
       {/* 运行控制模块和Terminal执行结果并排 */}
       <Grid container spacing={3} mb={2} alignItems="stretch">
         <Grid item xs={12} md={4}>
-          <Paper elevation={3} sx={{ p: 2, borderRadius: 3, height: 250, display: 'flex', flexDirection: 'column' }}>
+          <Paper elevation={3} sx={{ p: 2, borderRadius: 3, height: 350, display: 'flex', flexDirection: 'column' }}>
             <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: 'secondary.main', borderBottom: '2px solid', borderColor: 'secondary.main', pb: 1 }}>
               运行控制
             </Typography>
@@ -312,6 +423,23 @@ export default function Page() {
                 {algorithms.map((algo) => (
                   <MenuItem key={algo} value={algo}>
                     {algo}
+                  </MenuItem>
+                ))}
+              </Select>
+            </Box>
+            <Box sx={{ mb: 2 }}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 550, fontSize: '16px', mb: 1 }}>
+                选择数据集
+              </Typography>
+              <Select
+                fullWidth
+                value={selectedDataset}
+                onChange={(e) => setSelectedDataset(e.target.value)}
+                disabled={isRunning}
+              >
+                {algorithmMappings[selectedAlgo].datasets.map((dataset) => (
+                  <MenuItem key={dataset} value={dataset}>
+                    {dataset}
                   </MenuItem>
                 ))}
               </Select>
@@ -345,23 +473,8 @@ export default function Page() {
               flex: 1,
               whiteSpace: 'pre',
               p: 1.5,
-
-              '& > div': {
-                color: '#4caf50 !important',
-                lineHeight: 1.6,
-                borderBottom: '1px solid rgba(255,255,255,0.1)',
-                py: 0.5
-              }
             }} ref={resultsBoxRef}>
-                {/* {results['Terminal执行结果'] ? (<div>{`> ${results['Terminal执行结果']}`}</div>) : null} */}
-                
-                {/* {(typeof results['Terminal执行结果'] === 'string'
-                  ? results['Terminal执行结果'].split('\n')
-                  : []
-                ).map((line, index) => (
-                  <div key={index}>{`> ${line}`}</div>
-                ))} */}
-              <div>{results['Terminal执行结果'] || ''}</div>
+              <div>{results.terminal || ''}</div>
             </Box>
           </Paper>
         </Grid>
@@ -369,82 +482,49 @@ export default function Page() {
 
       {/* 示例展示区域 */}
       <Grid container spacing={3}>
-        <Grid item xs={12} md={6}>
-          <Paper elevation={3} sx={{ p: 2, borderRadius: 3, height: 500 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-              <Typography variant="h6" sx={{ fontWeight: 700, color: 'secondary.main' }}>
-                基于CGA编程模型的代码展示
-              </Typography>
-              {showButtons['编程接口示例'] && (
-                <Button 
-                  variant="contained" 
-                  color="primary" 
-                  onClick={() => handleShowExample('编程接口示例')}
-                >
-                  运行
-                </Button>
-              )}
-            </Box>
-            <ReadOnlyCodeBox content={results['编程接口示例'] || ''} height={400} />
-          </Paper>
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <Paper elevation={3} sx={{ p: 2, borderRadius: 3, height: 500 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-              <Typography variant="h6" sx={{ fontWeight: 700, color: 'secondary.main' }}>
-                GraphIR展示
-              </Typography>
-              {showButtons['graphIR示例'] && (
-                <Button 
-                  variant="contained" 
-                  color="primary" 
-                  onClick={() => handleShowExample('graphIR示例')}
-                >
-                  运行
-                </Button>
-              )}
-            </Box>
-            <ReadOnlyCodeBox content={results['graphIR示例'] || ''} height={400} />
-          </Paper>
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <Paper elevation={3} sx={{ p: 2, borderRadius: 3, height: 500 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-              <Typography variant="h6" sx={{ fontWeight: 700, color: 'secondary.main' }}>
-                MatrixIR展示
-              </Typography>
-              {showButtons['MatrixIR示例'] && (
-                <Button 
-                  variant="contained" 
-                  color="primary" 
-                  onClick={() => handleShowExample('MatrixIR示例')}
-                >
-                  运行
-                </Button>
-              )}
-            </Box>
-            <ReadOnlyCodeBox content={results['MatrixIR示例'] || ''} height={400} />
-          </Paper>
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <Paper elevation={3} sx={{ p: 2, borderRadius: 3, height: 500 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-              <Typography variant="h6" sx={{ fontWeight: 700, color: 'secondary.main' }}>
-                硬件指令展示
-              </Typography>
-              {showButtons['硬件指令示例'] && (
-                <Button 
-                  variant="contained" 
-                  color="primary" 
-                  onClick={() => handleShowExample('硬件指令示例')}
-                >
-                  运行
-                </Button>
-              )}
-            </Box>
-            <ReadOnlyCodeBox content={results['硬件指令示例'] || ''} height={400} />
-          </Paper>
-        </Grid>
+      {getVisibleExamples(selectedAlgo).map((exampleKey) => {
+          // 获取当前算法的阶段映射
+          const stageMap = NEXT_STAGE_MAP[selectedAlgo] || NEXT_STAGE_MAP['*'];
+          // 判断是否是最后一个阶段
+          const isLastStage = stageMap[exampleKey] === null;
+          
+          return (
+            <Grid item xs={12} md={6} key={exampleKey}>
+              <Paper elevation={3} sx={{ p: 2, borderRadius: 3, height: 500 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                  <Typography variant="h6" sx={{ fontWeight: 700, color: 'secondary.main' }}>
+                    {EXAMPLE_TYPES[exampleKey].label}
+                  </Typography>
+                  {/* 不显示cgafile的按钮，且不是最后一个阶段 */}
+                  {exampleKey !== 'cgafile' && !isLastStage && showButtons[exampleKey] && (
+                    <Button 
+                      variant="contained" 
+                      color="primary" 
+                      onClick={async () => {
+                        // 点击按钮后，先隐藏当前按钮
+                        setShowButtons(prev => ({
+                          ...prev,
+                          [exampleKey]: false
+                        }));
+                        
+                        // 获取下一个阶段
+                        const nextExampleKey = stageMap[exampleKey];
+                        
+                        if (nextExampleKey) {
+                          // 加载下一个阶段的代码
+                          await handleShowExample(nextExampleKey);
+                        }
+                      }}
+                    >
+                      运行
+                    </Button>
+                  )}
+                </Box>
+                <ReadOnlyCodeBox content={results[exampleKey] || ''} height={400} />
+              </Paper>
+            </Grid>
+          );
+        })}
       </Grid>
 
       {/* 模拟器执行区域 */}
