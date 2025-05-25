@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   Box, Grid, Button, Select, MenuItem,
   Paper, Typography, LinearProgress
@@ -62,20 +62,26 @@ const getDatasetUrl = (dataset) => {
   return datasetMappings[dataset] || dataset;
 };
 
-// 示例类型映射
-const EXAMPLE_TYPES = {
-  cgafile: { label: '基于CGA编程模型的代码展示' },
-  graphIR: { label: 'GraphIR展示' },
-  gcbefore: { label: '后端算子接口展示' },
-  gcafter: { label: '算子汇编生成展示' },
-  outdegbefore: { label: '后端算子接口2展示' },
-  outdegafter: { label: '算子汇编生成2展示' },
-  matrixIR: { label: 'MatrixIR展示' },
-  asmfile: { label: '硬件指令展示' }
-};
+
 
 export default function Page() {
   const [selectedAlgo, setSelectedAlgo] = useState(algorithms[0]);
+  // 示例类型映射
+  const EXAMPLE_TYPES = useMemo(() => {
+    const isPPR = selectedAlgo === 'ppr'; // 或者 selectedAlgo.id === 'ppr' 取决于你的数据结构
+    
+    return {
+      cgafile: { label: '基于CGA编程模型的代码展示' },
+      graphIR: { label: 'GraphIR展示' },
+      gcbefore: { label: isPPR ? '后端算子接口展示2' : '后端算子接口展示' },
+      gcafter: { label: isPPR ? '算子汇编生成展示2' : '算子汇编生成展示' },
+      outdegbefore: { label: '后端算子接口展示1' },
+      outdegafter: { label:  '算子汇编生成展示1' },
+      matrixIR: { label: 'MatrixIR展示' },
+      asmfile: { label: '硬件指令展示' }
+    };
+  }, [selectedAlgo]); // 当 selectedAlgo 变化时重新计算
+
   const [selectedDataset, setSelectedDataset] = useState(algorithmMappings[algorithms[0]].datasets[0]);
   const [results, setResults] = useState({
     cgafile: CGA_CODE_MAP[algorithms[0]]
@@ -118,7 +124,7 @@ export default function Page() {
     const baseExamples = ['cgafile', 'graphIR', 'matrixIR', 'asmfile'];
     
     if (['ppr'].includes(algorithm)) {
-      return ['cgafile', 'graphIR', 'gcbefore', 'gcafter', 'outdegbefore', 'outdegafter', 'matrixIR', 'asmfile', ];
+      return ['cgafile', 'graphIR', 'outdegbefore', 'outdegafter', 'gcbefore', 'gcafter', 'matrixIR', 'asmfile', ];
     } else if (['wcc', 'bfs', 'kcore', 'sssp'].includes(algorithm)) {
       return ['cgafile', 'graphIR', 'gcbefore', 'gcafter', 'matrixIR', 'asmfile', ];
     } else {
@@ -304,11 +310,11 @@ export default function Page() {
     },
     // PPR特殊流程
     'ppr': {
-      'graphIR': 'gcbefore',
-      'gcbefore': 'gcafter',
-      'gcafter': 'outdegbefore',
+      'graphIR': 'outdegbefore',
       'outdegbefore': 'outdegafter',
-      'outdegafter': 'matrixIR',
+      'outdegafter': 'gcbefore',
+      'gcbefore': 'gcafter',
+      'gcafter': 'matrixIR',
       'matrixIR': 'asmfile',
       'asmfile': null
     },
