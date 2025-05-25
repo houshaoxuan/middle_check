@@ -1,12 +1,12 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { Box, Grid, Paper, Typography } from '@mui/material';
+import { Box, Grid, Paper, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material';
 
-import { washLog, subGraphLog, localComputeLog } from './log';
+import { inputGraphCsr, resultVertex, subCsr, subVertexLabel, vertexLabel } from './data';
+import { localComputeLog, subGraphLog, washLog } from './log';
 import NetworkGraph from './NetworkGraph';
 import { getVisNetworkData, getVisNetworkDataInput } from './utils';
-import { resultVertex, inputGraphCsr, vertexLabel, subCsr, subVertexLabel } from './data'
 
 const logDataMap = {
   泛图数据: '泛图数据日志',
@@ -40,6 +40,16 @@ const Page = () => {
     本地子图计算: { x: 450, y: 325, width: 100, height: 55 },
     应用: { x: 40, y: 325, width: 95, height: 50 },
   };
+
+  const data = [
+    { step: '扩展', pureCPU: 0.49, cpuSubgraph: 0.49 },
+    { step: 'k-core', pureCPU: 0.2, cpuSubgraph: 0.000498 },
+    { step: 'CC', pureCPU: 0.14, cpuSubgraph: 0.001114 },
+    { step: '扩展', pureCPU: 0.27, cpuSubgraph: 0.27 },
+    { step: 'PPR', pureCPU: 2.53, cpuSubgraph: 0.00638 },
+    { step: '总和', pureCPU: 3.63, cpuSubgraph: 0.767992 },
+    { step: '加速比', pureCPU: '', cpuSubgraph: 4.726611736 },
+  ];
 
   const handleMouseMove = (event) => {
     const rect = event.target.getBoundingClientRect();
@@ -131,7 +141,7 @@ const Page = () => {
   }, [terminalData]);
 
   useEffect(() => {
-    let temp = []
+    let temp = [];
     for (let i = 0; i < subCsr.graph.length; i++) {
       const csrString = subCsr.graph[i];
       const result = getVisNetworkData(csrString, subVertexLabel);
@@ -175,12 +185,12 @@ const Page = () => {
               onMouseLeave={handleMouseLeave}
               style={{ cursor: 'pointer', maxWidth: '100%', height: '500px' }}
             />
-            <Typography variant="h6" sx={{ mt: 2 }}>
+            {/*             <Typography variant="h6" sx={{ mt: 2 }}>
               鼠标位置: (x: {mousePosition.x.toFixed(2)}, y: {mousePosition.y.toFixed(2)})
-            </Typography>
+            </Typography> */}
             {hoveredModule && (
               <Typography variant="h6" color="primary" sx={{ mt: 2 }}>
-                悬停: {hoveredModule}
+                模块: {hoveredModule}
               </Typography>
             )}
           </Box>
@@ -269,7 +279,6 @@ const Page = () => {
           {isShowMap['数据清洗'] && (
             <NetworkGraph nodes={inputCsrData.nodes} edges={inputCsrData.edges} height="420px" />
           )}
-
         </Paper>
       </Grid>
       <Grid item xs={12} md={6} id="子图划分">
@@ -351,9 +360,26 @@ const Page = () => {
           <Typography variant="h6" sx={{ fontWeight: 700, marginBottom: 2 }}>
             运行结果展示
           </Typography>
-          <Typography variant="body1" sx={{ mt: 2 }}>
-            CSR图
-          </Typography>
+          {isShowMap['本地子图计算'] && (
+            <Table sx={{ width: '95%', margin: '0 auto' }}>
+              <TableHead>
+                <TableRow>
+                  <TableCell></TableCell>
+                  <TableCell align="right">纯CPU版本 (ms)</TableCell>
+                  <TableCell align="right">CPU+基于子模块的图加速度 (ms)</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {data.map((row, index) => (
+                  <TableRow key={index}>
+                    <TableCell>{row.step}</TableCell>
+                    <TableCell align="right">{row.pureCPU}</TableCell>
+                    <TableCell align="right">{row.cpuSubgraph || ''}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
         </Paper>
       </Grid>
     </Grid>
