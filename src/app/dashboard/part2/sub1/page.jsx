@@ -179,7 +179,14 @@ export default function Page() {
     }
   };
 
-
+  const algoOnchange = (event) => {
+    const algo = event.target.value;
+    setSelectedAlgo(algo);
+    setSelectedDataset(datasets[algo][0]);
+    setSavedResults({ 'k-Clique': {}, GCN: {}, PageRank: {} });
+    setChartData([]);
+    setTerminalData([]);
+  };
 
   return (
     <Box sx={{ p: 3, backgroundColor: '#f5f6fa' }}>
@@ -318,10 +325,7 @@ export default function Page() {
                 <Select
                   fullWidth
                   value={selectedAlgo}
-                  onChange={(e) => {
-                    setSelectedAlgo(e.target.value);
-                    setSelectedDataset(datasets[e.target.value][0]);
-                  }}
+                  onChange={algoOnchange}
                   disabled={isRunning}
                 >
                   {algorithms.map((algo) => (
