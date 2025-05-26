@@ -66,14 +66,25 @@ export default function Page() {
   // 生成性能数据
   const generatePerformanceData = (res) => {
     const baseData = res.data || res; // 兼容两种数据格式
+    console.log(selectedAlgo)
+    console.log(selectedDataset)
+
+    console.log(PERFORMANCE_DATA[baseData.Algorithm]["CPU-Time(s)"])
+    const algorithmData = PERFORMANCE_DATA[baseData.Algorithm]; // 获取算法对应的数组
+    const datasetEntry = algorithmData.find(item => item.Dataset === baseData.Dataset); // 查找匹配的数据集
+
+    if (datasetEntry) {
+      console.log(datasetEntry["CPU-Time(s)"]); // 正确获取CPU时间
+      console.log(datasetEntry["ACC-Time(s)"]); // 正确获取加速器时间
+    }
     return {
       combinedKey: `${baseData.Algorithm}-${baseData.Dataset}`,
       algorithm: baseData.Algorithm,
       dataset: baseData.Dataset,
       nodes: baseData.Vertices,
       edges: baseData.Edges,
-      cpu: baseData['CPU-Time(s)'],
-      
+      // cpu: baseData['CPU-Time(s)'],
+      cpu: datasetEntry["CPU-Time(s)"],
       accelerator: baseData["ACC-Time(s)"],
       speedUp: baseData["Speedup"],
       throughput: baseData["GTSPS"]
