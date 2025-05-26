@@ -15,9 +15,8 @@ export const PERFORMANCE_DATA = {
       Vertices: Math.pow(2, 16),
       Edges: Math.pow(2, 20),
       'CPU-Time(s)': 0.182,
-      // 'CPU-Time(s)': 0.028,
       'ACC-Time(s)': 0.004,
-      'Speedup': 7.47603,
+      'Speedup': 0.182 / 0.004,  // 45.5
       'GTSPS': 7.47603
     },
     {
@@ -26,9 +25,8 @@ export const PERFORMANCE_DATA = {
       Vertices: Math.pow(2, 17),
       Edges: Math.pow(2, 21),
       'CPU-Time(s)': 0.394,
-      // 'CPU-Time(s)': 0.057,
       'ACC-Time(s)': 0.009,
-      'Speedup': 6.65543,
+      'Speedup': 0.394 / 0.009,  // ~43.78
       'GTSPS': 6.65543
     },
     {
@@ -37,9 +35,8 @@ export const PERFORMANCE_DATA = {
       Vertices: Math.pow(2, 18),
       Edges: Math.pow(2, 21),
       'CPU-Time(s)': 0.531,
-      // 'CPU-Time(s)': 0.057,
       'ACC-Time(s)': 0.009,
-      'Speedup': 6.617,
+      'Speedup': 0.531 / 0.009,  // 59
       'GTSPS': 6.617
     },
     {
@@ -48,9 +45,8 @@ export const PERFORMANCE_DATA = {
       Vertices: Math.pow(2, 19),
       Edges: Math.pow(2, 22),
       'CPU-Time(s)': 2.16,
-      // 'CPU-Time(s)': 0.218,
       'ACC-Time(s)': 0.036,
-      'Speedup': 6.102,
+      'Speedup': 2.16 / 0.036,  // 60
       'GTSPS': 6.102
     },
     {
@@ -59,9 +55,8 @@ export const PERFORMANCE_DATA = {
       Vertices: Math.pow(2, 20),
       Edges: Math.pow(2, 23),
       'CPU-Time(s)': 3.84,
-      // 'CPU-Time(s)': 0.210,
       'ACC-Time(s)': 0.034,
-      'Speedup': 6.141,
+      'Speedup': 3.84 / 0.034,  // ~112.94
       'GTSPS': 6.141
     }
   ],
@@ -72,9 +67,8 @@ export const PERFORMANCE_DATA = {
       Vertices: Math.pow(2, 16),
       Edges: Math.pow(2, 20),
       'CPU-Time(s)': 0.256,
-      // 'CPU-Time(s)': 0.122,
       'ACC-Time(s)': 0.048,
-      'Speedup': 2.525,
+      'Speedup': 0.256 / 0.048,  // ~5.33
       'GTSPS': 2.525
     },
     {
@@ -83,9 +77,8 @@ export const PERFORMANCE_DATA = {
       Vertices: Math.pow(2, 17),
       Edges: Math.pow(2, 21),
       'CPU-Time(s)': 0.639,
-      // 'CPU-Time(s)': 0.32,
       'ACC-Time(s)': 0.127,
-      'Speedup': 2.531,
+      'Speedup': 0.639 / 0.127,  // ~5.03
       'GTSPS': 2.531
     },
     {
@@ -94,9 +87,8 @@ export const PERFORMANCE_DATA = {
       Vertices: Math.pow(2, 18),
       Edges: Math.pow(2, 21),
       'CPU-Time(s)': 0.512,
-      // 'CPU-Time(s)': 0.273,
       'ACC-Time(s)': 0.118,
-      'Speedup': 2.308,
+      'Speedup': 0.512 / 0.118,  // ~4.34
       'GTSPS': 2.308
     },
     {
@@ -105,9 +97,8 @@ export const PERFORMANCE_DATA = {
       Vertices: Math.pow(2, 19),
       Edges: Math.pow(2, 22),
       'CPU-Time(s)': 1.275,
-      // 'CPU-Time(s)': 0.761,
       'ACC-Time(s)': 0.371,
-      'Speedup': 2.054,
+      'Speedup': 1.275 / 0.371,  // ~3.44
       'GTSPS': 2.054
     },
     {
@@ -116,9 +107,8 @@ export const PERFORMANCE_DATA = {
       Vertices: Math.pow(2, 20),
       Edges: Math.pow(2, 23),
       'CPU-Time(s)': 3.181,
-      // 'CPU-Time(s)': 1.987,
       'ACC-Time(s)': 0.796,
-      'Speedup': 2.495,
+      'Speedup': 3.181 / 0.796,  // ~4
       'GTSPS': 2.495
     }
   ],
@@ -130,7 +120,7 @@ export const PERFORMANCE_DATA = {
       Edges: Math.pow(2, 20),
       'CPU-Time(s)': 1.084,
       'ACC-Time(s)': 0.442,
-      'Speedup': 10,
+      'Speedup': 1.084 / 0.442,  // ~2.45
       'GTSPS': 1.227
     },
     {
@@ -140,7 +130,7 @@ export const PERFORMANCE_DATA = {
       Edges: Math.pow(2, 21),
       'CPU-Time(s)': 2.168,
       'ACC-Time(s)': 0.884,
-      'Speedup': 10,
+      'Speedup': 2.168 / 0.884,  // ~2.45
       'GTSPS': 1.227
     },
     {
@@ -150,7 +140,7 @@ export const PERFORMANCE_DATA = {
       Edges: Math.pow(2, 21),
       'CPU-Time(s)': 4.001,
       'ACC-Time(s)': 1.506,
-      'Speedup': 10,
+      'Speedup': 4.001 / 1.506,  // ~2.66
       'GTSPS': 1.328
     },
     {
@@ -160,7 +150,7 @@ export const PERFORMANCE_DATA = {
       Edges: Math.pow(2, 22),
       'CPU-Time(s)': 7.625,
       'ACC-Time(s)': 2.971,
-      'Speedup': 10,
+      'Speedup': 7.625 / 2.971,  // ~2.57
       'GTSPS': 1.283
     },
     {
@@ -170,7 +160,7 @@ export const PERFORMANCE_DATA = {
       Edges: Math.pow(2, 23),
       'CPU-Time(s)': 16.005,
       'ACC-Time(s)': 6.023,
-      'Speedup': 10,
+      'Speedup': 16.005 / 6.023,  // ~2.66
       'GTSPS': 1.329
     }
   ]

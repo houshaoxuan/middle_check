@@ -77,6 +77,10 @@ export default function Page() {
       console.log(datasetEntry["CPU-Time(s)"]); // 正确获取CPU时间
       console.log(datasetEntry["ACC-Time(s)"]); // 正确获取加速器时间
     }
+    
+    const cpu = datasetEntry["CPU-Time(s)"];
+    const accelerator = baseData["ACC-Time(s)"];
+  
     return {
       combinedKey: `${baseData.Algorithm}-${baseData.Dataset}`,
       algorithm: baseData.Algorithm,
@@ -84,9 +88,10 @@ export default function Page() {
       nodes: baseData.Vertices,
       edges: baseData.Edges,
       // cpu: baseData['CPU-Time(s)'],
-      cpu: datasetEntry["CPU-Time(s)"],
-      accelerator: baseData["ACC-Time(s)"],
-      speedUp: baseData["Speedup"],
+      cpu,
+      accelerator,
+      speedUp: cpu / accelerator,
+
       throughput: baseData["GTSPS"]
     };
   };
@@ -514,7 +519,7 @@ export default function Page() {
                           <TableCell>{row.edges.toLocaleString()}</TableCell>
                           <TableCell>{row.cpu.toFixed(3)}</TableCell>
                           <TableCell>{row.accelerator.toFixed(3)}</TableCell>
-                          <TableCell>{row.speedUp}</TableCell>
+                          <TableCell>{row.speedUp.toFixed(3)}</TableCell>
                           <TableCell>{`${row.throughput.toFixed(3)} ${getThroughputUnit(row.algorithm)}`}</TableCell>
                         </TableRow>
                       ))}
