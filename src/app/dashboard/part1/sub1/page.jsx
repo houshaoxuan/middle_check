@@ -19,9 +19,9 @@ const algorithmDetails = {
 const datasetInfo = {
   'Rmat-16': { nodes: '2^16', edges: '2^20' },
   'Rmat-17': { nodes: '2^17', edges: '2^21' },
-  'Rmat-18': { nodes: '2^18', edges: '2^22' },
-  'Rmat-19': { nodes: '2^19', edges: '2^23' },
-  'Rmat-20': { nodes: '2^20', edges: '2^24' },
+  'Rmat-18': { nodes: '2^18', edges: '2^21' },
+  'Rmat-19': { nodes: '2^19', edges: '2^22' },
+  'Rmat-20': { nodes: '2^20', edges: '2^23' },
 };
 
 // 获取吞吐量单位
@@ -73,6 +73,7 @@ export default function Page() {
       nodes: baseData.Vertices,
       edges: baseData.Edges,
       cpu: baseData['CPU-Time(s)'],
+      
       accelerator: baseData["ACC-Time(s)"],
       speedUp: baseData["Speedup"],
       throughput: baseData["GTSPS"]
