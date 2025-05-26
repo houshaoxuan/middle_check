@@ -523,7 +523,7 @@ export default function Page() {
                     <BarChart
                       data={chartData}
                       margin={{ top: 40, right: 20, left: 5, bottom: 20 }}
-                      width={650}
+                      width={550}
                       height={350}
                     >
                       <text
@@ -574,7 +574,7 @@ export default function Page() {
                     <BarChart
                       data={chartData}
                       margin={{ top: 40, right: 20, left: 5, bottom: 20 }}
-                      width={650}
+                      width={550}
                       height={350}
                     >
                       <text
