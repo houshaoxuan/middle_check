@@ -3,8 +3,6 @@ import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 import GlobalStyles from '@mui/material/GlobalStyles';
 
-import { SideNav } from '@/components/dashboard/layout/side-nav';
-
 interface LayoutProps {
   children: React.ReactNode;
 }
@@ -17,7 +15,7 @@ export default function Layout({ children }: LayoutProps): React.JSX.Element {
           body: {
             '--MainNav-height': '56px',
             '--MainNav-zIndex': 1000,
-            '--SideNav-width': '230px',
+            '--SideNav-width': '0px',
             '--SideNav-zIndex': 1100,
             '--MobileNav-width': '320px',
             '--MobileNav-zIndex': 1100,
@@ -33,10 +31,9 @@ export default function Layout({ children }: LayoutProps): React.JSX.Element {
           minHeight: '100%',
         }}
       >
-        <SideNav />
         <Box sx={{ display: 'flex', flex: '1 1 auto', flexDirection: 'column', pl: { lg: 'var(--SideNav-width)'  } }}>
           <main>
-            <Container maxWidth="xl" sx={{ padding: '32px 32px 32px 32px', margin: '32px auto 20px auto', backgroundColor: '#f5f7fa' }}>
+            <Container maxWidth="xl" sx={{ padding: '32px 56px 32px 56px', margin: '32px auto 20px auto', backgroundColor: '#f5f7fa' }}>
               {children}
             </Container>
           </main>
