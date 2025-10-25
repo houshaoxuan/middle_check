@@ -13,12 +13,8 @@ const datasets = ['31_16.fjr'];
 
 const isDev = true;
 
-const bfs_url = isDev
-  ? 'https://www.csdn.net/'
-  : 'http://21.47.100.103:21025/#/views/graphQuery/query?cypher=CALL+agl.bfs(%22myGraph%22%2c%7bsource%3a%5b%22v%22%2c0%5d%2corientation%3a%22FORWARD%22%2creturnLimit%3a100000%7d)+YIELD+label%2c+pk%2c+level+RETURN+label%2c+pk%2c+level%3b&name=graph500';
-const sssp_url = isDev
-  ? 'https://www.csdn.net/'
-  : 'http://21.47.100.103:21025/#/views/graphQuery/query?cypher=CALL+agl.sssp(%22myGraph%22%2c%7bsource%3a+%5b%22v%22%2c0%5d%2creturnLimit%3a1000%2creturnOrder%3a%22Ascending%22%2corientation%3a%22FORWARD%22%7d)+YIELD+label%2c+pk%2c+distance+RETURN+label%2c+pk%2c+distance%3b&name=graph500';
+const bfs_url = 'http://21.47.100.103:21025/#/views/graphQuery/query?cypher=CALL+agl.bfs(%22myGraph%22%2c%7bsource%3a%5b%22v%22%2c0%5d%2corientation%3a%22FORWARD%22%2creturnLimit%3a100000%7d)+YIELD+label%2c+pk%2c+level+RETURN+label%2c+pk%2c+level%3b&name=graph500';
+const sssp_url = 'http://21.47.100.103:21025/#/views/graphQuery/query?cypher=CALL+agl.sssp(%22myGraph%22%2c%7bsource%3a+%5b%22v%22%2c0%5d%2creturnLimit%3a1000%2creturnOrder%3a%22Ascending%22%2corientation%3a%22FORWARD%22%7d)+YIELD+label%2c+pk%2c+distance+RETURN+label%2c+pk%2c+distance%3b&name=graph500';
 
 export default function Page() {
   const [selectedAlgo, setSelectedAlgo] = useState(algorithms[0]);
