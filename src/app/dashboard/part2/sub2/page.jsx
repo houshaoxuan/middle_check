@@ -4,54 +4,21 @@ import React, { useEffect, useState } from 'react';
 import { Box, Button, Grid, LinearProgress, MenuItem, Paper, Select, Typography } from '@mui/material';
 
 import CodeContainer from './CodeContainer';
-import { fetch_top_data, inst_mem_data, moduleCodeMap, vexer_data } from './data'; // 假设你将模块代码映射放在了这个文件中
-import Waveform from './Waveform';
+import { moduleCodeMap } from './data';
 
 export default function Page() {
   const [module, setModule] = useState('module1');
   const [rtlCode, setRtlCode] = useState('');
   const [simulatorCode, setSimulatorCode] = useState('');
-  const [rtlWaveformData, setRtlWaveformData] = useState(null);
-  const [simulatorWaveformData, setSimulatorWaveformData] = useState(null);
-  const [currentIndex, setCurrentIndex] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
   const [logs, setLogs] = useState(['系统准备就绪']);
-
-  // 波形数据生成器
-  const generateWaveformData = () => {
-    let data;
-    if (module === 'module1') {
-      data = fetch_top_data;
-    } else if (module === 'module2') {
-      data = inst_mem_data;
-    } else if (module === 'module3') {
-      data = vexer_data;
-    }
-    const lines = data.split('\n');
-    const processedLines = lines.map((line) => {
-      const parts = line.split(' ').filter((part) => part);
-      parts.shift();
-      return parts.join(' ');
-    });
-    const newData = processedLines.join('\n');
-    console.log('newData', newData);
-    return newData;
-  };
 
   // 运行流程控制
   const handleRun = async () => {
     setIsRunning(true);
     try {
-      setRtlWaveformData('');
-      setSimulatorWaveformData('');
-      setCurrentIndex(0);
       // 第一阶段：编译
       await mockProcess('等待运行结果', 1500);
-
-      // 第三阶段：结果生成
-      const waveform = generateWaveformData();
-      setRtlWaveformData(waveform);
-      setSimulatorWaveformData(waveform);
 
       setLogs((prev) => [...prev, `[${new Date().toLocaleTimeString()}] ✅ 运行成功`]);
     } catch (err) {
@@ -77,8 +44,6 @@ export default function Page() {
     setModule(selectedModule);
     setRtlCode(moduleCodeMap[selectedModule].rtl);
     setSimulatorCode(moduleCodeMap[selectedModule].simulator);
-    setRtlWaveformData(null);
-    setSimulatorWaveformData(null);
     setLogs((prev) => [...prev, `[${new Date().toLocaleTimeString()}] 切换模块: ${selectedModule}`]);
   };
 
@@ -225,7 +190,7 @@ export default function Page() {
                   模拟器能够精确模拟硬件代码的行为，包括模块、子系统和系统等多层次的功能逻辑和时序关系，实现以较小的开发代价进行架构的验证和调优。
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  本页面展示了3个模块的RTL代码和对应的模拟器代码，并且分别运行并展示了对应的仿真运行和模拟器的波形图，通过对比能够看出模拟器精确模拟了硬件行为。
+                  本页面展示了3个模块的RTL代码和对应的模拟器代码，通过对比能够看出模拟器精确模拟了硬件行为。
                 </Typography>
               </Box>
             </Paper>
@@ -346,61 +311,6 @@ export default function Page() {
               </Paper>
             </Grid>
           </Grid>
-        </Grid>
-
-        {/* 波形展示区域 */}
-        <Grid item xs={12}>
-          <Paper
-            elevation={3}
-            sx={{
-              p: 2,
-              borderRadius: 3,
-            }}
-          >
-            <Typography
-              variant="h6"
-              sx={{
-                fontWeight: 700,
-                mb: 2,
-                color: 'secondary.main',
-              }}
-            >
-              RTL 波形
-            </Typography>
-            <Waveform
-              data={rtlWaveformData}
-              currentIndex={currentIndex}
-              setCurrentIndex={setCurrentIndex}
-              height={450}
-            />
-          </Paper>
-        </Grid>
-
-        <Grid item xs={12}>
-          <Paper
-            elevation={3}
-            sx={{
-              p: 2,
-              borderRadius: 3,
-            }}
-          >
-            <Typography
-              variant="h6"
-              sx={{
-                fontWeight: 700,
-                mb: 2,
-                color: 'secondary.main',
-              }}
-            >
-              Simulator 波形
-            </Typography>
-            <Waveform
-              data={simulatorWaveformData}
-              currentIndex={currentIndex}
-              setCurrentIndex={setCurrentIndex}
-              height={450}
-            />
-          </Paper>
         </Grid>
       </Grid>
     </Box>

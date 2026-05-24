@@ -9,7 +9,7 @@ import request from '@/lib/request/request';
 import { CGA_CODE_MAP } from './constCGACode';
 
 // 算法和数据集映射
-export const algorithmMappings = {
+const algorithmMappings = {
   'bfs': {
     url: 'bfs',
     datasets: ['smallgraph', 'facebook', 'physics', ],

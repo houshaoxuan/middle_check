@@ -21,6 +21,14 @@ module.exports = {
       },
     },
   },
+  overrides: [
+    {
+      files: ['*.js', '*.jsx'],
+      rules: {
+        '@typescript-eslint/restrict-template-expressions': 'off',
+      },
+    },
+  ],
   rules: {
     '@typescript-eslint/no-unused-vars': [
       'error',

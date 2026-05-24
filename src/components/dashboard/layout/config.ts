@@ -19,11 +19,6 @@ export const navItems = [
       {key: '内容三', title: '动态图数据管理', href: paths.dashboard.part3_sub3},
     ]
   },
-  { key: '课题四', title: '分布式图计算框架', href: paths.dashboard.part4, icon: 'gear-six',
-    subItems: [
-      {key: '内容一', title: '分布式图计算框架验收平台', href: paths.dashboard.part4_sub1},
-    ]
-  },
   { key: '课题五', title: '泛图计算典型应用', href: paths.dashboard.part5, icon: 'user',
     subItems: [
       {key: '内容一', title: '面向不同场景的数据清洗', href: paths.dashboard.part5_sub1},
