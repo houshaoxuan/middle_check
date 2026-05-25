@@ -1,8 +1,6 @@
+import { midtermProjectConfigs } from '@/data/midterm-project-configs';
 import MidtermTemplatePage from '@/components/midterm/midterm-template-page';
 
-import { midtermTemplateConfig } from './template-config';
-
 export default function Page() {
-  return <MidtermTemplatePage config={midtermTemplateConfig} />;
+  return <MidtermTemplatePage config={midtermProjectConfigs.part2} />;
 }
-

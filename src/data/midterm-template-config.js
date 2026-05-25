@@ -13,22 +13,13 @@ export const midtermTemplateConfig = {
       title: '中期指标',
       items: [
         {
-          parts: [
-            { text: '算法A在标准数据集上的性能达到 ' },
-            { text: '100 ops/s', highlight: true },
-          ],
+          parts: [{ text: '算法A在标准数据集上的性能达到 ' }, { text: '100 ops/s', highlight: true }],
         },
         {
-          parts: [
-            { text: '算法B在标准数据集上的性能达到 ' },
-            { text: '50 ops/s', highlight: true },
-          ],
+          parts: [{ text: '算法B在标准数据集上的性能达到 ' }, { text: '50 ops/s', highlight: true }],
         },
         {
-          parts: [
-            { text: '端到端处理时延低于 ' },
-            { text: '20 ms', highlight: true },
-          ],
+          parts: [{ text: '端到端处理时延低于 ' }, { text: '20 ms', highlight: true }],
         },
       ],
     },

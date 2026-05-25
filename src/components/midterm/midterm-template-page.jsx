@@ -3,13 +3,14 @@
 import React from 'react';
 import { Box, Grid } from '@mui/material';
 
+import request from '@/lib/request/request';
+
 import MetricBarChart from './metric-bar-chart';
 import MetricIntro from './metric-intro';
 import ResultTable from './result-table';
 import RunControl from './run-control';
 import SelectionInfo from './selection-info';
 import TerminalLog from './terminal-log';
-import request from '@/lib/request/request';
 
 function upsertRows(rows, incomingRows) {
   const map = new Map(rows.map((row) => [row.id, row]));
@@ -17,9 +18,9 @@ function upsertRows(rows, incomingRows) {
   return Array.from(map.values());
 }
 
-function streamRunLog({ algorithmKey, datasetKey, onLog }) {
+function streamRunLog({ apiBasePath, algorithmKey, datasetKey, onLog }) {
   return new Promise((resolve, reject) => {
-    const eventSource = new EventSource(`${request.BASE_URL}/part6/execute/${algorithmKey}/${datasetKey}/`);
+    const eventSource = new EventSource(`${request.BASE_URL}${apiBasePath}/execute/${algorithmKey}/${datasetKey}/`);
 
     eventSource.onmessage = (event) => {
       if (event.data === '[done]') {
@@ -45,6 +46,7 @@ function streamRunLog({ algorithmKey, datasetKey, onLog }) {
 }
 
 export default function MidtermTemplatePage({ config }) {
+  const apiBasePath = (config.apiBasePath || '/part6').replace(/\/$/, '');
   const firstAlgorithm = config.algorithms[0];
   const [selectedAlgorithm, setSelectedAlgorithm] = React.useState(firstAlgorithm.key);
   const [selectedDataset, setSelectedDataset] = React.useState(firstAlgorithm.datasets[0].key);
@@ -88,13 +90,14 @@ export default function MidtermTemplatePage({ config }) {
         const runKey = `${currentAlgorithm.key}:${dataset.key}`;
 
         await streamRunLog({
+          apiBasePath,
           algorithmKey: currentAlgorithm.key,
           datasetKey: dataset.key,
           onLog: (line) => setLogs((prev) => [...prev, line]),
         });
 
         const response = await request({
-          url: `/part6/result/${currentAlgorithm.key}/${dataset.key}/`,
+          url: `${apiBasePath}/result/${currentAlgorithm.key}/${dataset.key}/`,
           method: 'GET',
         });
         const result = response.data;
@@ -128,7 +131,11 @@ export default function MidtermTemplatePage({ config }) {
               />
             </Grid>
             <Grid item xs={12}>
-              <SelectionInfo algorithm={currentAlgorithm} datasetKey={selectedDataset} allDatasetsKey={config.allDatasetsKey} />
+              <SelectionInfo
+                algorithm={currentAlgorithm}
+                datasetKey={selectedDataset}
+                allDatasetsKey={config.allDatasetsKey}
+              />
             </Grid>
           </Grid>
         </Grid>

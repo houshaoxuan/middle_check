@@ -9,6 +9,8 @@ from .mock_data import (
     PART3_RESULT_DATA,
     PART3_STAGE_SNIPPETS,
     execution_log,
+    midterm_project_log,
+    midterm_project_result,
     part1_result,
     part2_log,
     part6_log,
@@ -110,3 +112,13 @@ async def part6_execute(algo: str, dataset: str) -> StreamingResponse:
 @app.get("/part6/result/{algo}/{dataset}/")
 async def part6_get_result(algo: str, dataset: str) -> dict[str, object]:
     return {"data": part6_result(algo, dataset)}
+
+
+@app.get("/midterm/{project}/execute/{algo}/{dataset}/")
+async def midterm_project_execute(project: str, algo: str, dataset: str) -> StreamingResponse:
+    return StreamingResponse(sse_stream(midterm_project_log(project, algo, dataset)), media_type="text/event-stream")
+
+
+@app.get("/midterm/{project}/result/{algo}/{dataset}/")
+async def midterm_project_get_result(project: str, algo: str, dataset: str) -> dict[str, object]:
+    return {"data": midterm_project_result(project, algo, dataset)}
