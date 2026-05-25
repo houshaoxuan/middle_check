@@ -1,8 +1,10 @@
-import { Box, MenuItem, Paper, Select, Typography } from '@mui/material';
+import React from 'react';
+
+import { Box, Paper, Typography } from '@mui/material';
 import { Bar, BarChart, CartesianGrid, Legend, ReferenceLine, Tooltip, XAxis, YAxis } from 'recharts';
 
-export default function MetricBarChart({ metrics, rows, selectedMetric, onMetricChange, title = '指标对比图' }) {
-  const metric = metrics.find((item) => item.key === selectedMetric) || metrics[0];
+export default function MetricBarChart({ metrics, rows, title = '性能图表' }) {
+  const metric = metrics[0];
   const chartData = rows.map((row) => ({
     dataset: row.dataset || row.algorithm || row.id,
     value: row[metric.valueKey],
@@ -14,17 +16,13 @@ export default function MetricBarChart({ metrics, rows, selectedMetric, onMetric
 
   return (
     <Paper elevation={3} sx={{ p: 2, borderRadius: 3 }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2, gap: 2 }}>
+      <Box sx={{ mb: 2 }}>
         <Typography variant="h6" sx={{ fontWeight: 700, color: 'secondary.main' }}>
           {title}
         </Typography>
-        <Select value={selectedMetric} onChange={onMetricChange} size="small" sx={{ minWidth: 180 }}>
-          {metrics.map((item) => (
-            <MenuItem key={item.key} value={item.key}>
-              {item.label}
-            </MenuItem>
-          ))}
-        </Select>
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+          {metric.label} - 实测值与中期指标对比，单位：{metric.unit}
+        </Typography>
       </Box>
 
       {rows.length > 0 ? (

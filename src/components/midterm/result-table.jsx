@@ -1,8 +1,13 @@
+import React from 'react';
+
 import { Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
 
 function formatValue(value) {
   if (typeof value === 'number') {
-    return Number.isInteger(value) ? value.toLocaleString() : value.toFixed(3);
+    return value.toLocaleString(undefined, {
+      minimumFractionDigits: 1,
+      maximumFractionDigits: 1,
+    });
   }
 
   return value ?? '-';
@@ -19,7 +24,7 @@ export default function ResultTable({ columns, rows, title = '测试结果' }) {
           <TableHead>
             <TableRow>
               {columns.map((column) => (
-                <TableCell key={column.key} align={column.align || 'left'}>
+                <TableCell key={column.key} align="center" sx={{ whiteSpace: 'nowrap' }}>
                   {column.label}
                 </TableCell>
               ))}
@@ -30,7 +35,7 @@ export default function ResultTable({ columns, rows, title = '测试结果' }) {
               rows.map((row) => (
                 <TableRow key={row.id}>
                   {columns.map((column) => (
-                    <TableCell key={column.key} align={column.align || 'left'}>
+                    <TableCell key={column.key} align="center" sx={{ whiteSpace: 'nowrap' }}>
                       {column.render ? column.render(row) : formatValue(row[column.key])}
                     </TableCell>
                   ))}
@@ -49,4 +54,3 @@ export default function ResultTable({ columns, rows, title = '测试结果' }) {
     </Paper>
   );
 }
-

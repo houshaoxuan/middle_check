@@ -52,7 +52,6 @@ export default function MidtermTemplatePage({ config }) {
   const firstAlgorithm = config.algorithms[0];
   const [selectedAlgorithm, setSelectedAlgorithm] = React.useState(firstAlgorithm.key);
   const [selectedDataset, setSelectedDataset] = React.useState(firstAlgorithm.datasets[0].key);
-  const [selectedMetric, setSelectedMetric] = React.useState(config.chart.metrics[0].key);
   const [isRunning, setIsRunning] = React.useState(false);
   const [logs, setLogs] = React.useState([]);
   const [resultRows, setResultRows] = React.useState([]);
@@ -103,7 +102,17 @@ export default function MidtermTemplatePage({ config }) {
           method: 'GET',
         });
         const result = response.data;
-        setResultRows((prev) => upsertRows(prev, [{ ...result, id: runKey }]));
+        setResultRows((prev) =>
+          upsertRows(prev, [
+            {
+              ...result,
+              vertices: result.vertices ?? dataset.nodes,
+              edges: result.edges ?? dataset.edges,
+              updateScale: result.updateScale ?? dataset.updateScale,
+              id: runKey,
+            },
+          ])
+        );
         setLogs((prev) => [...prev, `✅ ${currentAlgorithm.label} / ${dataset.label} 执行完成`]);
       }
     } catch (error) {
@@ -130,6 +139,7 @@ export default function MidtermTemplatePage({ config }) {
                 onAlgorithmChange={handleAlgorithmChange}
                 onDatasetChange={handleDatasetChange}
                 onRun={runProcess}
+                allDatasetsKey={config.allDatasetsKey}
                 showAlgorithmSelect={controls.showAlgorithmSelect !== false}
                 showDatasetSelect={controls.showDatasetSelect !== false}
                 disableDatasetSelect={Boolean(controls.disableDatasetSelect)}
@@ -164,8 +174,6 @@ export default function MidtermTemplatePage({ config }) {
           <MetricBarChart
             metrics={config.chart.metrics}
             rows={resultRows}
-            selectedMetric={selectedMetric}
-            onMetricChange={(event) => setSelectedMetric(event.target.value)}
             title={config.chart.title}
           />
         </Grid>

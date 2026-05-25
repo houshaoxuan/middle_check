@@ -49,6 +49,7 @@ const updateGraph1 = {
   label: 'Graph1',
   nodes: '268.4M',
   edges: '16.1B',
+  updateScale: '0.1%-1%',
   source: 'PPT 动态图差分数据存储技术实验结果',
   description: '图更新规模为 0.1%-1%，图更新吞吐率为 1.91 亿边/秒。',
 };
@@ -58,6 +59,7 @@ const updateGraph2 = {
   label: 'Graph2',
   nodes: '536.9M',
   edges: '4.4B',
+  updateScale: '0.1%-1%',
   source: 'PPT 动态图差分数据存储技术实验结果',
   description: '图更新规模为 0.1%-1%，图更新吞吐率为 2.18 亿边/秒。',
 };
@@ -324,8 +326,7 @@ export const midtermProjectConfigs = {
       assessment: [line('指标1.1：异构高性能图计算高层次综合系统综合后的加速器平均性能达到', highlight('15GTEPS'))],
       midterm: [line('指标1.1：异构高性能图计算高层次综合系统综合后的加速器平均性能达到', highlight('8GTEPS'))],
       completion: [
-        line('异构高性能图计算高层次综合系统综合后的加速器平均性能达到', highlight('30.46GTEPS')),
-        '完成中期指标值且达到考核指标，通过第三方测试。',
+        line('指标1.1：异构高性能图计算高层次综合系统综合后的加速器平均性能达到', highlight('30.46GTEPS')),
       ],
       method: [
         '在 Xilinx Alveo U55C FPGA 板卡上实现所提出的高性能动态图计算加速器，运行 PageRank、BFS、CC 并统计 GTEPS。',
@@ -342,13 +343,13 @@ export const midtermProjectConfigs = {
     tableColumns: [
       { key: 'algorithm', label: '算法' },
       { key: 'dataset', label: '数据集' },
-      { key: 'performanceTarget', label: '目标性能(GTEPS)', align: 'right' },
-      { key: 'performance', label: '完成性能(GTEPS)', align: 'right' },
-      { key: 'completionRate', label: '达成率(%)', align: 'right' },
-      { key: 'status', label: '状态' },
+      { key: 'vertices', label: '顶点数', align: 'right' },
+      { key: 'edges', label: '边数', align: 'right' },
+      { key: 'performanceTarget', label: '中期指标（GTEPS）', align: 'right' },
+      { key: 'performance', label: '中期完成情况（GTEPS）', align: 'right' },
     ],
     chart: {
-      title: '指标1.1 平均性能达成情况',
+      title: '加速器性能图表',
       metrics: [
         {
           key: 'performance',
@@ -399,13 +400,13 @@ export const midtermProjectConfigs = {
     tableTitle: '自适应优化和部署工具验收结果',
     tableColumns: [
       { key: 'algorithm', label: '算法' },
-      { key: 'resourceReductionTarget', label: '目标降低比例(%)', align: 'right' },
-      { key: 'resourceReduction', label: '完成降低比例(%)', align: 'right' },
-      { key: 'completionRate', label: '达成率(%)', align: 'right' },
-      { key: 'status', label: '状态' },
+      { key: 'graflexClbPerMteps', label: 'GraFlex 资源占用（CLB/MTEPS）', align: 'right' },
+      { key: 'dfgraphClbPerMteps', label: 'DFGraph 资源占用（CLB/MTEPS）', align: 'right' },
+      { key: 'resourceReductionTarget', label: '资源使用量降低中期指标（%）', align: 'right' },
+      { key: 'resourceReduction', label: '中期完成情况（%）', align: 'right' },
     ],
     chart: {
-      title: '指标2.1 单位性能逻辑资源使用量降低情况',
+      title: '资源占用降低图表',
       metrics: [
         {
           key: 'resourceReduction',
@@ -450,13 +451,14 @@ export const midtermProjectConfigs = {
     tableTitle: '图更新性能验收结果',
     tableColumns: [
       { key: 'dataset', label: '数据集' },
-      { key: 'updateThroughputTarget', label: '目标更新吞吐(亿边/秒)', align: 'right' },
-      { key: 'updateThroughput', label: '完成更新吞吐(亿边/秒)', align: 'right' },
-      { key: 'completionRate', label: '达成率(%)', align: 'right' },
-      { key: 'status', label: '状态' },
+      { key: 'vertices', label: '顶点数', align: 'right' },
+      { key: 'edges', label: '边数', align: 'right' },
+      { key: 'updateScale', label: '图更新规模', align: 'right' },
+      { key: 'updateThroughputTarget', label: '中期指标（亿边/秒）', align: 'right' },
+      { key: 'updateThroughput', label: '中期完成情况（亿边/秒）', align: 'right' },
     ],
     chart: {
-      title: '指标3.2 图更新吞吐达成情况',
+      title: '图更新性能图表',
       metrics: [
         {
           key: 'updateThroughput',
@@ -496,13 +498,13 @@ export const midtermProjectConfigs = {
     tableColumns: [
       { key: 'algorithm', label: '算法' },
       { key: 'dataset', label: '数据集' },
-      { key: 'performanceTarget', label: '目标执行性能(GTEPS)', align: 'right' },
-      { key: 'performance', label: '完成执行性能(GTEPS)', align: 'right' },
-      { key: 'completionRate', label: '达成率(%)', align: 'right' },
-      { key: 'status', label: '状态' },
+      { key: 'vertices', label: '顶点数', align: 'right' },
+      { key: 'edges', label: '边数', align: 'right' },
+      { key: 'performanceTarget', label: '中期指标（GTEPS）', align: 'right' },
+      { key: 'performance', label: '中期完成情况（GTEPS）', align: 'right' },
     ],
     chart: {
-      title: '指标3.1 图算法性能达成情况',
+      title: '图算法性能图表',
       metrics: [
         {
           key: 'performance',
@@ -586,13 +588,13 @@ export const midtermProjectConfigs = {
     tableTitle: '高层编程抽象与应用验证结果',
     tableColumns: [
       { key: 'algorithm', label: '算法' },
-      { key: 'codeDensityTarget', label: '目标代码密度压缩(倍)', align: 'right' },
-      { key: 'codeDensity', label: '完成代码密度压缩(倍)', align: 'right' },
-      { key: 'completionRate', label: '达成率(%)', align: 'right' },
-      { key: 'status', label: '状态' },
+      { key: 'hitgraphCodeLines', label: 'HitGraph 效果（行）', align: 'right' },
+      { key: 'dfgraphCodeLines', label: '本课题效果（行）', align: 'right' },
+      { key: 'codeDensityTarget', label: '中期指标（压缩x倍）', align: 'right' },
+      { key: 'codeDensity', label: '中期完成情况（压缩x倍）', align: 'right' },
     ],
     chart: {
-      title: '指标4.1 代码密度压缩达成情况',
+      title: '代码密度压缩图表',
       metrics: [
         {
           key: 'codeDensity',

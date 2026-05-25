@@ -10,12 +10,18 @@ export default function RunControl({
   onAlgorithmChange,
   onDatasetChange,
   onRun,
+  allDatasetsKey,
   showAlgorithmSelect = true,
   showDatasetSelect = true,
   disableDatasetSelect = false,
   algorithmLabel = '选择算法',
   datasetLabel = '选择数据集',
 }) {
+  const datasetOptions =
+    allDatasetsKey && datasets.length > 1 && !disableDatasetSelect
+      ? [{ key: allDatasetsKey, label: '全部数据集' }, ...datasets]
+      : datasets;
+
   return (
     <Paper elevation={3} sx={{ p: 2, borderRadius: 3, height: '100%' }}>
       <Typography
@@ -59,7 +65,7 @@ export default function RunControl({
             disabled={isRunning || disableDatasetSelect}
             size="small"
           >
-            {datasets.map((dataset) => (
+            {datasetOptions.map((dataset) => (
               <MenuItem key={dataset.key} value={dataset.key}>
                 {dataset.label}
               </MenuItem>

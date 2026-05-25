@@ -180,6 +180,20 @@ MIDTERM_ACTIVE_RESULTS: dict[str, dict[str, Any]] = {
     },
 }
 
+MIDTERM_DATASET_META: dict[tuple[str, str], dict[str, Any]] = {
+    ("part2", "graph1"): {"vertices": "17.1M", "edges": "1046.9M"},
+    ("part2", "graph2"): {"vertices": "16.8M", "edges": "503.3M"},
+    ("part4-update", "graph1"): {"vertices": "268.4M", "edges": "16.1B", "updateScale": "0.1%-1%"},
+    ("part4-update", "graph2"): {"vertices": "536.9M", "edges": "4.4B", "updateScale": "0.1%-1%"},
+    ("part4-algorithm", "graph1"): {"vertices": "268.4M", "edges": "16.1B"},
+}
+
+MIDTERM_CODE_EFFECTS: dict[tuple[str, str], dict[str, Any]] = {
+    ("part5", "pagerank"): {"hitgraphCodeLines": 129, "dfgraphCodeLines": 20},
+    ("part5", "bfs"): {"hitgraphCodeLines": 129, "dfgraphCodeLines": 20},
+    ("part5", "cc"): {"hitgraphCodeLines": 129, "dfgraphCodeLines": 20},
+}
+
 
 def part1_result(algo: str, dataset: str) -> dict[str, Any]:
     algo_key = algo.lower()
@@ -231,4 +245,9 @@ def midterm_project_log(project: str, algo: str, dataset: str) -> list[str]:
 
 def midterm_project_result(project: str, algo: str, dataset: str) -> dict[str, Any]:
     key = f"{project}:{algo}:{dataset}"
-    return MIDTERM_ACTIVE_RESULTS.get(key, next(iter(MIDTERM_ACTIVE_RESULTS.values())))
+    result = MIDTERM_ACTIVE_RESULTS.get(key, next(iter(MIDTERM_ACTIVE_RESULTS.values())))
+    return {
+        **result,
+        **MIDTERM_DATASET_META.get((project, dataset), {}),
+        **MIDTERM_CODE_EFFECTS.get((project, algo), {}),
+    }
