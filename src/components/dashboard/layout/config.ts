@@ -26,4 +26,9 @@ export const navItems = [
       {key: '内容三', title: '金融应用示例展示', href: paths.dashboard.part5_sub3}
     ]
   },
+  { key: '通用模板', title: '中期指标展示模板', href: paths.dashboard.part6, icon: 'gear-six',
+    subItems: [
+      {key: '内容一', title: '通用指标展示页面', href: paths.dashboard.part6_sub1},
+    ]
+  },
 ] satisfies NavItemConfig[];

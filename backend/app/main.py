@@ -11,6 +11,8 @@ from .mock_data import (
     execution_log,
     part1_result,
     part2_log,
+    part6_log,
+    part6_result,
 )
 from .sse import sse_stream
 
@@ -99,3 +101,12 @@ async def part3_dynamic_execute(dataset: str) -> StreamingResponse:
 async def part3_dynamic_result(dataset: str) -> dict[str, object]:
     return PART3_DYNAMIC_RESULTS.get(dataset, PART3_DYNAMIC_RESULTS["askubuntu"])
 
+
+@app.get("/part6/execute/{algo}/{dataset}/")
+async def part6_execute(algo: str, dataset: str) -> StreamingResponse:
+    return StreamingResponse(sse_stream(part6_log(algo, dataset)), media_type="text/event-stream")
+
+
+@app.get("/part6/result/{algo}/{dataset}/")
+async def part6_get_result(algo: str, dataset: str) -> dict[str, object]:
+    return {"data": part6_result(algo, dataset)}

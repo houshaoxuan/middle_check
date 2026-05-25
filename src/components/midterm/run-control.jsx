@@ -1,0 +1,60 @@
+import { Box, Button, LinearProgress, MenuItem, Paper, Select, Typography } from '@mui/material';
+
+export default function RunControl({
+  algorithms,
+  datasets,
+  isRunning,
+  selectedAlgorithm,
+  selectedDataset,
+  onAlgorithmChange,
+  onDatasetChange,
+  onRun,
+}) {
+  return (
+    <Paper elevation={3} sx={{ p: 2, borderRadius: 3, height: '100%' }}>
+      <Typography
+        variant="h6"
+        sx={{ fontWeight: 700, mb: 2, color: 'secondary.main', borderBottom: '2px solid', borderColor: 'secondary.main', pb: 1 }}
+      >
+        运行控制
+      </Typography>
+
+      <Box sx={{ mb: 2 }}>
+        <Typography variant="subtitle1" sx={{ fontWeight: 550, fontSize: '16px', mb: 1 }}>
+          选择算法
+        </Typography>
+        <Select fullWidth value={selectedAlgorithm} onChange={onAlgorithmChange} disabled={isRunning} size="small">
+          {algorithms.map((algorithm) => (
+            <MenuItem key={algorithm.key} value={algorithm.key}>
+              {algorithm.label}
+            </MenuItem>
+          ))}
+        </Select>
+      </Box>
+
+      <Box sx={{ mb: 2 }}>
+        <Typography variant="subtitle1" sx={{ fontWeight: 550, fontSize: '16px', mb: 1 }}>
+          选择数据集
+        </Typography>
+        <Select fullWidth value={selectedDataset} onChange={onDatasetChange} disabled={isRunning} size="small">
+          {datasets.map((dataset) => (
+            <MenuItem key={dataset.key} value={dataset.key}>
+              {dataset.label}
+            </MenuItem>
+          ))}
+        </Select>
+      </Box>
+
+      <Button fullWidth variant="contained" color="success" onClick={onRun} disabled={isRunning} sx={{ py: 1.2 }}>
+        {isRunning ? '运行中...' : '开始运行'}
+      </Button>
+
+      {isRunning ? (
+        <Box sx={{ mt: 2 }}>
+          <LinearProgress color="success" />
+        </Box>
+      ) : null}
+    </Paper>
+  );
+}
+

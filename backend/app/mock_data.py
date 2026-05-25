@@ -163,6 +163,80 @@ PART3_DYNAMIC_RESULTS = {
     },
 }
 
+PART6_LOGS = {
+    "algorithm-a:demo-small": [
+        "> 加载 Demo-Small 数据集",
+        "> 启动算法A核心流程",
+        "> 完成 3 轮重复测试",
+        "> 生成指标结果",
+    ],
+    "algorithm-a:demo-medium": [
+        "> 加载 Demo-Medium 数据集",
+        "> 启动算法A核心流程",
+        "> 完成 3 轮重复测试",
+        "> 生成指标结果",
+    ],
+    "algorithm-b:case-1": [
+        "> 加载 Case-1 数据集",
+        "> 启动算法B核心流程",
+        "> 完成中期指标核验",
+        "> 生成指标结果",
+    ],
+    "algorithm-b:case-2": [
+        "> 加载 Case-2 数据集",
+        "> 启动算法B核心流程",
+        "> 完成中期指标核验",
+        "> 生成指标结果",
+    ],
+}
+
+PART6_RESULTS = {
+    "algorithm-a:demo-small": {
+        "algorithm": "算法A",
+        "dataset": "Demo-Small",
+        "nodes": 65536,
+        "edges": 1048576,
+        "latency": 12.4,
+        "latencyTarget": 20,
+        "performance": 128.6,
+        "performanceTarget": 100,
+        "speedup": 8.3,
+    },
+    "algorithm-a:demo-medium": {
+        "algorithm": "算法A",
+        "dataset": "Demo-Medium",
+        "nodes": 262144,
+        "edges": 4194304,
+        "latency": 18.7,
+        "latencyTarget": 20,
+        "performance": 116.2,
+        "performanceTarget": 100,
+        "speedup": 7.6,
+    },
+    "algorithm-b:case-1": {
+        "algorithm": "算法B",
+        "dataset": "Case-1",
+        "nodes": 120000,
+        "edges": 2200000,
+        "latency": 16.5,
+        "latencyTarget": 20,
+        "performance": 62.8,
+        "performanceTarget": 50,
+        "speedup": 5.1,
+    },
+    "algorithm-b:case-2": {
+        "algorithm": "算法B",
+        "dataset": "Case-2",
+        "nodes": 380000,
+        "edges": 6400000,
+        "latency": 19.2,
+        "latencyTarget": 20,
+        "performance": 57.4,
+        "performanceTarget": 50,
+        "speedup": 4.7,
+    },
+}
+
 
 def part1_result(algo: str, dataset: str) -> dict[str, Any]:
     algo_key = algo.lower()
@@ -198,3 +272,20 @@ def execution_log(title: str, algo: str | None = None, dataset: str | None = Non
         "整理运行结果...",
     ]
 
+
+def part6_log(algo: str, dataset: str) -> list[str]:
+    key = f"{algo}:{dataset}"
+    return PART6_LOGS.get(
+        key,
+        [
+            f"> 加载测试配置：{algo} / {dataset}",
+            "> 初始化本地模拟运行环境",
+            "> 执行指标测试",
+            "> 汇总性能与时延数据",
+        ],
+    )
+
+
+def part6_result(algo: str, dataset: str) -> dict[str, Any]:
+    key = f"{algo}:{dataset}"
+    return PART6_RESULTS.get(key, PART6_RESULTS["algorithm-a:demo-small"])

@@ -15,6 +15,8 @@ export const paths = {
     part5_sub1: '/dashboard/part5/sub1',
     part5_sub2: '/dashboard/part5/sub2',
     part5_sub3: '/dashboard/part5/sub3',
+    part6: '/dashboard/part6/sub1',
+    part6_sub1: '/dashboard/part6/sub1',
 
   },
   errors: { notFound: '/errors/not-found' },
