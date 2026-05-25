@@ -28,4 +28,5 @@ yarn-debug.log*
 yarn-error.log*
 
 *.pptx
+__pycache__/
 *.pyc
