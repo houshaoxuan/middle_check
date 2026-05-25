@@ -4,7 +4,7 @@ import { Bar, BarChart, CartesianGrid, Legend, ReferenceLine, Tooltip, XAxis, YA
 export default function MetricBarChart({ metrics, rows, selectedMetric, onMetricChange, title = '指标对比图' }) {
   const metric = metrics.find((item) => item.key === selectedMetric) || metrics[0];
   const chartData = rows.map((row) => ({
-    dataset: row.dataset,
+    dataset: row.dataset || row.algorithm || row.id,
     value: row[metric.valueKey],
     target: row[metric.targetKey],
   }));
@@ -47,7 +47,14 @@ export default function MetricBarChart({ metrics, rows, selectedMetric, onMetric
               borderRadius: 1,
             }}
           >
-            <BarChart width={chartWidth} height={330} data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }} barGap={8} barCategoryGap={24}>
+            <BarChart
+              width={chartWidth}
+              height={330}
+              data={chartData}
+              margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+              barGap={8}
+              barCategoryGap={24}
+            >
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="dataset" />
               <YAxis label={{ value: metric.unit, angle: -90, position: 'insideLeft' }} />
@@ -60,7 +67,9 @@ export default function MetricBarChart({ metrics, rows, selectedMetric, onMetric
           </Box>
         </Box>
       ) : (
-        <Box sx={{ height: 330, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'text.secondary' }}>
+        <Box
+          sx={{ height: 330, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'text.secondary' }}
+        >
           暂无图表数据
         </Box>
       )}

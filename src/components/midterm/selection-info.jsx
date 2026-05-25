@@ -1,4 +1,18 @@
-import { Box, Chip, Divider, Paper, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
+import React from 'react';
+import {
+  Box,
+  Chip,
+  Divider,
+  Paper,
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Typography,
+} from '@mui/material';
 
 function InfoLine({ label, value }) {
   return (
@@ -33,17 +47,23 @@ function DatasetSummary({ dataset }) {
 
 export default function SelectionInfo({ algorithm, datasetKey, allDatasetsKey }) {
   const isAllDatasets = datasetKey === allDatasetsKey;
-  const selectedDatasets =
-    isAllDatasets
-      ? algorithm.datasets.filter((dataset) => dataset.key !== allDatasetsKey)
-      : algorithm.datasets.filter((dataset) => dataset.key === datasetKey);
+  const selectedDatasets = isAllDatasets
+    ? algorithm.datasets.filter((dataset) => dataset.key !== allDatasetsKey)
+    : algorithm.datasets.filter((dataset) => dataset.key === datasetKey);
 
   return (
     <Stack spacing={3}>
       <Paper elevation={3} sx={{ p: 2, borderRadius: 3 }}>
         <Typography
           variant="h6"
-          sx={{ fontWeight: 700, mb: 2, color: 'secondary.main', borderBottom: '2px solid', borderColor: 'secondary.main', pb: 1 }}
+          sx={{
+            fontWeight: 700,
+            mb: 2,
+            color: 'secondary.main',
+            borderBottom: '2px solid',
+            borderColor: 'secondary.main',
+            pb: 1,
+          }}
         >
           算法信息
         </Typography>
@@ -63,7 +83,14 @@ export default function SelectionInfo({ algorithm, datasetKey, allDatasetsKey })
       <Paper elevation={3} sx={{ p: 2, borderRadius: 3 }}>
         <Typography
           variant="h6"
-          sx={{ fontWeight: 700, mb: 2, color: 'secondary.main', borderBottom: '2px solid', borderColor: 'secondary.main', pb: 1 }}
+          sx={{
+            fontWeight: 700,
+            mb: 2,
+            color: 'secondary.main',
+            borderBottom: '2px solid',
+            borderColor: 'secondary.main',
+            pb: 1,
+          }}
         >
           {isAllDatasets ? '数据集概览' : '数据集信息'}
         </Typography>

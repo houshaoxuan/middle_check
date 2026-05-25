@@ -3,8 +3,9 @@
 import React from 'react';
 import { Box, Grid } from '@mui/material';
 
-import request from '@/lib/request/request';
+import request, { BASE_URL } from '@/lib/request/request';
 
+import CodeComparison from './code-comparison';
 import MetricBarChart from './metric-bar-chart';
 import MetricIntro from './metric-intro';
 import ResultTable from './result-table';
@@ -20,7 +21,7 @@ function upsertRows(rows, incomingRows) {
 
 function streamRunLog({ apiBasePath, algorithmKey, datasetKey, onLog }) {
   return new Promise((resolve, reject) => {
-    const eventSource = new EventSource(`${request.BASE_URL}${apiBasePath}/execute/${algorithmKey}/${datasetKey}/`);
+    const eventSource = new EventSource(`${BASE_URL}${apiBasePath}/execute/${algorithmKey}/${datasetKey}/`);
 
     eventSource.onmessage = (event) => {
       if (event.data === '[done]') {
@@ -46,7 +47,8 @@ function streamRunLog({ apiBasePath, algorithmKey, datasetKey, onLog }) {
 }
 
 export default function MidtermTemplatePage({ config }) {
-  const apiBasePath = (config.apiBasePath || '/part6').replace(/\/$/, '');
+  const apiBasePath = (config.apiBasePath || '/midterm/part2').replace(/\/$/, '');
+  const controls = config.controls || {};
   const firstAlgorithm = config.algorithms[0];
   const [selectedAlgorithm, setSelectedAlgorithm] = React.useState(firstAlgorithm.key);
   const [selectedDataset, setSelectedDataset] = React.useState(firstAlgorithm.datasets[0].key);
@@ -63,7 +65,7 @@ export default function MidtermTemplatePage({ config }) {
     const algorithm = config.algorithms.find((item) => item.key === algorithmKey);
 
     setSelectedAlgorithm(algorithmKey);
-    setSelectedDataset(algorithm.datasets[0].key);
+    setSelectedDataset(algorithm?.datasets?.[0]?.key);
     setLogs([]);
   };
 
@@ -128,6 +130,11 @@ export default function MidtermTemplatePage({ config }) {
                 onAlgorithmChange={handleAlgorithmChange}
                 onDatasetChange={handleDatasetChange}
                 onRun={runProcess}
+                showAlgorithmSelect={controls.showAlgorithmSelect !== false}
+                showDatasetSelect={controls.showDatasetSelect !== false}
+                disableDatasetSelect={Boolean(controls.disableDatasetSelect)}
+                algorithmLabel={controls.algorithmLabel}
+                datasetLabel={controls.datasetLabel}
               />
             </Grid>
             <Grid item xs={12}>
@@ -145,6 +152,11 @@ export default function MidtermTemplatePage({ config }) {
       </Grid>
 
       <Grid container spacing={3}>
+        {config.codeComparison ? (
+          <Grid item xs={12}>
+            <CodeComparison config={config.codeComparison} selectedAlgorithm={selectedAlgorithm} />
+          </Grid>
+        ) : null}
         <Grid item xs={12}>
           <ResultTable columns={config.tableColumns} rows={resultRows} title={config.tableTitle} />
         </Grid>
