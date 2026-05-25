@@ -339,7 +339,7 @@ export const midtermProjectConfigs = {
       datasetLabel: '选择数据集',
     },
     algorithms: graphAlgorithms([acceleratorGraph1, acceleratorGraph2]),
-    tableTitle: '高性能动态图计算加速器架构验收结果',
+    tableTitle: '动态图加速器性能结果汇总',
     tableColumns: [
       { key: 'algorithm', label: '算法' },
       { key: 'dataset', label: '数据集' },
@@ -349,7 +349,7 @@ export const midtermProjectConfigs = {
       { key: 'performance', label: '中期完成情况（GTEPS）', align: 'right' },
     ],
     chart: {
-      title: '加速器性能图表',
+      title: '加速器吞吐性能对比',
       metrics: [
         {
           key: 'performance',
@@ -397,7 +397,7 @@ export const midtermProjectConfigs = {
       algorithmLabel: '选择算法',
     },
     algorithms: graphAlgorithms([deploymentDefaultDataset]),
-    tableTitle: '自适应优化和部署工具验收结果',
+    tableTitle: '资源占用对比结果汇总',
     tableColumns: [
       { key: 'algorithm', label: '算法' },
       { key: 'graflexClbPerMteps', label: 'GraFlex 资源占用（CLB/MTEPS）', align: 'right' },
@@ -406,7 +406,7 @@ export const midtermProjectConfigs = {
       { key: 'resourceReduction', label: '中期完成情况（%）', align: 'right' },
     ],
     chart: {
-      title: '资源占用降低图表',
+      title: '资源使用量降低比例对比',
       metrics: [
         {
           key: 'resourceReduction',
@@ -448,7 +448,7 @@ export const midtermProjectConfigs = {
         datasets: [updateGraph1, updateGraph2],
       },
     ],
-    tableTitle: '图更新性能验收结果',
+    tableTitle: '动态图更新吞吐结果汇总',
     tableColumns: [
       { key: 'dataset', label: '数据集' },
       { key: 'vertices', label: '顶点数', align: 'right' },
@@ -458,7 +458,7 @@ export const midtermProjectConfigs = {
       { key: 'updateThroughput', label: '中期完成情况（亿边/秒）', align: 'right' },
     ],
     chart: {
-      title: '图更新性能图表',
+      title: '图更新吞吐性能对比',
       metrics: [
         {
           key: 'updateThroughput',
@@ -494,7 +494,7 @@ export const midtermProjectConfigs = {
       disableDatasetSelect: true,
     },
     algorithms: graphAlgorithms([algorithmGraph1]),
-    tableTitle: '图算法性能验收结果',
+    tableTitle: '图算法执行性能结果汇总',
     tableColumns: [
       { key: 'algorithm', label: '算法' },
       { key: 'dataset', label: '数据集' },
@@ -504,7 +504,7 @@ export const midtermProjectConfigs = {
       { key: 'performance', label: '中期完成情况（GTEPS）', align: 'right' },
     ],
     chart: {
-      title: '图算法性能图表',
+      title: '图算法执行性能对比',
       metrics: [
         {
           key: 'performance',
@@ -585,7 +585,7 @@ export const midtermProjectConfigs = {
         ],
       },
     },
-    tableTitle: '高层编程抽象与应用验证结果',
+    tableTitle: '编程抽象代码密度结果汇总',
     tableColumns: [
       { key: 'algorithm', label: '算法' },
       { key: 'hitgraphCodeLines', label: 'HitGraph 效果（行）', align: 'right' },
@@ -594,7 +594,7 @@ export const midtermProjectConfigs = {
       { key: 'codeDensity', label: '中期完成情况（压缩x倍）', align: 'right' },
     ],
     chart: {
-      title: '代码密度压缩图表',
+      title: '代码密度压缩效果对比',
       metrics: [
         {
           key: 'codeDensity',

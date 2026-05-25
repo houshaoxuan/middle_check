@@ -29,13 +29,12 @@ function InfoLine({ label, value }) {
 
 function DatasetSummary({ dataset }) {
   return (
-    <Box sx={{ py: 1 }}>
+    <Box sx={{ pb: 0.5 }}>
       <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 0.75 }}>
         {dataset.label}
       </Typography>
       <InfoLine label="点规模" value={dataset.nodes} />
       <InfoLine label="边规模" value={dataset.edges} />
-      <InfoLine label="数据来源" value={dataset.source} />
       {dataset.description ? (
         <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.6, mt: 1 }}>
           {dataset.description}
@@ -58,7 +57,7 @@ export default function SelectionInfo({ algorithm, datasetKey, allDatasetsKey })
           variant="h6"
           sx={{
             fontWeight: 700,
-            mb: 2,
+            mb: 1,
             color: 'secondary.main',
             borderBottom: '2px solid',
             borderColor: 'secondary.main',
@@ -76,8 +75,6 @@ export default function SelectionInfo({ algorithm, datasetKey, allDatasetsKey })
         <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.6, mb: 1.5 }}>
           {algorithm.description}
         </Typography>
-        <InfoLine label="中期目标" value={algorithm.midtermTarget} />
-        <InfoLine label="考核口径" value={algorithm.evaluation} />
       </Paper>
 
       <Paper elevation={3} sx={{ p: 2, borderRadius: 3 }}>
@@ -85,7 +82,7 @@ export default function SelectionInfo({ algorithm, datasetKey, allDatasetsKey })
           variant="h6"
           sx={{
             fontWeight: 700,
-            mb: 2,
+            mb: 1,
             color: 'secondary.main',
             borderBottom: '2px solid',
             borderColor: 'secondary.main',
