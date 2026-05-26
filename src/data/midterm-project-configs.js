@@ -13,8 +13,8 @@ function line(...parts) {
 }
 
 const platformItems = [
-  'CPU：36-core 2-way hyper-threaded Intel Xeon 6554S CPU @ 2.20GHz；内存 2TB；缓存 180MB；g++ 编译器。',
-  'FPGA：Xilinx Alveo U55C；16GB 高带宽内存（460GB/s）；AMD Vitis 编译器。',
+  'CPU：1 颗 36-core 2-way hyper-threaded Intel Xeon 6554S CPU @ 2.20GHz；内存 2TB；缓存 180MB；g++ 编译器。',
+  'FPGA：4 张 Xilinx Alveo U55C；16GB 高带宽内存（460GB/s）；AMD Vitis 编译器。',
 ];
 
 const acceleratorGraph1 = {
@@ -357,6 +357,8 @@ export const midtermProjectConfigs = {
           unit: 'GTEPS',
           valueKey: 'performance',
           targetKey: 'performanceTarget',
+          assessmentTarget: 15,
+          midtermTarget: 8,
           defaultTarget: 15,
         },
       ],
@@ -414,6 +416,8 @@ export const midtermProjectConfigs = {
           unit: '%',
           valueKey: 'resourceReduction',
           targetKey: 'resourceReductionTarget',
+          assessmentTarget: 20,
+          midtermTarget: 10,
           defaultTarget: 20,
         },
       ],
@@ -466,6 +470,8 @@ export const midtermProjectConfigs = {
           unit: '亿边/秒',
           valueKey: 'updateThroughput',
           targetKey: 'updateThroughputTarget',
+          assessmentTarget: 1,
+          midtermTarget: 0.1,
           defaultTarget: 1,
         },
       ],
@@ -512,6 +518,8 @@ export const midtermProjectConfigs = {
           unit: 'GTEPS',
           valueKey: 'performance',
           targetKey: 'performanceTarget',
+          assessmentTarget: 5,
+          midtermTarget: 3,
           defaultTarget: 5,
         },
       ],
@@ -602,6 +610,8 @@ export const midtermProjectConfigs = {
           unit: '倍',
           valueKey: 'codeDensity',
           targetKey: 'codeDensityTarget',
+          assessmentTarget: 10,
+          midtermTarget: 5,
           defaultTarget: 10,
         },
       ],

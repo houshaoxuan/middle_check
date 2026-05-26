@@ -102,13 +102,20 @@ export default function MidtermTemplatePage({ config }) {
           method: 'GET',
         });
         const result = response.data;
+        const normalizedResult = config.chart.metrics.reduce(
+          (acc, metric) =>
+            metric.midtermTarget === undefined || !metric.targetKey
+              ? acc
+              : { ...acc, [metric.targetKey]: metric.midtermTarget },
+          result
+        );
         setResultRows((prev) =>
           upsertRows(prev, [
             {
-              ...result,
-              vertices: result.vertices ?? dataset.nodes,
-              edges: result.edges ?? dataset.edges,
-              updateScale: result.updateScale ?? dataset.updateScale,
+              ...normalizedResult,
+              vertices: normalizedResult.vertices ?? dataset.nodes,
+              edges: normalizedResult.edges ?? dataset.edges,
+              updateScale: normalizedResult.updateScale ?? dataset.updateScale,
               id: runKey,
             },
           ])

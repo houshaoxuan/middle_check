@@ -1,16 +1,19 @@
 import React from 'react';
 
 import { Box, Paper, Typography } from '@mui/material';
-import { Bar, BarChart, CartesianGrid, Tooltip, XAxis, YAxis } from 'recharts';
+import { Bar, BarChart, CartesianGrid, ReferenceLine, Tooltip, XAxis, YAxis } from 'recharts';
 
 export default function MetricBarChart({ metrics, rows, title = '性能图表' }) {
   const metric = metrics[0];
+  const assessmentTarget = metric.assessmentTarget ?? metric.defaultTarget;
+  const midtermTarget = metric.midtermTarget;
   const chartData = rows.map((row) => ({
     dataset: row.dataset || row.algorithm || row.id,
-    assessment: metric.defaultTarget,
+    assessment: assessmentTarget,
     value: row[metric.valueKey],
-    target: row[metric.targetKey],
+    target: midtermTarget ?? row[metric.targetKey],
   }));
+  const referenceTarget = midtermTarget ?? chartData.find((item) => typeof item.target === 'number')?.target;
   const groupWidth = 120;
   const chartWidth = Math.max(360, chartData.length * groupWidth + 180);
   const chartHeight = 330;
@@ -92,23 +95,35 @@ export default function MetricBarChart({ metrics, rows, title = '性能图表' }
               <Bar dataKey="assessment" name="考核指标" fill="#7e57c2" barSize={barSize} />
               <Bar dataKey="value" name="实测值" fill="#1976d2" barSize={barSize} />
               <Bar dataKey="target" name="中期指标" fill="#ff7043" barSize={barSize} />
+              {typeof referenceTarget === 'number' ? (
+                <ReferenceLine y={referenceTarget} stroke="#d32f2f" strokeDasharray="6 4" strokeWidth={2} />
+              ) : null}
             </BarChart>
             <Box
               sx={{
                 position: 'absolute',
-                left: plotLeft,
+                left: plotLeft + plotWidth / 2,
                 bottom: 22,
-                width: plotWidth,
+                width: 'max-content',
                 display: 'flex',
                 justifyContent: 'center',
                 gap: 3,
+                flexWrap: 'nowrap',
                 pointerEvents: 'none',
+                transform: 'translateX(-50%)',
+                whiteSpace: 'nowrap',
               }}
             >
               {legendItems.map((item) => (
-                <Box key={item.label} sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.75 }}>
-                  <Box sx={{ width: 15, height: 15, borderRadius: 0.5, backgroundColor: item.color }} />
-                  <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 600, lineHeight: 1 }}>
+                <Box
+                  key={item.label}
+                  sx={{ display: 'inline-flex', alignItems: 'center', flexShrink: 0, gap: 0.75 }}
+                >
+                  <Box sx={{ width: 15, height: 15, flexShrink: 0, borderRadius: 0.5, backgroundColor: item.color }} />
+                  <Typography
+                    variant="body2"
+                    sx={{ color: 'text.secondary', flexShrink: 0, fontWeight: 600, lineHeight: 1, whiteSpace: 'nowrap' }}
+                  >
                     {item.label}
                   </Typography>
                 </Box>

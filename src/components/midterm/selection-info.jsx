@@ -35,11 +35,6 @@ function DatasetSummary({ dataset }) {
       </Typography>
       <InfoLine label="点规模" value={dataset.nodes} />
       <InfoLine label="边规模" value={dataset.edges} />
-      {dataset.description ? (
-        <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.6, mt: 1 }}>
-          {dataset.description}
-        </Typography>
-      ) : null}
     </Box>
   );
 }
