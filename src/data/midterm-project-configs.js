@@ -346,7 +346,7 @@ export const midtermProjectConfigs = {
       { key: 'vertices', label: '顶点数', align: 'right' },
       { key: 'edges', label: '边数', align: 'right' },
       { key: 'performanceTarget', label: '中期指标（GTEPS）', align: 'right' },
-      { key: 'performance', label: '中期完成情况（GTEPS）', align: 'right' },
+      { key: 'performance', label: '中期完成值（GTEPS）', align: 'right' },
     ],
     chart: {
       title: '加速器吞吐性能对比',
@@ -405,7 +405,7 @@ export const midtermProjectConfigs = {
       { key: 'graflexClbPerMteps', label: 'GraFlex 资源占用（CLB/MTEPS）', align: 'right' },
       { key: 'dfgraphClbPerMteps', label: 'DFGraph 资源占用（CLB/MTEPS）', align: 'right' },
       { key: 'resourceReductionTarget', label: '资源使用量降低中期指标（%）', align: 'right' },
-      { key: 'resourceReduction', label: '中期完成情况（%）', align: 'right' },
+      { key: 'resourceReduction', label: '中期完成值（%）', align: 'right' },
     ],
     chart: {
       title: '资源使用量降低比例对比',
@@ -429,7 +429,7 @@ export const midtermProjectConfigs = {
     allDatasetsKey: 'all',
     introSections: sections({
       assessment: [line('指标3.2：动态图更新吞吐率可达每秒', highlight('亿级边'))],
-      midterm: [line('指标3.2：动态图更新吞吐率可达', highlight('每秒千万级边'))],
+      midterm: [line('指标3.2：动态图更新吞吐率可达每秒', highlight('千万级边'))],
       completion: [line('动态图更新吞吐率可达每秒', highlight('1.95亿条边'))],
       method: ['在 CPU-FPGA 异构架构上实现所提出的异构运行时方法，执行动态图更新吞吐测试。', ...platformItems],
       source: [
@@ -470,7 +470,7 @@ export const midtermProjectConfigs = {
       { key: 'edges', label: '边数', align: 'right' },
       { key: 'updateScale', label: '图更新规模', align: 'right' },
       { key: 'updateThroughputTarget', label: '中期指标（亿边/秒）', align: 'right' },
-      { key: 'updateThroughput', label: '中期完成情况（亿边/秒）', align: 'right' },
+      { key: 'updateThroughput', label: '中期完成值（亿边/秒）', align: 'right' },
     ],
     chart: {
       title: '图更新吞吐性能对比',
@@ -497,7 +497,7 @@ export const midtermProjectConfigs = {
       midterm: [line('指标3.1：图算法执行平均性能达到', highlight('3GTEPS'))],
       completion: [line('图算法执行平均性能达到', highlight('3.34GTEPS'))],
       method: [
-        '在 CPU-FPGA 异构架构上实现所提出的异构运行时方法，固定 Graph1 运行 PageRank、BFS、CC 并统计 GTEPS。',
+        '在 CPU-FPGA 异构架构上实现所提出的异构运行时方法，在 Graph1 运行 PageRank、BFS、CC 并统计 GTEPS。',
         ...platformItems,
       ],
       source: [
@@ -507,7 +507,7 @@ export const midtermProjectConfigs = {
     }),
     controls: {
       algorithmLabel: '选择算法',
-      datasetLabel: '固定数据集',
+      datasetLabel: '数据集',
       disableDatasetSelect: true,
     },
     algorithms: graphAlgorithms([algorithmGraph1]),
@@ -518,7 +518,7 @@ export const midtermProjectConfigs = {
       { key: 'vertices', label: '顶点数', align: 'right' },
       { key: 'edges', label: '边数', align: 'right' },
       { key: 'performanceTarget', label: '中期指标（GTEPS）', align: 'right' },
-      { key: 'performance', label: '中期完成情况（GTEPS）', align: 'right' },
+      { key: 'performance', label: '中期完成值（GTEPS）', align: 'right' },
     ],
     chart: {
       title: '图算法执行性能对比',
@@ -547,17 +547,7 @@ export const midtermProjectConfigs = {
           highlight('10倍')
         ),
         line(
-          '指标4.2：针对',
-          highlight('电表数据'),
-          '在电力领域的应用场景，采用动态图计算技术，基于电表数据构建图模型，实现',
-          highlight('电力潮流分析'),
-          '和',
-          highlight('电网状态监测'),
-          '，确保高效稳定的省侧级电力潮流分析计算以及省级区域内',
-          highlight('负荷优化响应'),
-          '；同时提供面向图应用的高效易用',
-          highlight('开发工具链'),
-          '，基于工具链开发面向电力领域的典型应用'
+          '指标4.2：针对电表数据在电力领域的应用场景，采用动态图计算技术，基于电表数据构建图模型，实现电力潮流分析和电网状态监测，确保高效稳定的省侧级电力潮流分析计算以及省级区域内负荷优化响应；同时提供面向图应用的高效易用开发工具链，基于工具链开发面向电力领域的典型应用'
         ),
       ],
       midterm: [
@@ -568,17 +558,14 @@ export const midtermProjectConfigs = {
       ],
       completion: [
         line(
-          '相比典型寄存器传输级（RTL）图计算加速器（HitGraph），基于高层次综合系统设计的图计算代码密度压缩',
+          '指标4.1：相比典型寄存器传输级（RTL）图计算加速器（HitGraph），基于高层次综合系统设计的图计算代码密度压缩',
           highlight('6.45倍')
         ),
-        '完成中期指标值，通过第三方测试。',
       ],
       method: [
-        '利用高层次综合优势提供用户可编程接口，用户只需要编写少量 C++ 风格代码即可实现自定义算法。',
         '对比 HitGraph 的编程抽象与本课题中设计的编程抽象，并统计有效代码密度（行数）。',
       ],
       source: [
-        'PPT 有效代码密度（行数）对比：包含 BFS、PageRank、CC 三类算法。',
         '代码对比展示中的示例代码为本地模拟展示数据，用于体现 HitGraph 与本课题编程抽象的表达差异。',
       ],
     }),
@@ -610,7 +597,7 @@ export const midtermProjectConfigs = {
       { key: 'hitgraphCodeLines', label: 'HitGraph 效果（行）', align: 'right' },
       { key: 'dfgraphCodeLines', label: '本课题效果（行）', align: 'right' },
       { key: 'codeDensityTarget', label: '中期指标（压缩x倍）', align: 'right' },
-      { key: 'codeDensity', label: '中期完成情况（压缩x倍）', align: 'right' },
+      { key: 'codeDensity', label: '中期完成值（压缩x倍）', align: 'right' },
     ],
     chart: {
       title: '代码密度压缩效果对比',

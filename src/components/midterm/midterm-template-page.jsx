@@ -66,6 +66,7 @@ export default function MidtermTemplatePage({ config }) {
   const controls = config.controls || {};
   const updateScaleControl = config.updateScaleControl || {};
   const updateScaleOptions = React.useMemo(() => updateScaleControl.options || [], [updateScaleControl.options]);
+  const leftColumnRef = React.useRef(null);
   const firstAlgorithm = config.algorithms[0];
   const [selectedAlgorithm, setSelectedAlgorithm] = React.useState(firstAlgorithm.key);
   const [selectedDataset, setSelectedDataset] = React.useState(firstAlgorithm.datasets[0].key);
@@ -73,9 +74,36 @@ export default function MidtermTemplatePage({ config }) {
   const [isRunning, setIsRunning] = React.useState(false);
   const [logs, setLogs] = React.useState([]);
   const [resultRows, setResultRows] = React.useState([]);
+  const [leftColumnHeight, setLeftColumnHeight] = React.useState(0);
 
   const currentAlgorithm = config.algorithms.find((algorithm) => algorithm.key === selectedAlgorithm) || firstAlgorithm;
   const availableDatasets = currentAlgorithm.datasets;
+
+  React.useEffect(() => {
+    const element = leftColumnRef.current;
+    if (!element) return undefined;
+
+    const updateHeight = () => {
+      const nextHeight = Math.ceil(element.getBoundingClientRect().height);
+      setLeftColumnHeight((prevHeight) => (Math.abs(prevHeight - nextHeight) < 1 ? prevHeight : nextHeight));
+    };
+
+    updateHeight();
+    window.addEventListener('resize', updateHeight);
+
+    if (typeof ResizeObserver === 'undefined') {
+      return () => window.removeEventListener('resize', updateHeight);
+    }
+
+    const resizeObserver = new ResizeObserver(updateHeight);
+    resizeObserver.observe(element);
+
+    return () => {
+      resizeObserver.disconnect();
+      window.removeEventListener('resize', updateHeight);
+    };
+  }, []);
+
   const displayRows = React.useMemo(() => {
     return [...resultRows].sort((a, b) => {
       const algorithmOrder =
@@ -194,7 +222,7 @@ export default function MidtermTemplatePage({ config }) {
 
       <Grid container spacing={3} sx={{ mb: 3 }} alignItems="stretch">
         <Grid item xs={12} md={4}>
-          <Grid container spacing={3}>
+          <Grid ref={leftColumnRef} container spacing={3}>
             <Grid item xs={12}>
               <RunControl
                 algorithms={config.algorithms}
@@ -227,8 +255,26 @@ export default function MidtermTemplatePage({ config }) {
             </Grid>
           </Grid>
         </Grid>
-        <Grid item xs={12} md={8}>
-          <TerminalLog lines={logs} />
+        <Grid
+          item
+          xs={12}
+          md={8}
+          sx={{
+            display: 'flex',
+            minHeight: 0,
+          }}
+        >
+          <Box
+            sx={{
+              display: 'flex',
+              width: '100%',
+              minHeight: 0,
+              height: { xs: 'auto', md: leftColumnHeight || 'auto' },
+              overflow: 'hidden',
+            }}
+          >
+            <TerminalLog lines={logs} />
+          </Box>
         </Grid>
       </Grid>
 

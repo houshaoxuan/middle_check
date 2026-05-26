@@ -11,7 +11,19 @@ export default function TerminalLog({ lines, title = 'Terminal 执行结果' }) 
   }, [lines]);
 
   return (
-    <Paper elevation={3} sx={{ p: 2, borderRadius: 3, height: '100%', display: 'flex', flexDirection: 'column' }}>
+    <Paper
+      elevation={3}
+      sx={{
+        p: 2,
+        borderRadius: 3,
+        width: '100%',
+        height: '100%',
+        minHeight: 0,
+        display: 'flex',
+        flexDirection: 'column',
+        overflow: 'hidden',
+      }}
+    >
       <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: 'secondary.main' }}>
         {title}
       </Typography>
@@ -19,9 +31,8 @@ export default function TerminalLog({ lines, title = 'Terminal 执行结果' }) 
         ref={terminalRef}
         sx={{
           flex: '1 1 auto',
-          height: { xs: 360, md: 560 },
-          minHeight: 0,
-          maxHeight: { xs: 360, md: 560 },
+          minHeight: { xs: 360, md: 0 },
+          maxHeight: '100%',
           backgroundColor: '#1e1e1e',
           color: '#4caf50',
           fontFamily: 'Menlo, Monaco, Consolas, "Courier New", monospace',
