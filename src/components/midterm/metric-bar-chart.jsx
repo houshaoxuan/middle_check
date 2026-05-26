@@ -8,7 +8,7 @@ export default function MetricBarChart({ metrics, rows, title = '性能图表' }
   const assessmentTarget = metric.assessmentTarget ?? metric.defaultTarget;
   const midtermTarget = metric.midtermTarget;
   const chartData = rows.map((row) => ({
-    dataset: row.dataset || row.algorithm || row.id,
+    dataset: row.updateScale ? `${row.dataset || row.algorithm || row.id} / ${row.updateScale}` : row.dataset || row.algorithm || row.id,
     assessment: assessmentTarget,
     value: row[metric.valueKey],
     target: midtermTarget ?? row[metric.targetKey],

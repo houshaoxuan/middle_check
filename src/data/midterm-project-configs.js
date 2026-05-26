@@ -441,6 +441,17 @@ export const midtermProjectConfigs = {
       showAlgorithmSelect: false,
       datasetLabel: '选择数据集',
     },
+    updateScaleControl: {
+      enabled: true,
+      label: '图更新规模',
+      allKey: 'all',
+      options: [
+        { key: '0.1', label: '0.1%' },
+        { key: '0.5', label: '0.5%' },
+        { key: '1', label: '1%' },
+        { key: 'all', label: '全部规模' },
+      ],
+    },
     algorithms: [
       {
         key: 'graph-update',

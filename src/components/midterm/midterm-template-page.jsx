@@ -19,9 +19,19 @@ function upsertRows(rows, incomingRows) {
   return Array.from(map.values());
 }
 
-function streamRunLog({ apiBasePath, algorithmKey, datasetKey, onLog }) {
+function buildQuery(params) {
+  const query = new URLSearchParams(
+    Object.entries(params).filter(([, value]) => value !== undefined && value !== null && value !== '')
+  ).toString();
+
+  return query ? `?${query}` : '';
+}
+
+function streamRunLog({ apiBasePath, algorithmKey, datasetKey, params = {}, onLog }) {
   return new Promise((resolve, reject) => {
-    const eventSource = new EventSource(`${BASE_URL}${apiBasePath}/execute/${algorithmKey}/${datasetKey}/`);
+    const eventSource = new EventSource(
+      `${BASE_URL}${apiBasePath}/execute/${algorithmKey}/${datasetKey}/${buildQuery(params)}`
+    );
 
     eventSource.onmessage = (event) => {
       if (event.data === '[done]') {
@@ -49,9 +59,12 @@ function streamRunLog({ apiBasePath, algorithmKey, datasetKey, onLog }) {
 export default function MidtermTemplatePage({ config }) {
   const apiBasePath = (config.apiBasePath || '/midterm/part2').replace(/\/$/, '');
   const controls = config.controls || {};
+  const updateScaleControl = config.updateScaleControl || {};
+  const updateScaleOptions = updateScaleControl.options || [];
   const firstAlgorithm = config.algorithms[0];
   const [selectedAlgorithm, setSelectedAlgorithm] = React.useState(firstAlgorithm.key);
   const [selectedDataset, setSelectedDataset] = React.useState(firstAlgorithm.datasets[0].key);
+  const [selectedUpdateScale, setSelectedUpdateScale] = React.useState(updateScaleOptions[0]?.key || '');
   const [isRunning, setIsRunning] = React.useState(false);
   const [logs, setLogs] = React.useState([]);
   const [resultRows, setResultRows] = React.useState([]);
@@ -73,6 +86,11 @@ export default function MidtermTemplatePage({ config }) {
     setLogs([]);
   };
 
+  const handleUpdateScaleChange = (event) => {
+    setSelectedUpdateScale(event.target.value);
+    setLogs([]);
+  };
+
   const runProcess = async () => {
     if (isRunning) return;
 
@@ -83,44 +101,55 @@ export default function MidtermTemplatePage({ config }) {
       selectedDataset === config.allDatasetsKey
         ? currentAlgorithm.datasets.filter((dataset) => dataset.key !== config.allDatasetsKey)
         : currentAlgorithm.datasets.filter((dataset) => dataset.key === selectedDataset);
+    const updateScalesToRun =
+      updateScaleOptions.length === 0
+        ? [null]
+        : selectedUpdateScale === updateScaleControl.allKey
+          ? updateScaleOptions.filter((option) => option.key !== updateScaleControl.allKey)
+          : updateScaleOptions.filter((option) => option.key === selectedUpdateScale);
 
     try {
       setLogs([`开始执行 ${currentAlgorithm.label} 指标测试...`]);
 
       for (const dataset of datasetsToRun) {
-        const runKey = `${currentAlgorithm.key}:${dataset.key}`;
+        for (const updateScale of updateScalesToRun) {
+          const requestParams = updateScale ? { scale: updateScale.key } : {};
+          const runKey = [currentAlgorithm.key, dataset.key, updateScale?.key].filter(Boolean).join(':');
 
-        await streamRunLog({
-          apiBasePath,
-          algorithmKey: currentAlgorithm.key,
-          datasetKey: dataset.key,
-          onLog: (line) => setLogs((prev) => [...prev, line]),
-        });
+          await streamRunLog({
+            apiBasePath,
+            algorithmKey: currentAlgorithm.key,
+            datasetKey: dataset.key,
+            params: requestParams,
+            onLog: (line) => setLogs((prev) => [...prev, line]),
+          });
 
-        const response = await request({
-          url: `${apiBasePath}/result/${currentAlgorithm.key}/${dataset.key}/`,
-          method: 'GET',
-        });
-        const result = response.data;
-        const normalizedResult = config.chart.metrics.reduce(
-          (acc, metric) =>
-            metric.midtermTarget === undefined || !metric.targetKey
-              ? acc
-              : { ...acc, [metric.targetKey]: metric.midtermTarget },
-          result
-        );
-        setResultRows((prev) =>
-          upsertRows(prev, [
-            {
-              ...normalizedResult,
-              vertices: normalizedResult.vertices ?? dataset.nodes,
-              edges: normalizedResult.edges ?? dataset.edges,
-              updateScale: normalizedResult.updateScale ?? dataset.updateScale,
-              id: runKey,
-            },
-          ])
-        );
-        setLogs((prev) => [...prev, `✅ ${currentAlgorithm.label} / ${dataset.label} 执行完成`]);
+          const response = await request({
+            url: `${apiBasePath}/result/${currentAlgorithm.key}/${dataset.key}/${buildQuery(requestParams)}`,
+            method: 'GET',
+          });
+          const result = response.data;
+          const normalizedResult = config.chart.metrics.reduce(
+            (acc, metric) =>
+              metric.midtermTarget === undefined || !metric.targetKey
+                ? acc
+                : { ...acc, [metric.targetKey]: metric.midtermTarget },
+            result
+          );
+          setResultRows((prev) =>
+            upsertRows(prev, [
+              {
+                ...normalizedResult,
+                vertices: normalizedResult.vertices ?? dataset.nodes,
+                edges: normalizedResult.edges ?? dataset.edges,
+                updateScale: normalizedResult.updateScale ?? updateScale?.label ?? dataset.updateScale,
+                id: runKey,
+              },
+            ])
+          );
+          const scaleLabel = updateScale ? ` / ${updateScale.label}` : '';
+          setLogs((prev) => [...prev, `✅ ${currentAlgorithm.label} / ${dataset.label}${scaleLabel} 执行完成`]);
+        }
       }
     } catch (error) {
       setLogs((prev) => [...prev, `❌ 运行失败: ${error.message}`]);
@@ -143,15 +172,20 @@ export default function MidtermTemplatePage({ config }) {
                 isRunning={isRunning}
                 selectedAlgorithm={selectedAlgorithm}
                 selectedDataset={selectedDataset}
+                selectedUpdateScale={selectedUpdateScale}
                 onAlgorithmChange={handleAlgorithmChange}
                 onDatasetChange={handleDatasetChange}
+                onUpdateScaleChange={handleUpdateScaleChange}
                 onRun={runProcess}
                 allDatasetsKey={config.allDatasetsKey}
+                updateScaleOptions={updateScaleOptions}
                 showAlgorithmSelect={controls.showAlgorithmSelect !== false}
                 showDatasetSelect={controls.showDatasetSelect !== false}
+                showUpdateScaleSelect={Boolean(updateScaleControl.enabled)}
                 disableDatasetSelect={Boolean(controls.disableDatasetSelect)}
                 algorithmLabel={controls.algorithmLabel}
                 datasetLabel={controls.datasetLabel}
+                updateScaleLabel={updateScaleControl.label}
               />
             </Grid>
             <Grid item xs={12}>

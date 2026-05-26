@@ -34,10 +34,10 @@ async def part1_get_result(algo: str, dataset: str) -> dict[str, object]:
 
 
 @app.get("/midterm/{project}/execute/{algo}/{dataset}/")
-async def midterm_project_execute(project: str, algo: str, dataset: str) -> StreamingResponse:
-    return StreamingResponse(sse_stream(midterm_project_log(project, algo, dataset)), media_type="text/event-stream")
+async def midterm_project_execute(project: str, algo: str, dataset: str, scale: str | None = None) -> StreamingResponse:
+    return StreamingResponse(sse_stream(midterm_project_log(project, algo, dataset, scale)), media_type="text/event-stream")
 
 
 @app.get("/midterm/{project}/result/{algo}/{dataset}/")
-async def midterm_project_get_result(project: str, algo: str, dataset: str) -> dict[str, object]:
-    return {"data": midterm_project_result(project, algo, dataset)}
+async def midterm_project_get_result(project: str, algo: str, dataset: str, scale: str | None = None) -> dict[str, object]:
+    return {"data": midterm_project_result(project, algo, dataset, scale)}

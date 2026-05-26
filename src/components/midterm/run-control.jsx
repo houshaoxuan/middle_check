@@ -7,15 +7,20 @@ export default function RunControl({
   isRunning,
   selectedAlgorithm,
   selectedDataset,
+  selectedUpdateScale,
   onAlgorithmChange,
   onDatasetChange,
+  onUpdateScaleChange,
   onRun,
   allDatasetsKey,
+  updateScaleOptions = [],
   showAlgorithmSelect = true,
   showDatasetSelect = true,
+  showUpdateScaleSelect = false,
   disableDatasetSelect = false,
   algorithmLabel = '选择算法',
   datasetLabel = '选择数据集',
+  updateScaleLabel = '图更新规模',
 }) {
   const datasetOptions =
     allDatasetsKey && datasets.length > 1 && !disableDatasetSelect
@@ -68,6 +73,27 @@ export default function RunControl({
             {datasetOptions.map((dataset) => (
               <MenuItem key={dataset.key} value={dataset.key}>
                 {dataset.label}
+              </MenuItem>
+            ))}
+          </Select>
+        </Box>
+      ) : null}
+
+      {showUpdateScaleSelect ? (
+        <Box sx={{ mb: 2 }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 550, fontSize: '16px', mb: 1 }}>
+            {updateScaleLabel}
+          </Typography>
+          <Select
+            fullWidth
+            value={selectedUpdateScale}
+            onChange={onUpdateScaleChange}
+            disabled={isRunning}
+            size="small"
+          >
+            {updateScaleOptions.map((option) => (
+              <MenuItem key={option.key} value={option.key}>
+                {option.label}
               </MenuItem>
             ))}
           </Select>

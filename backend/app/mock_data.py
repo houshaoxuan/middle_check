@@ -194,6 +194,21 @@ MIDTERM_CODE_EFFECTS: dict[tuple[str, str], dict[str, Any]] = {
     ("part5", "cc"): {"hitgraphCodeLines": 129, "dfgraphCodeLines": 20},
 }
 
+UPDATE_SCALE_LABELS = {
+    "0.1": "0.1%",
+    "0.5": "0.5%",
+    "1": "1%",
+}
+
+UPDATE_THROUGHPUT_BY_SCALE = {
+    ("graph1", "0.1"): 1.91,
+    ("graph1", "0.5"): 1.86,
+    ("graph1", "1"): 1.79,
+    ("graph2", "0.1"): 2.18,
+    ("graph2", "0.5"): 2.12,
+    ("graph2", "1"): 2.04,
+}
+
 
 def part1_result(algo: str, dataset: str) -> dict[str, Any]:
     algo_key = algo.lower()
@@ -223,7 +238,7 @@ def execution_log(title: str, algo: str | None = None, dataset: str | None = Non
     ]
 
 
-def midterm_project_log(project: str, algo: str, dataset: str) -> list[str]:
+def midterm_project_log(project: str, algo: str, dataset: str, scale: str | None = None) -> list[str]:
     key = f"{project}:{algo}:{dataset}"
     result = MIDTERM_ACTIVE_RESULTS.get(key)
     if result is None:
@@ -234,7 +249,8 @@ def midterm_project_log(project: str, algo: str, dataset: str) -> list[str]:
             "> 汇总模拟日志与指标结果",
         ]
 
-    subject = " / ".join(str(item) for item in [result.get("algorithm"), result.get("dataset")] if item)
+    scale_label = UPDATE_SCALE_LABELS.get(scale or "") if project == "part4-update" else None
+    subject = " / ".join(str(item) for item in [result.get("algorithm"), result.get("dataset"), scale_label] if item)
     return [
         f"> 加载验收任务：{subject}",
         "> 初始化本地模拟运行环境",
@@ -243,11 +259,20 @@ def midterm_project_log(project: str, algo: str, dataset: str) -> list[str]:
     ]
 
 
-def midterm_project_result(project: str, algo: str, dataset: str) -> dict[str, Any]:
+def midterm_project_result(project: str, algo: str, dataset: str, scale: str | None = None) -> dict[str, Any]:
     key = f"{project}:{algo}:{dataset}"
     result = MIDTERM_ACTIVE_RESULTS.get(key, next(iter(MIDTERM_ACTIVE_RESULTS.values())))
-    return {
+    merged = {
         **result,
         **MIDTERM_DATASET_META.get((project, dataset), {}),
         **MIDTERM_CODE_EFFECTS.get((project, algo), {}),
     }
+
+    if project == "part4-update" and scale in UPDATE_SCALE_LABELS:
+        return {
+            **merged,
+            "updateScale": UPDATE_SCALE_LABELS[scale],
+            "updateThroughput": UPDATE_THROUGHPUT_BY_SCALE.get((dataset, scale), merged.get("updateThroughput")),
+        }
+
+    return merged
