@@ -13,6 +13,8 @@ import RunControl from './run-control';
 import SelectionInfo from './selection-info';
 import TerminalLog from './terminal-log';
 
+const TARGET_LOG_DURATION_SECONDS = 4.2;
+
 function upsertRows(rows, incomingRows) {
   const map = new Map(rows.map((row) => [row.id, row]));
   incomingRows.forEach((row) => map.set(row.id, row));
@@ -160,7 +162,7 @@ export default function MidtermTemplatePage({ config }) {
           ? updateScaleOptions.filter((option) => option.key !== updateScaleControl.allKey)
           : updateScaleOptions.filter((option) => option.key === selectedUpdateScale);
     const runCount = Math.max(datasetsToRun.length * updateScalesToRun.length, 1);
-    const streamDuration = Math.max(0.9, 6.5 / runCount).toFixed(2);
+    const streamDuration = (TARGET_LOG_DURATION_SECONDS / runCount).toFixed(2);
 
     try {
       setLogs([`开始执行 ${currentAlgorithm.label} 指标测试...`]);
@@ -184,13 +186,22 @@ export default function MidtermTemplatePage({ config }) {
             method: 'GET',
           });
           const result = response.data;
-          const normalizedResult = config.chart.metrics.reduce(
-            (acc, metric) =>
-              metric.midtermTarget === undefined || !metric.targetKey
-                ? acc
-                : { ...acc, [metric.targetKey]: metric.midtermTarget },
-            result
-          );
+          const normalizedResult = config.chart.metrics.reduce((acc, metric) => {
+            let nextResult = acc;
+
+            if (metric.midtermTarget !== undefined && metric.targetKey) {
+              nextResult = { ...nextResult, [metric.targetKey]: metric.midtermTarget };
+            }
+
+            if (metric.assessmentTarget !== undefined) {
+              nextResult = {
+                ...nextResult,
+                [metric.assessmentTargetKey || 'assessmentTarget']: metric.assessmentTarget,
+              };
+            }
+
+            return nextResult;
+          }, result);
           setResultRows((prev) =>
             upsertRows(prev, [
               {
@@ -251,6 +262,7 @@ export default function MidtermTemplatePage({ config }) {
                 algorithm={currentAlgorithm}
                 datasetKey={selectedDataset}
                 allDatasetsKey={config.allDatasetsKey}
+                showDatasetInfo={controls.showDatasetInfo !== false}
               />
             </Grid>
           </Grid>

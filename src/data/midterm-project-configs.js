@@ -106,13 +106,18 @@ const graphAlgorithms = (datasets) => [
 ];
 
 function sections({ assessment, midterm, completion, method, source }) {
-  return [
+  const items = [
     { title: '考核指标', items: assessment },
     { title: '中期指标', items: midterm },
     { title: '中期完成情况', items: completion },
     { title: '考核方式', items: method },
-    { title: '数据集来源', items: source },
   ];
+
+  if (source?.length > 0) {
+    items.push({ title: '数据集来源', items: source });
+  }
+
+  return items;
 }
 
 const pagerankHitGraphCode = `module HitGraphPageRank(
@@ -347,6 +352,7 @@ export const midtermProjectConfigs = {
       { key: 'edges', label: '边数', align: 'right' },
       { key: 'performanceTarget', label: '中期指标（GTEPS）', align: 'right' },
       { key: 'performance', label: '中期完成值（GTEPS）', align: 'right' },
+      { key: 'assessmentTarget', label: '考核指标（GTEPS）', align: 'right' },
     ],
     chart: {
       title: '加速器吞吐性能对比',
@@ -382,20 +388,16 @@ export const midtermProjectConfigs = {
         ),
       ],
       completion: [
-        line('相比GraFlex生成的寄存器传输级（RTL）加速器，综合后的单位性能逻辑资源使用量降低', highlight('43.06%')),
-        '完成中期指标值且达到考核指标，通过第三方测试。',
+        line('指标2.1：相比GraFlex生成的寄存器传输级（RTL）加速器，综合后的单位性能逻辑资源使用量降低', highlight('43.06%')),
       ],
       method: [
         '在 Xilinx Alveo U55C FPGA 板卡上使用所提出方法综合和部署动态图计算加速器（DFGraph），对比 GraFlex 与 DFGraph 的单位性能逻辑资源使用量（CLB/MTEPS）。',
         ...platformItems,
       ],
-      source: [
-        'GraFlex 基线 CLB/MTEPS：PageRank 7.15，BFS 3.75，CC 3.98。',
-        'DFGraph 综合后 CLB/MTEPS：PageRank 3.51，BFS 2.36，CC 2.34。',
-      ],
     }),
     controls: {
       showDatasetSelect: false,
+      showDatasetInfo: false,
       algorithmLabel: '选择算法',
     },
     algorithms: graphAlgorithms([deploymentDefaultDataset]),
@@ -406,6 +408,7 @@ export const midtermProjectConfigs = {
       { key: 'dfgraphClbPerMteps', label: 'DFGraph 资源占用（CLB/MTEPS）', align: 'right' },
       { key: 'resourceReductionTarget', label: '资源使用量降低中期指标（%）', align: 'right' },
       { key: 'resourceReduction', label: '中期完成值（%）', align: 'right' },
+      { key: 'assessmentTarget', label: '考核指标（%）', align: 'right' },
     ],
     chart: {
       title: '资源使用量降低比例对比',
@@ -430,7 +433,7 @@ export const midtermProjectConfigs = {
     introSections: sections({
       assessment: [line('指标3.2：动态图更新吞吐率可达每秒', highlight('亿级边'))],
       midterm: [line('指标3.2：动态图更新吞吐率可达每秒', highlight('千万级边'))],
-      completion: [line('动态图更新吞吐率可达每秒', highlight('1.95亿条边'))],
+      completion: [line('指标3.2：动态图更新吞吐率可达每秒', highlight('1.95亿条边'))],
       method: ['在 CPU-FPGA 异构架构上实现所提出的异构运行时方法，执行动态图更新吞吐测试。', ...platformItems],
       source: [
         'Graph1：顶点数 268.4M，边数 16.1B，图更新规模 0.1%-1%，吞吐 1.91 亿边/秒。',
@@ -471,6 +474,7 @@ export const midtermProjectConfigs = {
       { key: 'updateScale', label: '图更新规模', align: 'right' },
       { key: 'updateThroughputTarget', label: '中期指标（亿边/秒）', align: 'right' },
       { key: 'updateThroughput', label: '中期完成值（亿边/秒）', align: 'right' },
+      { key: 'assessmentTarget', label: '考核指标（亿边/秒）', align: 'right' },
     ],
     chart: {
       title: '图更新吞吐性能对比',
@@ -495,14 +499,13 @@ export const midtermProjectConfigs = {
     introSections: sections({
       assessment: [line('指标3.1：图算法执行平均性能达到', highlight('5GTEPS'))],
       midterm: [line('指标3.1：图算法执行平均性能达到', highlight('3GTEPS'))],
-      completion: [line('图算法执行平均性能达到', highlight('3.34GTEPS'))],
+      completion: [line('指标3.1：图算法执行平均性能达到', highlight('3.34GTEPS'))],
       method: [
         '在 CPU-FPGA 异构架构上实现所提出的异构运行时方法，在 Graph1 运行 PageRank、BFS、CC 并统计 GTEPS。',
         ...platformItems,
       ],
       source: [
         'Graph1：顶点数 268.4M，边数 16.1B。',
-        'Graph1 上 PageRank/BFS/CC 的性能分别为 3.61、3.15、3.27 GTEPS。',
       ],
     }),
     controls: {
@@ -519,6 +522,7 @@ export const midtermProjectConfigs = {
       { key: 'edges', label: '边数', align: 'right' },
       { key: 'performanceTarget', label: '中期指标（GTEPS）', align: 'right' },
       { key: 'performance', label: '中期完成值（GTEPS）', align: 'right' },
+      { key: 'assessmentTarget', label: '考核指标（GTEPS）', align: 'right' },
     ],
     chart: {
       title: '图算法执行性能对比',
@@ -565,12 +569,10 @@ export const midtermProjectConfigs = {
       method: [
         '对比 HitGraph 的编程抽象与本课题中设计的编程抽象，并统计有效代码密度（行数）。',
       ],
-      source: [
-        '代码对比展示中的示例代码为本地模拟展示数据，用于体现 HitGraph 与本课题编程抽象的表达差异。',
-      ],
     }),
     controls: {
       showDatasetSelect: false,
+      showDatasetInfo: false,
       algorithmLabel: '选择算法',
     },
     algorithms: graphAlgorithms([abstractionDefaultDataset]),
@@ -598,6 +600,7 @@ export const midtermProjectConfigs = {
       { key: 'dfgraphCodeLines', label: '本课题效果（行）', align: 'right' },
       { key: 'codeDensityTarget', label: '中期指标（压缩x倍）', align: 'right' },
       { key: 'codeDensity', label: '中期完成值（压缩x倍）', align: 'right' },
+      { key: 'assessmentTarget', label: '考核指标（压缩x倍）', align: 'right' },
     ],
     chart: {
       title: '代码密度压缩效果对比',

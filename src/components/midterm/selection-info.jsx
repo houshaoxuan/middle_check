@@ -39,7 +39,7 @@ function DatasetSummary({ dataset }) {
   );
 }
 
-export default function SelectionInfo({ algorithm, datasetKey, allDatasetsKey }) {
+export default function SelectionInfo({ algorithm, datasetKey, allDatasetsKey, showDatasetInfo = true }) {
   const isAllDatasets = datasetKey === allDatasetsKey;
   const selectedDatasets = isAllDatasets
     ? algorithm.datasets.filter((dataset) => dataset.key !== allDatasetsKey)
@@ -72,50 +72,52 @@ export default function SelectionInfo({ algorithm, datasetKey, allDatasetsKey })
         </Typography>
       </Paper>
 
-      <Paper elevation={3} sx={{ p: 2, borderRadius: 3 }}>
-        <Typography
-          variant="h6"
-          sx={{
-            fontWeight: 700,
-            mb: 1,
-            color: 'secondary.main',
-            borderBottom: '2px solid',
-            borderColor: 'secondary.main',
-            pb: 1,
-          }}
-        >
-          {isAllDatasets ? '数据集概览' : '数据集信息'}
-        </Typography>
-        {isAllDatasets ? (
-          <TableContainer>
-            <Table size="small">
-              <TableHead>
-                <TableRow>
-                  <TableCell>名称</TableCell>
-                  <TableCell align="right">节点规模</TableCell>
-                  <TableCell align="right">边规模</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {selectedDatasets.map((dataset) => (
-                  <TableRow key={dataset.key}>
-                    <TableCell>{dataset.label}</TableCell>
-                    <TableCell align="right">{dataset.nodes || '-'}</TableCell>
-                    <TableCell align="right">{dataset.edges || '-'}</TableCell>
+      {showDatasetInfo ? (
+        <Paper elevation={3} sx={{ p: 2, borderRadius: 3 }}>
+          <Typography
+            variant="h6"
+            sx={{
+              fontWeight: 700,
+              mb: 1,
+              color: 'secondary.main',
+              borderBottom: '2px solid',
+              borderColor: 'secondary.main',
+              pb: 1,
+            }}
+          >
+            {isAllDatasets ? '数据集概览' : '数据集信息'}
+          </Typography>
+          {isAllDatasets ? (
+            <TableContainer>
+              <Table size="small">
+                <TableHead>
+                  <TableRow>
+                    <TableCell>名称</TableCell>
+                    <TableCell align="right">节点规模</TableCell>
+                    <TableCell align="right">边规模</TableCell>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        ) : (
-          selectedDatasets.map((dataset, index) => (
-            <Box key={dataset.key}>
-              {index > 0 ? <Divider sx={{ my: 1 }} /> : null}
-              <DatasetSummary dataset={dataset} />
-            </Box>
-          ))
-        )}
-      </Paper>
+                </TableHead>
+                <TableBody>
+                  {selectedDatasets.map((dataset) => (
+                    <TableRow key={dataset.key}>
+                      <TableCell>{dataset.label}</TableCell>
+                      <TableCell align="right">{dataset.nodes || '-'}</TableCell>
+                      <TableCell align="right">{dataset.edges || '-'}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          ) : (
+            selectedDatasets.map((dataset, index) => (
+              <Box key={dataset.key}>
+                {index > 0 ? <Divider sx={{ my: 1 }} /> : null}
+                <DatasetSummary dataset={dataset} />
+              </Box>
+            ))
+          )}
+        </Paper>
+      ) : null}
     </Stack>
   );
 }
