@@ -31,7 +31,7 @@ export default function MetricBarChart({ metrics, rows, title = '性能图表' }
   const plotWidth = chartWidth - plotLeft - chartMargin.right;
   const plotHeight = chartHeight - chartMargin.top - chartMargin.bottom - xAxisHeight;
   const axisTitleTop = chartMargin.top + plotHeight / 2;
-  const axisTitleLeft = 22;
+  const axisTitleLeft = 52;
   const barSize = 28;
   const legendItems = [
     { label: '考核指标', color: '#7e57c2' },
