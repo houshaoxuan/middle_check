@@ -3,6 +3,11 @@ import React from 'react';
 import { Box, Paper, Typography } from '@mui/material';
 import { Bar, BarChart, CartesianGrid, ReferenceLine, Tooltip, XAxis, YAxis } from 'recharts';
 
+function formatMetricValue(value) {
+  const numericValue = Number(value);
+  return Number.isFinite(numericValue) ? numericValue.toFixed(2) : value;
+}
+
 export default function MetricBarChart({ metrics, rows, title = '性能图表' }) {
   const metric = metrics[0];
   const assessmentTarget = metric.assessmentTarget ?? metric.defaultTarget;
@@ -17,16 +22,16 @@ export default function MetricBarChart({ metrics, rows, title = '性能图表' }
   }));
   const referenceTarget = midtermTarget ?? chartData.find((item) => typeof item.target === 'number')?.target;
   const groupWidth = 120;
-  const chartWidth = Math.max(360, chartData.length * groupWidth + 180);
+  const chartWidth = Math.max(400, chartData.length * groupWidth + 220);
   const chartHeight = 330;
-  const chartMargin = { top: 20, right: 30, left: 14, bottom: 44 };
-  const yAxisWidth = 66;
+  const chartMargin = { top: 20, right: 30, left: 44, bottom: 44 };
+  const yAxisWidth = 78;
   const xAxisHeight = 34;
   const plotLeft = chartMargin.left + yAxisWidth;
   const plotWidth = chartWidth - plotLeft - chartMargin.right;
   const plotHeight = chartHeight - chartMargin.top - chartMargin.bottom - xAxisHeight;
   const axisTitleTop = chartMargin.top + plotHeight / 2;
-  const axisTitleLeft = chartMargin.left + 24;
+  const axisTitleLeft = 22;
   const barSize = 28;
   const legendItems = [
     { label: '考核指标', color: '#7e57c2' },
@@ -85,8 +90,8 @@ export default function MetricBarChart({ metrics, rows, title = '性能图表' }
               >
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="dataset" height={xAxisHeight} />
-                <YAxis width={yAxisWidth} />
-                <Tooltip formatter={(value) => [`${value} ${metric.unit}`, '']} />
+                <YAxis width={yAxisWidth} tickFormatter={formatMetricValue} />
+                <Tooltip formatter={(value) => [`${formatMetricValue(value)} ${metric.unit}`, '']} />
                 <Bar dataKey="assessment" name="考核指标" fill="#7e57c2" barSize={barSize} />
                 <Bar dataKey="value" name="中期完成值" fill="#1976d2" barSize={barSize} />
                 <Bar dataKey="target" name="中期指标" fill="#ff7043" barSize={barSize} />

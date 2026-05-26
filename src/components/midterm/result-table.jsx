@@ -5,8 +5,8 @@ import { Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow
 function formatValue(value) {
   if (typeof value === 'number') {
     return value.toLocaleString(undefined, {
-      minimumFractionDigits: 1,
-      maximumFractionDigits: 1,
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
     });
   }
 
