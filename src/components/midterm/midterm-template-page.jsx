@@ -19,6 +19,11 @@ function upsertRows(rows, incomingRows) {
   return Array.from(map.values());
 }
 
+function optionIndex(options, value) {
+  const index = options.findIndex((option) => option.key === value || option.label === value);
+  return index === -1 ? Number.MAX_SAFE_INTEGER : index;
+}
+
 function buildQuery(params) {
   const query = new URLSearchParams(
     Object.entries(params).filter(([, value]) => value !== undefined && value !== null && value !== '')
@@ -60,7 +65,7 @@ export default function MidtermTemplatePage({ config }) {
   const apiBasePath = (config.apiBasePath || '/midterm/part1').replace(/\/$/, '');
   const controls = config.controls || {};
   const updateScaleControl = config.updateScaleControl || {};
-  const updateScaleOptions = updateScaleControl.options || [];
+  const updateScaleOptions = React.useMemo(() => updateScaleControl.options || [], [updateScaleControl.options]);
   const firstAlgorithm = config.algorithms[0];
   const [selectedAlgorithm, setSelectedAlgorithm] = React.useState(firstAlgorithm.key);
   const [selectedDataset, setSelectedDataset] = React.useState(firstAlgorithm.datasets[0].key);
@@ -71,6 +76,25 @@ export default function MidtermTemplatePage({ config }) {
 
   const currentAlgorithm = config.algorithms.find((algorithm) => algorithm.key === selectedAlgorithm) || firstAlgorithm;
   const availableDatasets = currentAlgorithm.datasets;
+  const displayRows = React.useMemo(() => {
+    return [...resultRows].sort((a, b) => {
+      const algorithmOrder =
+        optionIndex(config.algorithms, a.algorithmKey ?? a.algorithm) -
+        optionIndex(config.algorithms, b.algorithmKey ?? b.algorithm);
+      if (algorithmOrder !== 0) return algorithmOrder;
+
+      const datasetOrder =
+        optionIndex(availableDatasets, a.datasetKey ?? a.dataset) - optionIndex(availableDatasets, b.datasetKey ?? b.dataset);
+      if (datasetOrder !== 0) return datasetOrder;
+
+      const updateScaleOrder =
+        optionIndex(updateScaleOptions, a.updateScaleKey ?? a.updateScale) -
+        optionIndex(updateScaleOptions, b.updateScaleKey ?? b.updateScale);
+      if (updateScaleOrder !== 0) return updateScaleOrder;
+
+      return String(a.id).localeCompare(String(b.id));
+    });
+  }, [availableDatasets, config.algorithms, resultRows, updateScaleOptions]);
 
   const handleAlgorithmChange = (event) => {
     const algorithmKey = event.target.value;
@@ -146,6 +170,9 @@ export default function MidtermTemplatePage({ config }) {
                 vertices: normalizedResult.vertices ?? dataset.nodes,
                 edges: normalizedResult.edges ?? dataset.edges,
                 updateScale: normalizedResult.updateScale ?? updateScale?.label ?? dataset.updateScale,
+                algorithmKey: currentAlgorithm.key,
+                datasetKey: dataset.key,
+                updateScaleKey: updateScale?.key,
                 id: runKey,
               },
             ])
@@ -212,12 +239,12 @@ export default function MidtermTemplatePage({ config }) {
           </Grid>
         ) : null}
         <Grid item xs={12}>
-          <ResultTable columns={config.tableColumns} rows={resultRows} title={config.tableTitle} />
+          <ResultTable columns={config.tableColumns} rows={displayRows} title={config.tableTitle} />
         </Grid>
         <Grid item xs={12}>
           <MetricBarChart
             metrics={config.chart.metrics}
-            rows={resultRows}
+            rows={displayRows}
             title={config.chart.title}
           />
         </Grid>

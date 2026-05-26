@@ -19,7 +19,9 @@ export default function TerminalLog({ lines, title = 'Terminal 执行结果' }) 
         ref={terminalRef}
         sx={{
           flex: '1 1 auto',
-          minHeight: 560,
+          height: { xs: 360, md: 560 },
+          minHeight: 0,
+          maxHeight: { xs: 360, md: 560 },
           backgroundColor: '#1e1e1e',
           color: '#4caf50',
           fontFamily: 'Menlo, Monaco, Consolas, "Courier New", monospace',
