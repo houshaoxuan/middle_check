@@ -1,12 +1,13 @@
 import React from 'react';
 
 import { Box, Paper, Typography } from '@mui/material';
-import { Bar, BarChart, CartesianGrid, ReferenceLine, Tooltip, XAxis, YAxis } from 'recharts';
+import { Bar, BarChart, CartesianGrid, Tooltip, XAxis, YAxis } from 'recharts';
 
 export default function MetricBarChart({ metrics, rows, title = '性能图表' }) {
   const metric = metrics[0];
   const chartData = rows.map((row) => ({
     dataset: row.dataset || row.algorithm || row.id,
+    assessment: metric.defaultTarget,
     value: row[metric.valueKey],
     target: row[metric.targetKey],
   }));
@@ -23,6 +24,7 @@ export default function MetricBarChart({ metrics, rows, title = '性能图表' }
   const axisTitleLeft = chartMargin.left + 24;
   const barSize = 28;
   const legendItems = [
+    { label: '考核指标', color: '#7e57c2' },
     { label: '实测值', color: '#1976d2' },
     { label: '中期指标', color: '#ff7043' },
   ];
@@ -87,7 +89,7 @@ export default function MetricBarChart({ metrics, rows, title = '性能图表' }
               <XAxis dataKey="dataset" height={xAxisHeight} />
               <YAxis width={yAxisWidth} />
               <Tooltip formatter={(value) => [`${value} ${metric.unit}`, '']} />
-              <ReferenceLine y={metric.defaultTarget} stroke="#ff4444" strokeDasharray="3 3" />
+              <Bar dataKey="assessment" name="考核指标" fill="#7e57c2" barSize={barSize} />
               <Bar dataKey="value" name="实测值" fill="#1976d2" barSize={barSize} />
               <Bar dataKey="target" name="中期指标" fill="#ff7043" barSize={barSize} />
             </BarChart>
@@ -95,7 +97,7 @@ export default function MetricBarChart({ metrics, rows, title = '性能图表' }
               sx={{
                 position: 'absolute',
                 left: plotLeft,
-                bottom: 8,
+                bottom: 22,
                 width: plotWidth,
                 display: 'flex',
                 justifyContent: 'center',

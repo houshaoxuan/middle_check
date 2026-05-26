@@ -45,7 +45,7 @@ MIDTERM_ACTIVE_RESULTS: dict[str, dict[str, Any]] = {
     "part2:pagerank:graph1": {
         "algorithm": "PageRank",
         "dataset": "Graph1",
-        "performanceTarget": 15,
+        "performanceTarget": 8,
         "performance": 29.50,
         "completionRate": 196.67,
         "status": "已超额完成",
@@ -53,7 +53,7 @@ MIDTERM_ACTIVE_RESULTS: dict[str, dict[str, Any]] = {
     "part2:pagerank:graph2": {
         "algorithm": "PageRank",
         "dataset": "Graph2",
-        "performanceTarget": 15,
+        "performanceTarget": 8,
         "performance": 24.79,
         "completionRate": 165.27,
         "status": "已超额完成",
@@ -61,7 +61,7 @@ MIDTERM_ACTIVE_RESULTS: dict[str, dict[str, Any]] = {
     "part2:bfs:graph1": {
         "algorithm": "BFS",
         "dataset": "Graph1",
-        "performanceTarget": 15,
+        "performanceTarget": 8,
         "performance": 30.56,
         "completionRate": 203.73,
         "status": "已超额完成",
@@ -69,7 +69,7 @@ MIDTERM_ACTIVE_RESULTS: dict[str, dict[str, Any]] = {
     "part2:bfs:graph2": {
         "algorithm": "BFS",
         "dataset": "Graph2",
-        "performanceTarget": 15,
+        "performanceTarget": 8,
         "performance": 27.78,
         "completionRate": 185.20,
         "status": "已超额完成",
@@ -77,7 +77,7 @@ MIDTERM_ACTIVE_RESULTS: dict[str, dict[str, Any]] = {
     "part2:cc:graph1": {
         "algorithm": "CC",
         "dataset": "Graph1",
-        "performanceTarget": 15,
+        "performanceTarget": 8,
         "performance": 31.33,
         "completionRate": 208.87,
         "status": "已超额完成",
@@ -85,14 +85,14 @@ MIDTERM_ACTIVE_RESULTS: dict[str, dict[str, Any]] = {
     "part2:cc:graph2": {
         "algorithm": "CC",
         "dataset": "Graph2",
-        "performanceTarget": 15,
+        "performanceTarget": 8,
         "performance": 29.28,
         "completionRate": 195.20,
         "status": "已超额完成",
     },
     "part3:pagerank:default": {
         "algorithm": "PageRank",
-        "resourceReductionTarget": 20,
+        "resourceReductionTarget": 10,
         "graflexClbPerMteps": 7.15,
         "dfgraphClbPerMteps": 3.51,
         "resourceReduction": 50.91,
@@ -101,7 +101,7 @@ MIDTERM_ACTIVE_RESULTS: dict[str, dict[str, Any]] = {
     },
     "part3:bfs:default": {
         "algorithm": "BFS",
-        "resourceReductionTarget": 20,
+        "resourceReductionTarget": 10,
         "graflexClbPerMteps": 3.75,
         "dfgraphClbPerMteps": 2.36,
         "resourceReduction": 37.07,
@@ -110,7 +110,7 @@ MIDTERM_ACTIVE_RESULTS: dict[str, dict[str, Any]] = {
     },
     "part3:cc:default": {
         "algorithm": "CC",
-        "resourceReductionTarget": 20,
+        "resourceReductionTarget": 10,
         "graflexClbPerMteps": 3.98,
         "dfgraphClbPerMteps": 2.34,
         "resourceReduction": 41.21,
@@ -120,7 +120,7 @@ MIDTERM_ACTIVE_RESULTS: dict[str, dict[str, Any]] = {
     "part4-update:graph-update:graph1": {
         "algorithm": "图更新性能展示",
         "dataset": "Graph1",
-        "updateThroughputTarget": 1.00,
+        "updateThroughputTarget": 0.10,
         "updateThroughput": 1.91,
         "completionRate": 191.00,
         "status": "已达到亿级边更新吞吐",
@@ -128,7 +128,7 @@ MIDTERM_ACTIVE_RESULTS: dict[str, dict[str, Any]] = {
     "part4-update:graph-update:graph2": {
         "algorithm": "图更新性能展示",
         "dataset": "Graph2",
-        "updateThroughputTarget": 1.00,
+        "updateThroughputTarget": 0.10,
         "updateThroughput": 2.18,
         "completionRate": 218.00,
         "status": "已达到亿级边更新吞吐",
@@ -136,7 +136,7 @@ MIDTERM_ACTIVE_RESULTS: dict[str, dict[str, Any]] = {
     "part4-algorithm:pagerank:graph1": {
         "algorithm": "PageRank",
         "dataset": "Graph1",
-        "performanceTarget": 5,
+        "performanceTarget": 3,
         "performance": 3.61,
         "completionRate": 72.20,
         "status": "已完成中期指标",
@@ -144,7 +144,7 @@ MIDTERM_ACTIVE_RESULTS: dict[str, dict[str, Any]] = {
     "part4-algorithm:bfs:graph1": {
         "algorithm": "BFS",
         "dataset": "Graph1",
-        "performanceTarget": 5,
+        "performanceTarget": 3,
         "performance": 3.15,
         "completionRate": 63.00,
         "status": "已完成中期指标",
@@ -152,28 +152,28 @@ MIDTERM_ACTIVE_RESULTS: dict[str, dict[str, Any]] = {
     "part4-algorithm:cc:graph1": {
         "algorithm": "CC",
         "dataset": "Graph1",
-        "performanceTarget": 5,
+        "performanceTarget": 3,
         "performance": 3.27,
         "completionRate": 65.40,
         "status": "已完成中期指标",
     },
     "part5:pagerank:default": {
         "algorithm": "PageRank",
-        "codeDensityTarget": 10,
+        "codeDensityTarget": 5,
         "codeDensity": 6.45,
         "completionRate": 64.50,
         "status": "已完成中期指标",
     },
     "part5:bfs:default": {
         "algorithm": "BFS",
-        "codeDensityTarget": 10,
+        "codeDensityTarget": 5,
         "codeDensity": 6.45,
         "completionRate": 64.50,
         "status": "已完成中期指标",
     },
     "part5:cc:default": {
         "algorithm": "CC",
-        "codeDensityTarget": 10,
+        "codeDensityTarget": 5,
         "codeDensity": 6.45,
         "completionRate": 64.50,
         "status": "已完成中期指标",
