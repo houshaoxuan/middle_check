@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 
-from .mock_data import execution_log, midterm_project_log, midterm_project_result, part1_result
+from .mock_data import midterm_project_log, midterm_project_result
 from .sse import sse_stream
 
 app = FastAPI(title="Middle Check Local Mock Backend", version="1.0.0")
@@ -20,17 +20,6 @@ app.add_middleware(
 @app.get("/health")
 async def health() -> dict[str, str]:
     return {"status": "ok"}
-
-
-@app.get("/part1/execute/{algo}/{dataset}/")
-async def part1_execute(algo: str, dataset: str) -> StreamingResponse:
-    lines = execution_log("课题一加速器性能测试", algo, dataset)
-    return StreamingResponse(sse_stream(lines), media_type="text/event-stream")
-
-
-@app.get("/part1/result/{algo}/{dataset}/")
-async def part1_get_result(algo: str, dataset: str) -> dict[str, object]:
-    return {"data": part1_result(algo, dataset)}
 
 
 @app.get("/midterm/{project}/execute/{algo}/{dataset}/")

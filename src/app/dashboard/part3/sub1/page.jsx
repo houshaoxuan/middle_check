@@ -1,6 +1,8 @@
+import React from 'react';
+
 import { midtermProjectConfigs } from '@/data/midterm-project-configs';
 import MidtermTemplatePage from '@/components/midterm/midterm-template-page';
 
 export default function Page() {
-  return <MidtermTemplatePage config={midtermProjectConfigs.part3} />;
+  return <MidtermTemplatePage config={midtermProjectConfigs.part3Update} />;
 }

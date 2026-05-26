@@ -57,7 +57,7 @@ function streamRunLog({ apiBasePath, algorithmKey, datasetKey, params = {}, onLo
 }
 
 export default function MidtermTemplatePage({ config }) {
-  const apiBasePath = (config.apiBasePath || '/midterm/part2').replace(/\/$/, '');
+  const apiBasePath = (config.apiBasePath || '/midterm/part1').replace(/\/$/, '');
   const controls = config.controls || {};
   const updateScaleControl = config.updateScaleControl || {};
   const updateScaleOptions = updateScaleControl.options || [];

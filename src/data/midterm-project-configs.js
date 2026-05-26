@@ -319,8 +319,8 @@ const ccDfCode = `graph_app ConnectedComponents(Graph g, Property comp) {
 }`;
 
 export const midtermProjectConfigs = {
-  part2: {
-    apiBasePath: '/midterm/part2',
+  part1: {
+    apiBasePath: '/midterm/part1',
     allDatasetsKey: 'all',
     introSections: sections({
       assessment: [line('指标1.1：异构高性能图计算高层次综合系统综合后的加速器平均性能达到', highlight('15GTEPS'))],
@@ -365,8 +365,8 @@ export const midtermProjectConfigs = {
     },
   },
 
-  part3: {
-    apiBasePath: '/midterm/part3',
+  part2: {
+    apiBasePath: '/midterm/part2',
     allDatasetsKey: 'all',
     introSections: sections({
       assessment: [
@@ -424,8 +424,8 @@ export const midtermProjectConfigs = {
     },
   },
 
-  part4Update: {
-    apiBasePath: '/midterm/part4-update',
+  part3Update: {
+    apiBasePath: '/midterm/part3-update',
     allDatasetsKey: 'all',
     introSections: sections({
       assessment: [line('指标3.2：动态图更新吞吐率可达每秒', highlight('亿级边'))],
@@ -489,8 +489,8 @@ export const midtermProjectConfigs = {
     },
   },
 
-  part4Algorithm: {
-    apiBasePath: '/midterm/part4-algorithm',
+  part3Algorithm: {
+    apiBasePath: '/midterm/part3-algorithm',
     allDatasetsKey: 'all',
     introSections: sections({
       assessment: [line('指标3.1：图算法执行平均性能达到', highlight('5GTEPS'))],
@@ -537,8 +537,8 @@ export const midtermProjectConfigs = {
     },
   },
 
-  part5: {
-    apiBasePath: '/midterm/part5',
+  part4: {
+    apiBasePath: '/midterm/part4',
     allDatasetsKey: 'all',
     introSections: sections({
       assessment: [
