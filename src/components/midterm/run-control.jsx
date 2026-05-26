@@ -24,7 +24,7 @@ export default function RunControl({
 }) {
   const datasetOptions =
     allDatasetsKey && datasets.length > 1 && !disableDatasetSelect
-      ? [{ key: allDatasetsKey, label: '全部数据集' }, ...datasets]
+      ? [...datasets, { key: allDatasetsKey, label: '全部数据集' }]
       : datasets;
 
   return (

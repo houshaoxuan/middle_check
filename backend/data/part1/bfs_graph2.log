@@ -1,0 +1,14 @@
+[INFO] task=part1 accelerator throughput evaluation
+[INFO] algorithm=BFS
+[INFO] dataset=Graph2
+[INFO] vertex num: 16.8M
+[INFO] edge num: 503.3M
+[INFO] Loading local FPGA bitstream...
+[INFO] Creating graph processing kernels...
+[INFO] Transferring graph partitions to HBM...
+[RUN] Execute BFS on Graph2
+[RUN] Collecting GTEPS samples...
+RESULT algorithm=BFS
+RESULT dataset=Graph2
+RESULT performance=27.78
+[DONE] BFS Graph2 throughput evaluation finished.

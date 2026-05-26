@@ -1,0 +1,35 @@
+[INFO] /local-ssd/CONNECT\jhuang683/graph2880.txt uses streamed huge-graph mode.
+[INFO] algorithm: BFS
+[INFO] vertex num: 268435456
+[INFO] edge num: 16106127360
+[INFO] edges occupy 122880 MB capacity!
+[INFO] vertices occupy 1024 MB capacity!
+[INFO] Combined: 123904 MB capacity!
+[INFO] Using device indices: 0,1,2,3
+Initialize the accelerator(s) and create kernels...
+Found Platform
+Platform Name: Xilinx
+INFO: Reading ./xclbin_hw_bfs/graph_fpga.hw.xilinx_u55c_gen3x16_xdma_3_202210_1.xclbin
+Trying to program device[0]: xilinx_u55c_gen3x16_xdma_base_3
+Device[0]: program successful!
+Creating a big kernel [bigKernelScatterGather:{bigKernelScatterGather_1}] for CU(1)
+Creating a little kernel [littleKernelScatterGather:{littleKernelScatterGather_1}] for CU(1)
+Creating the apply kernel [kernelApply:{kernelApply_1}]
+Creating the hbm kernel [kernelHBMWrapper:{kernelHBMWrapper_1}]
+
+[HUGEGRAPH] ====== Configuration ======
+[HUGEGRAPH] algorithm=BFS
+[HUGEGRAPH] graph=/local-ssd/CONNECT\jhuang683/graph2880.txt
+[HUGEGRAPH] num_vertex=268435456  num_edge=16106127360
+[HUGEGRAPH] chunk_size=29360128  K=10
+[HUGEGRAPH] num_devices=4
+[HUGEGRAPH] cpu_threads=32
+[HUGEGRAPH] timing=hbm_event profiling (hardware)
+
+[HUGEGRAPH] dst_tile=9 tiles=10 edges=169385949 kernel_time=49.73 ms
+
+[HUGEGRAPH] ====== SUMMARY ======
+[HUGEGRAPH] num_vertex=268435456  num_edge=16106127360
+[HUGEGRAPH] K=10  nonempty_tiles=100  tiles_processed=100
+[HUGEGRAPH] Total kernel time (multi-device) =5113.05 ms
+[HUGEGRAPH] Kernel MTEPS (multi-device)       =3150.0

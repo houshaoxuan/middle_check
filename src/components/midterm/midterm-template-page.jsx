@@ -107,6 +107,8 @@ export default function MidtermTemplatePage({ config }) {
         : selectedUpdateScale === updateScaleControl.allKey
           ? updateScaleOptions.filter((option) => option.key !== updateScaleControl.allKey)
           : updateScaleOptions.filter((option) => option.key === selectedUpdateScale);
+    const runCount = Math.max(datasetsToRun.length * updateScalesToRun.length, 1);
+    const streamDuration = Math.max(0.9, 6.5 / runCount).toFixed(2);
 
     try {
       setLogs([`开始执行 ${currentAlgorithm.label} 指标测试...`]);
@@ -114,13 +116,14 @@ export default function MidtermTemplatePage({ config }) {
       for (const dataset of datasetsToRun) {
         for (const updateScale of updateScalesToRun) {
           const requestParams = updateScale ? { scale: updateScale.key } : {};
+          const streamParams = { ...requestParams, duration: streamDuration };
           const runKey = [currentAlgorithm.key, dataset.key, updateScale?.key].filter(Boolean).join(':');
 
           await streamRunLog({
             apiBasePath,
             algorithmKey: currentAlgorithm.key,
             datasetKey: dataset.key,
-            params: requestParams,
+            params: streamParams,
             onLog: (line) => setLogs((prev) => [...prev, line]),
           });
 

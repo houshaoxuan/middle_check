@@ -1,0 +1,12 @@
+[INFO] task=part4 programming abstraction density comparison
+[INFO] algorithm=BFS
+[INFO] baseline=HitGraph
+[INFO] method=DFGraph high-level abstraction
+[RUN] Counting effective code lines for HitGraph implementation...
+[RUN] Counting effective code lines for proposed abstraction...
+[RUN] Calculating code density compression ratio...
+RESULT algorithm=BFS
+RESULT hitgraphCodeLines=129
+RESULT dfgraphCodeLines=20
+RESULT codeDensity=6.45
+[DONE] BFS code density comparison finished.

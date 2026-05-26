@@ -1,0 +1,14 @@
+[INFO] task=part1 accelerator throughput evaluation
+[INFO] algorithm=CC
+[INFO] dataset=Graph1
+[INFO] vertex num: 17.1M
+[INFO] edge num: 1046.9M
+[INFO] Loading local FPGA bitstream...
+[INFO] Creating graph processing kernels...
+[INFO] Transferring graph partitions to HBM...
+[RUN] Execute CC on Graph1
+[RUN] Collecting GTEPS samples...
+RESULT algorithm=CC
+RESULT dataset=Graph1
+RESULT performance=31.33
+[DONE] CC Graph1 throughput evaluation finished.

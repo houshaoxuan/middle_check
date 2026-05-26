@@ -1,0 +1,14 @@
+[INFO] task=part1 accelerator throughput evaluation
+[INFO] algorithm=PageRank
+[INFO] dataset=Graph2
+[INFO] vertex num: 16.8M
+[INFO] edge num: 503.3M
+[INFO] Loading local FPGA bitstream...
+[INFO] Creating graph processing kernels...
+[INFO] Transferring graph partitions to HBM...
+[RUN] Execute PageRank on Graph2
+[RUN] Collecting GTEPS samples...
+RESULT algorithm=PageRank
+RESULT dataset=Graph2
+RESULT performance=24.79
+[DONE] PageRank Graph2 throughput evaluation finished.

@@ -1,0 +1,26 @@
+command: /home/lzt/LSGraph/DFGraph -f /home/lzt/graph500/converters/converters/map2864_2.adj -bs 4425369
+batch_pct: 0.1%
+hostname: hacchead
+cwd: /home/lzt/LSGraph
+----------------------------------------
+Partation edge: Total Time Elapsed: 1.607061 seconds
+bulk load time: Total Time Elapsed: 22.304996 seconds
+[DFGRAPH] graph construction update_time_ms=23913.31 construction Throughput=75412127.45 edges/s
+[DFGRAPH] ====== SUMMARY ======
+[DFGRAPH] graph=/home/lzt/graph500/converters/converters/map2864_2.adj
+[DFGRAPH] insert update_edges=4425369
+[DFGRAPH] insert update_time_ms=32.58
+[DFGRAPH] inserting throughput=135816673.32 edges/s
+[DFGRAPH] delete update_edges=4425369
+[DFGRAPH] delete update_time_ms=12.88
+[DFGRAPH] delete throughput=343536539.39 edges/s
+[DFGRAPH] total update update_edges=8850738
+[DFGRAPH] total update update_time_ms=45.47
+[DFGRAPH] total update throughput=194670604.92 edges/s
+----------------------------------------
+elapsed_seconds: 64
+Validation...
+Construct the Graph with Updates...
+Comparison...
+Validation Pass!
+exit_code: 0

@@ -1,0 +1,13 @@
+[INFO] task=part2 resource efficiency comparison
+[INFO] algorithm=PageRank
+[INFO] baseline=GraFlex
+[INFO] method=DFGraph
+[INFO] unit=CLB/MTEPS
+[RUN] Synthesizing GraFlex RTL accelerator...
+[RUN] Synthesizing DFGraph generated accelerator...
+[RUN] Comparing unit performance logic resource usage...
+RESULT algorithm=PageRank
+RESULT graflexClbPerMteps=7.15
+RESULT dfgraphClbPerMteps=3.51
+RESULT resourceReduction=50.91
+[DONE] PageRank resource comparison finished.

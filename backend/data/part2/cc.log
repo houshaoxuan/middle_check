@@ -1,0 +1,13 @@
+[INFO] task=part2 resource efficiency comparison
+[INFO] algorithm=CC
+[INFO] baseline=GraFlex
+[INFO] method=DFGraph
+[INFO] unit=CLB/MTEPS
+[RUN] Synthesizing GraFlex RTL accelerator...
+[RUN] Synthesizing DFGraph generated accelerator...
+[RUN] Comparing unit performance logic resource usage...
+RESULT algorithm=CC
+RESULT graflexClbPerMteps=3.98
+RESULT dfgraphClbPerMteps=2.34
+RESULT resourceReduction=41.21
+[DONE] CC resource comparison finished.

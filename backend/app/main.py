@@ -23,8 +23,17 @@ async def health() -> dict[str, str]:
 
 
 @app.get("/midterm/{project}/execute/{algo}/{dataset}/")
-async def midterm_project_execute(project: str, algo: str, dataset: str, scale: str | None = None) -> StreamingResponse:
-    return StreamingResponse(sse_stream(midterm_project_log(project, algo, dataset, scale)), media_type="text/event-stream")
+async def midterm_project_execute(
+    project: str,
+    algo: str,
+    dataset: str,
+    scale: str | None = None,
+    duration: float = 6.5,
+) -> StreamingResponse:
+    return StreamingResponse(
+        sse_stream(midterm_project_log(project, algo, dataset, scale), duration=duration),
+        media_type="text/event-stream",
+    )
 
 
 @app.get("/midterm/{project}/result/{algo}/{dataset}/")
