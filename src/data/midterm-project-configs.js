@@ -450,8 +450,7 @@ export const midtermProjectConfigs = {
       completion: [line('指标3.2：动态图更新吞吐率可达每秒', highlight('1.95亿条边'))],
       method: ['在 CPU-FPGA 异构架构上实现所提出的异构运行时方法，执行动态图更新吞吐测试。', ...platformItems],
       source: [
-        'Graph1：顶点数 268.4M，边数 16.1B。',
-        'Graph2：顶点数 536.9M，边数 4.4B。',
+        '由 Graph500 基准生成器生成的合成图',
       ],
     }),
     controls: {
