@@ -20,22 +20,22 @@ const platformItems = [
 const acceleratorGraph1 = {
   key: 'graph1',
   apiKey: 'graph1',
-  label: 'Graph1',
-  displayName: 'Graph1',
+  label: 'SNAP-1',
+  displayName: 'SNAP-1',
   nodes: '17.1M',
   edges: '1046.9M',
-  source: 'PPT 图数据集规模与实验结果',
+  source: '来自 SNAP 官方数据集的真实图',
   description: '用于验证高性能动态图计算加速器架构，PageRank/BFS/CC 的性能分别为 29.50、30.56、31.33 GTEPS。',
 };
 
 const acceleratorGraph2 = {
   key: 'graph2',
   apiKey: 'graph2',
-  label: 'Graph2',
-  displayName: 'Graph2',
+  label: 'SNAP-2',
+  displayName: 'SNAP-2',
   nodes: '16.8M',
   edges: '503.3M',
-  source: 'PPT 图数据集规模与实验结果',
+  source: '来自 SNAP 官方数据集的真实图',
   description: '用于验证高性能动态图计算加速器架构，PageRank/BFS/CC 的性能分别为 24.79、27.78、29.28 GTEPS。',
 };
 
@@ -53,35 +53,35 @@ const deploymentDefaultDataset = {
 const updateGraph1 = {
   key: 'graph1',
   apiKey: 'graph1',
-  label: 'Graph1',
-  displayName: 'Graph1',
+  label: 'RMAT-28',
+  displayName: 'RMAT-28',
   nodes: '268.4M',
   edges: '16.1B',
   updateScale: '0.1%-1%',
-  source: 'PPT 动态图差分数据存储技术实验结果',
+  source: 'Graph500 基准生成器生成的 R-MAT/Kronecker 合成图',
   description: '图更新规模为 0.1%-1%，图更新吞吐率为 1.91 亿边/秒。',
 };
 
 const updateGraph2 = {
   key: 'graph2',
   apiKey: 'graph2',
-  label: 'Graph2',
-  displayName: 'Graph2',
+  label: 'RMAT-29',
+  displayName: 'RMAT-29',
   nodes: '536.9M',
   edges: '4.4B',
   updateScale: '0.1%-1%',
-  source: 'PPT 动态图差分数据存储技术实验结果',
+  source: 'Graph500 基准生成器生成的 R-MAT/Kronecker 合成图',
   description: '图更新规模为 0.1%-1%，图更新吞吐率为 2.18 亿边/秒。',
 };
 
 const algorithmGraph1 = {
   key: 'graph1',
   apiKey: 'graph1',
-  label: 'Graph1',
-  displayName: 'Graph1',
+  label: 'RMAT-28',
+  displayName: 'RMAT-28',
   nodes: '268.4M',
   edges: '16.1B',
-  source: 'PPT 图算法性能实验结果',
+  source: 'Graph500 基准生成器生成的 R-MAT/Kronecker 合成图',
   description: '固定用于图算法性能展示，PageRank/BFS/CC 的性能分别为 3.61、3.15、3.27 GTEPS。',
 };
 
@@ -134,209 +134,6 @@ function sections({ assessment, midterm, completion, method, source }) {
   return items;
 }
 
-const pagerankHitGraphCode = `module HitGraphPageRank(
-  input  wire        clk,
-  input  wire        rst_n,
-  input  wire [31:0] row_ptr_base,
-  input  wire [31:0] col_idx_base,
-  input  wire [31:0] rank_base,
-  input  wire [31:0] out_degree_base,
-  output wire        done
-);
-  localparam LOAD_ROW      = 4'd0;
-  localparam LOAD_EDGE     = 4'd1;
-  localparam READ_RANK     = 4'd2;
-  localparam READ_DEGREE   = 4'd3;
-  localparam SCATTER_MSG   = 4'd4;
-  localparam REDUCE_MSG    = 4'd5;
-  localparam APPLY_DAMPING = 4'd6;
-  localparam WRITE_RANK    = 4'd7;
-  localparam NEXT_VERTEX   = 4'd8;
-  localparam CHECK_DONE    = 4'd9;
-  reg [3:0] state;
-  reg [31:0] src;
-  reg [31:0] dst;
-  reg [31:0] edge_offset;
-  reg [31:0] msg_buffer;
-  reg [31:0] accum_buffer;
-  always @(posedge clk) begin
-    if (!rst_n) begin
-      state <= LOAD_ROW;
-      src <= 0;
-      dst <= 0;
-      edge_offset <= 0;
-    end else begin
-      case (state)
-        LOAD_ROW:      state <= LOAD_EDGE;
-        LOAD_EDGE:     state <= READ_RANK;
-        READ_RANK:     state <= READ_DEGREE;
-        READ_DEGREE:   state <= SCATTER_MSG;
-        SCATTER_MSG:   state <= REDUCE_MSG;
-        REDUCE_MSG:    state <= APPLY_DAMPING;
-        APPLY_DAMPING: state <= WRITE_RANK;
-        WRITE_RANK:    state <= NEXT_VERTEX;
-        NEXT_VERTEX:   state <= CHECK_DONE;
-        CHECK_DONE:    state <= LOAD_ROW;
-        default:       state <= LOAD_ROW;
-      endcase
-    end
-  end
-endmodule`;
-
-const pagerankDfCode = `graph_app PageRank(Graph g, Property rank) {
-  const fixed damping = 0.85;
-  frontier active = g.vertices();
-
-  initialize(rank, 1.0 / g.vertex_count());
-
-  iterate until converged {
-    message contrib = scatter(active, g.out_edges) {
-      return rank[src] / out_degree(src);
-    };
-
-    rank = apply(rank, reduce_sum(contrib)) {
-      return (1.0 - damping) + damping * value;
-    };
-
-    active = changed(rank);
-  }
-
-  emit rank;
-}`;
-
-const bfsHitGraphCode = `module HitGraphBFS(
-  input  wire        clk,
-  input  wire        rst_n,
-  input  wire [31:0] frontier_base,
-  input  wire [31:0] row_ptr_base,
-  input  wire [31:0] col_idx_base,
-  output wire        done
-);
-  localparam READ_FRONTIER = 4'd0;
-  localparam CHECK_ACTIVE  = 4'd1;
-  localparam LOAD_ROW      = 4'd2;
-  localparam SCAN_EDGE     = 4'd3;
-  localparam TEST_VISITED  = 4'd4;
-  localparam WRITE_LEVEL   = 4'd5;
-  localparam PUSH_NEXT     = 4'd6;
-  localparam UPDATE_QUEUE  = 4'd7;
-  localparam NEXT_VERTEX   = 4'd8;
-  localparam FINISH_LEVEL  = 4'd9;
-  reg [3:0] state;
-  reg [31:0] vertex_id;
-  reg [31:0] neighbor_id;
-  reg [31:0] level_value;
-  always @(posedge clk) begin
-    if (!rst_n) begin
-      state <= READ_FRONTIER;
-      vertex_id <= 0;
-      neighbor_id <= 0;
-      level_value <= 0;
-    end else begin
-      case (state)
-        READ_FRONTIER: state <= CHECK_ACTIVE;
-        CHECK_ACTIVE:  state <= LOAD_ROW;
-        LOAD_ROW:      state <= SCAN_EDGE;
-        SCAN_EDGE:     state <= TEST_VISITED;
-        TEST_VISITED:  state <= WRITE_LEVEL;
-        WRITE_LEVEL:   state <= PUSH_NEXT;
-        PUSH_NEXT:     state <= UPDATE_QUEUE;
-        UPDATE_QUEUE:  state <= NEXT_VERTEX;
-        NEXT_VERTEX:   state <= FINISH_LEVEL;
-        FINISH_LEVEL:  state <= READ_FRONTIER;
-        default:       state <= READ_FRONTIER;
-      endcase
-    end
-  end
-endmodule`;
-
-const bfsDfCode = `graph_app BFS(Graph g, Vertex root, Property level) {
-  frontier current = frontier_of(root);
-  initialize(level, INF);
-  level[root] = 0;
-
-  while current.not_empty() {
-    frontier next = scatter(current, g.out_edges) {
-      if (level[dst] == INF) {
-        return dst;
-      }
-    };
-
-    apply(next) {
-      level[vertex] = level[src] + 1;
-    };
-
-    current = unique(next);
-  }
-
-  emit level;
-}`;
-
-const ccHitGraphCode = `module HitGraphCC(
-  input  wire        clk,
-  input  wire        rst_n,
-  input  wire [31:0] row_ptr_base,
-  input  wire [31:0] col_idx_base,
-  input  wire [31:0] comp_base,
-  output wire        done
-);
-  localparam INIT_COMP       = 4'd0;
-  localparam LOAD_VERTEX     = 4'd1;
-  localparam LOAD_EDGE_RANGE = 4'd2;
-  localparam READ_NEIGHBOR   = 4'd3;
-  localparam READ_COMP       = 4'd4;
-  localparam MIN_REDUCE      = 4'd5;
-  localparam WRITE_COMP      = 4'd6;
-  localparam SET_CHANGED     = 4'd7;
-  localparam NEXT_EDGE       = 4'd8;
-  localparam NEXT_ROUND      = 4'd9;
-  reg [3:0] state;
-  reg [31:0] vertex_id;
-  reg [31:0] min_component;
-  reg        changed;
-  always @(posedge clk) begin
-    if (!rst_n) begin
-      state <= INIT_COMP;
-      changed <= 1'b0;
-      vertex_id <= 0;
-      min_component <= 0;
-    end else begin
-      case (state)
-        INIT_COMP:       state <= LOAD_VERTEX;
-        LOAD_VERTEX:     state <= LOAD_EDGE_RANGE;
-        LOAD_EDGE_RANGE: state <= READ_NEIGHBOR;
-        READ_NEIGHBOR:   state <= READ_COMP;
-        READ_COMP:       state <= MIN_REDUCE;
-        MIN_REDUCE:      state <= WRITE_COMP;
-        WRITE_COMP:      state <= SET_CHANGED;
-        SET_CHANGED:     state <= NEXT_EDGE;
-        NEXT_EDGE:       state <= NEXT_ROUND;
-        NEXT_ROUND:      state <= LOAD_VERTEX;
-        default:         state <= INIT_COMP;
-      endcase
-    end
-  end
-endmodule`;
-
-const ccDfCode = `graph_app ConnectedComponents(Graph g, Property comp) {
-  initialize(comp, vertex_id());
-  frontier active = g.vertices();
-
-  iterate while changed(comp) {
-    message candidate = scatter(active, g.edges) {
-      return min(comp[src], comp[dst]);
-    };
-
-    comp = apply(comp, reduce_min(candidate)) {
-      return min(old_value, value);
-    };
-
-    active = vertices_changed(comp);
-  }
-
-  emit comp;
-}`;
-
 export const midtermProjectConfigs = {
   part1: {
     apiBasePath: '/midterm/part1',
@@ -351,7 +148,7 @@ export const midtermProjectConfigs = {
         '在 Xilinx Alveo U55C FPGA 板卡上实现所提出的高性能动态图计算加速器，运行 PageRank、BFS、CC 并统计 GTEPS。',
         ...platformItems,
       ],
-      source: ['Graph1：顶点数 17.1M，边数 1046.9M。', 'Graph2：顶点数 16.8M，边数 503.3M。'],
+      source: ['SNAP 官方数据集的真实图'],
     }),
     controls: {
       algorithmLabel: '选择算法',
@@ -405,7 +202,7 @@ export const midtermProjectConfigs = {
         line('指标2.1：相比GraFlex生成的寄存器传输级（RTL）加速器，综合后的单位性能逻辑资源使用量降低', highlight('43.06%')),
       ],
       method: [
-        '在 Xilinx Alveo U55C FPGA 板卡上使用所提出方法综合和部署动态图计算加速器（DFGraph），对比 GraFlex 与 DFGraph 的单位性能逻辑资源使用量（CLB/MTEPS）。',
+        '在 Xilinx Alveo U55C FPGA 板卡上使用所提出方法综合和部署动态图计算加速器（DFGraph），对比 GraFlex 与 DFGraph 的逻辑资源使用量（CLB）。',
         ...platformItems,
       ],
     }),
@@ -418,8 +215,8 @@ export const midtermProjectConfigs = {
     tableTitle: '资源占用对比结果汇总',
     tableColumns: [
       { key: 'algorithm', label: '算法' },
-      { key: 'graflexClbPerMteps', label: 'GraFlex 资源占用（CLB/MTEPS）', align: 'right' },
-      { key: 'dfgraphClbPerMteps', label: 'DFGraph 资源占用（CLB/MTEPS）', align: 'right' },
+      { key: 'graflexClbPerMteps', label: 'GraFlex 资源占用（CLB）', align: 'right' },
+      { key: 'dfgraphClbPerMteps', label: 'DFGraph 资源占用（CLB）', align: 'right' },
       { key: 'resourceReductionTarget', label: '资源使用量降低中期指标（%）', align: 'right' },
       { key: 'resourceReduction', label: '中期完成值（%）', align: 'right' },
       { key: 'assessmentTarget', label: '考核指标（%）', align: 'right' },
@@ -449,9 +246,7 @@ export const midtermProjectConfigs = {
       midterm: [line('指标3.2：动态图更新吞吐率可达每秒', highlight('千万级边'))],
       completion: [line('指标3.2：动态图更新吞吐率可达每秒', highlight('1.95亿条边'))],
       method: ['在 CPU-FPGA 异构架构上实现所提出的异构运行时方法，执行动态图更新吞吐测试。', ...platformItems],
-      source: [
-        '由 Graph500 基准生成器生成的合成图',
-      ],
+      source: ['Graph500 生成的合成图'],
     }),
     controls: {
       showAlgorithmSelect: false,
@@ -475,7 +270,7 @@ export const midtermProjectConfigs = {
         category: '异构运行时',
         description: '展示面向动态图计算的异构运行时在边更新场景下的吞吐性能。',
         midtermTarget: '动态图更新吞吐率达到每秒千万级边，中期完成达到每秒 1.95 亿条边。',
-        evaluation: '选择 Graph1 或 Graph2 后运行，统计动态图边更新吞吐率。',
+        evaluation: '选择 RMAT-28 或 RMAT-29 后运行，统计动态图边更新吞吐率。',
         datasets: [updateGraph1, updateGraph2],
       },
     ],
@@ -514,12 +309,10 @@ export const midtermProjectConfigs = {
       midterm: [line('指标3.1：图算法执行平均性能达到', highlight('3GTEPS'))],
       completion: [line('指标3.1：图算法执行平均性能达到', highlight('3.34GTEPS'))],
       method: [
-        '在 CPU-FPGA 异构架构上实现所提出的异构运行时方法，在 Graph1 运行 PageRank、BFS、CC 并统计 GTEPS。',
+        '在 CPU-FPGA 异构架构上实现所提出的异构运行时方法，在 RMAT-28 运行 PageRank、BFS、CC 并统计 GTEPS。',
         ...platformItems,
       ],
-      source: [
-        'Graph1：顶点数 268.4M，边数 16.1B。',
-      ],
+      source: ['Graph500 生成的合成图'],
     }),
     controls: {
       algorithmLabel: '选择算法',
@@ -556,7 +349,7 @@ export const midtermProjectConfigs = {
 
   part4: {
     apiBasePath: '/midterm/part4',
-    logDurationSeconds: 1.5,
+    logDurationSeconds: 1,
     allDatasetsKey: 'all',
     introSections: sections({
       assessment: [
@@ -592,20 +385,7 @@ export const midtermProjectConfigs = {
     algorithms: graphAlgorithms([abstractionDefaultDataset]),
     codeComparison: {
       title: '代码对比展示',
-      byAlgorithm: {
-        pagerank: [
-          { title: 'HitGraph的编程抽象', code: pagerankHitGraphCode },
-          { title: '本课题中设计的编程抽象', code: pagerankDfCode },
-        ],
-        bfs: [
-          { title: 'HitGraph的编程抽象', code: bfsHitGraphCode },
-          { title: '本课题中设计的编程抽象', code: bfsDfCode },
-        ],
-        cc: [
-          { title: 'HitGraph的编程抽象', code: ccHitGraphCode },
-          { title: '本课题中设计的编程抽象', code: ccDfCode },
-        ],
-      },
+      source: 'backend',
     },
     tableTitle: '编程抽象代码密度结果汇总',
     tableColumns: [
@@ -633,3 +413,4 @@ export const midtermProjectConfigs = {
     },
   },
 };
+

@@ -1,0 +1,20 @@
+generated_at: 2026-05-27T13:30:48+08:00
+====== HitGraph vs DFGraph 代码行数对比 ======
+HitGraph: /home/lzt/LSGraph/cc_PP.v
+DFGraph : /home/lzt/LSGraph/cc_l2.h
+
+指标                     HitGraph      DFGraph DFGraph 节省
+---------------------- ------------ ------------ ------------
+总行数                       319           38          281
+空行数                        49            8           41
+仅注释行                     28            3           25
+有效代码行                 242           27          215
+
+====== 对比结论（DFGraph 代码更少）======
+实现同等 CC 逻辑：
+  - HitGraph (cc_PP.v) 需 242 行有效代码（硬件 RTL）
+  - DFGraph  (cc_l2.h)    仅需 27 行有效代码（软件算子接口）
+  - DFGraph 比 HitGraph 少 215 行，代码量减少 88.8%
+  - 约为 HitGraph 的 11.2%（HitGraph 为 8.96x）
+
+总行数：DFGraph 比 HitGraph 少 281 行（减少 88.1%）

@@ -1,8 +1,10 @@
 import React from 'react';
 import { Box, Grid, Paper, Typography } from '@mui/material';
 
+import request from '@/lib/request/request';
+
 function CodePanel({ panel }) {
-  const lines = panel.code.split('\n').map((content, index) => ({
+  const lines = (panel.code || '').split('\n').map((content, index) => ({
     content,
     number: index + 1,
   }));
@@ -10,7 +12,7 @@ function CodePanel({ panel }) {
   return (
     <Grid item xs={12} md={6}>
       <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-        <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 1 }}>
+        <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 1, lineHeight: 1.4 }}>
           {panel.title}
         </Typography>
         <Box
@@ -57,18 +59,54 @@ function CodePanel({ panel }) {
   );
 }
 
-export default function CodeComparison({ config, selectedAlgorithm }) {
-  const panels = config?.byAlgorithm?.[selectedAlgorithm] || config?.panels || [];
+export default function CodeComparison({ apiBasePath, config, selectedAlgorithm }) {
+  const [remoteConfig, setRemoteConfig] = React.useState(null);
+
+  React.useEffect(() => {
+    let isMounted = true;
+
+    if (config?.source !== 'backend' || !apiBasePath || !selectedAlgorithm) {
+      setRemoteConfig(null);
+      return () => {
+        isMounted = false;
+      };
+    }
+
+    setRemoteConfig(null);
+
+    request({
+      url: `${apiBasePath}/code/${selectedAlgorithm}/`,
+      method: 'GET',
+    })
+      .then((response) => {
+        if (isMounted) {
+          setRemoteConfig(response.data || null);
+        }
+      })
+      .catch(() => {
+        if (isMounted) {
+          setRemoteConfig({ panels: [] });
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [apiBasePath, config?.source, selectedAlgorithm]);
+
+  const panels =
+    remoteConfig?.panels || config?.byAlgorithm?.[selectedAlgorithm] || config?.panels || [];
+
   if (!panels.length) return null;
 
   return (
     <Paper elevation={3} sx={{ p: 2, borderRadius: 3 }}>
       <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: 'secondary.main' }}>
-        {config.title || '代码对比展示'}
+        {remoteConfig?.title || config.title || '代码对比展示'}
       </Typography>
       <Grid container spacing={2} alignItems="stretch">
         {panels.map((panel) => (
-          <CodePanel key={panel.title} panel={panel} />
+          <CodePanel key={panel.filename || panel.title} panel={panel} />
         ))}
       </Grid>
     </Paper>

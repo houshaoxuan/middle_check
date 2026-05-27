@@ -1,13 +1,94 @@
-[INFO] task=part2 resource efficiency comparison
+﻿[INFO] task=part2 resource utilization comparison
 [INFO] algorithm=CC
 [INFO] baseline=GraFlex
 [INFO] method=DFGraph
-[INFO] unit=CLB/MTEPS
-[RUN] Synthesizing GraFlex RTL accelerator...
-[RUN] Synthesizing DFGraph generated accelerator...
-[RUN] Comparing unit performance logic resource usage...
-RESULT algorithm=CC
-RESULT graflexClbPerMteps=3.98
-RESULT dfgraphClbPerMteps=2.34
-RESULT resourceReduction=41.21
-[DONE] CC resource comparison finished.
+[INFO] metric=CLB used
+[SECTION] GraFlex / CC utilization report
+Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2023 Advanced Micro Devices, Inc. All Rights Reserved.
+---------------------------------------------------------------------------------------------------------------------------------------------
+| Tool Version : Vivado v.2023.2 (lin64) Build 4029153 Fri Oct 13 20:13:54 MDT 2023
+| Host         : fpga06 running 64-bit Ubuntu 22.04.5 LTS
+| Command      : report_utilization -file full_util_routed.rpt -pb full_util_routed.pb
+| Design       : level0_wrapper
+| Device       : xcu55c-fsvh2892-2L-e
+| Speed File   : -2L
+| Design State : Routed
+---------------------------------------------------------------------------------------------------------------------------------------------
+
+Utilization Design Information
+
+CLB Logic Distribution
+-------------------------
+
++--------------------------------------------+--------+--------+------------+-----------+-------+
+|                  Site Type                 |  Used  |  Fixed | Prohibited | Available | Util% |
++--------------------------------------------+--------+--------+------------+-----------+-------+
+| CLB                                        | 93197 |      0 |          0 |    162960 | 57.19 |
+|   CLBL                                     |  53794 |      0 |            |           |       |
+|   CLBM                                     |  39403 |      0 |            |           |       |
+| LUT as Logic                               | 281465 | 79096 |          0 |   1303680 | 21.59 |
+|   using O5 output only                     |   5889 |        |            |           |       |
+|   using O6 output only                     | 220233 |        |            |           |       |
+|   using O5 and O6                          |  55343 |        |            |           |       |
+| LUT as Memory                              |  68630 |   4677 |          0 |    600960 | 11.42 |
+|   LUT as Distributed RAM                   |  36660 |   3996 |            |           |       |
+|     using O5 output only                   |      0 |        |            |           |       |
+|     using O6 output only                   |    771 |        |            |           |       |
+|     using O5 and O6                        |  35889 |        |            |           |       |
+|   LUT as Shift Register                    |  31970 |   681 |            |           |       |
+|     using O5 output only                   |      0 |        |            |           |       |
+|     using O6 output only                   |  14836 |        |            |           |       |
+|     using O5 and O6                        |  17134 |        |            |           |       |
+| CLB Registers                              | 564233 |      0 |          0 |   2607360 | 21.64 |
+|   Register driven from within the CLB      | 273451 |        |            |           |       |
+|   Register driven from outside the CLB     | 290782 |        |            |           |       |
+|     LUT in front of the register is unused | 213904 |        |            |           |       |
+|     LUT in front of the register is used   | 76878 |        |            |           |       |
+| Unique Control Sets                        |  16687 |        |          0 |    325920 |  5.12 |
++--------------------------------------------+--------+--------+------------+-----------+-------+
+* * Note: Available Control Sets calculated as Slices * 2, Review the Control Sets Report for more information regarding control sets.
+[SECTION] DFGraph / CC utilization report
+Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2023 Advanced Micro Devices, Inc. All Rights Reserved.
+---------------------------------------------------------------------------------------------------------------------------------------------
+| Tool Version : Vivado v.2023.2 (lin64) Build 4029153 Fri Oct 13 20:13:54 MDT 2023
+| Host         : fpga06 running 64-bit Ubuntu 22.04.5 LTS
+| Command      : report_utilization -file full_util_routed.rpt -pb full_util_routed.pb
+| Design       : level0_wrapper
+| Device       : xcu55c-fsvh2892-2L-e
+| Speed File   : -2L
+| Design State : Routed
+---------------------------------------------------------------------------------------------------------------------------------------------
+
+Utilization Design Information
+
+CLB Logic Distribution
+-------------------------
+
++--------------------------------------------+--------+--------+------------+-----------+-------+
+|                  Site Type                 |  Used  |  Fixed | Prohibited | Available | Util% |
++--------------------------------------------+--------+--------+------------+-----------+-------+
+| CLB                                        | 73397 |      0 |          0 |    162960 | 45.04 |
+|   CLBL                                     |  37866 |      0 |            |           |       |
+|   CLBM                                     |  35,531 |      0 |            |           |       |
+| LUT as Logic                               | 246656 | 71769 |          0 |   1303680 | 18.92 |
+|   using O5 output only                     |   3611 |        |            |           |       |
+|   using O6 output only                     | 185274 |        |            |           |       |
+|   using O5 and O6                          |  57771 |        |            |           |       |
+| LUT as Memory                              |  52163 |   4269 |          0 |    600960 | 8.68 |
+|   LUT as Distributed RAM                   |  30182 |   3169 |            |           |       |
+|     using O5 output only                   |      0 |        |            |           |       |
+|     using O6 output only                   |    544 |        |            |           |       |
+|     using O5 and O6                        |  29638 |        |            |           |       |
+|   LUT as Shift Register                    |  21981 |   1413 |            |           |       |
+|     using O5 output only                   |      0 |        |            |           |       |
+|     using O6 output only                   |  12918 |        |            |           |       |
+|     using O5 and O6                        |  9063 |        |            |           |       |
+| CLB Registers                              | 490184 |      0 |          0 |   2607360 | 18.80 |
+|   Register driven from within the CLB      | 228429 |        |            |           |       |
+|   Register driven from outside the CLB     | 261755 |        |            |           |       |
+|     LUT in front of the register is unused | 186169 |        |            |           |       |
+|     LUT in front of the register is used   | 75586 |        |            |           |       |
+| Unique Control Sets                        |  13265 |        |          0 |    325920 |  4.07 |
++--------------------------------------------+--------+--------+------------+-----------+-------+
+* * Note: Available Control Sets calculated as Slices * 2, Review the Control Sets Report for more information regarding control sets.
+[DONE] CC resource utilization comparison finished.

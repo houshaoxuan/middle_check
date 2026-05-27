@@ -165,6 +165,18 @@ UPDATE_SCALE_LABELS = {
     "1": "1%",
 }
 
+ALGORITHM_LABELS = {
+    "pagerank": "PageRank",
+    "bfs": "BFS",
+    "cc": "CC",
+}
+
+PART4_FILE_PREFIXES = {
+    "pagerank": ("pr", "pagerank"),
+    "bfs": ("bfs",),
+    "cc": ("cc",),
+}
+
 PROJECT_LOG_DIRS = {
     "part3-update": "part3",
     "part3-algorithm": "part3",
@@ -173,6 +185,16 @@ PROJECT_LOG_DIRS = {
 
 def project_log_dir(project: str) -> Path:
     return DATA_ROOT / PROJECT_LOG_DIRS.get(project, project)
+
+
+def part4_compare_log_path(algo: str) -> Path | None:
+    log_dir = project_log_dir("part4")
+    candidates: list[Path] = []
+
+    for prefix in PART4_FILE_PREFIXES.get(algo, (algo,)):
+        candidates.extend(sorted(log_dir.glob(f"{prefix}_compare*.log")))
+
+    return candidates[0] if candidates else None
 
 
 def midterm_log_path(project: str, algo: str, dataset: str, scale: str | None = None) -> Path | None:
@@ -189,6 +211,9 @@ def midterm_log_path(project: str, algo: str, dataset: str, scale: str | None = 
     if project == "part3-algorithm":
         return log_dir / f"update_{algo}.txt"
 
+    if project == "part4":
+        return part4_compare_log_path(algo) or log_dir / f"{algo}.log"
+
     if dataset == "default":
         return log_dir / f"{algo}.log"
 
@@ -198,7 +223,7 @@ def midterm_log_path(project: str, algo: str, dataset: str, scale: str | None = 
 def read_log_lines(project: str, algo: str, dataset: str, scale: str | None = None) -> list[str]:
     log_path = midterm_log_path(project, algo, dataset, scale)
     if log_path and log_path.exists():
-        return log_path.read_text(encoding="utf-8", errors="replace").splitlines()
+        return log_path.read_text(encoding="utf-8-sig", errors="replace").splitlines()
 
     subject = " / ".join(item for item in [project, algo, dataset, scale] if item)
     return [
@@ -249,11 +274,97 @@ def parse_update_log(lines: list[str]) -> dict[str, Any]:
 
 def parse_algorithm_log(lines: list[str]) -> dict[str, Any]:
     text = "\n".join(lines)
-    mteps_match = re.search(r"Kernel MTEPS \(multi-device\)\s*=([0-9.]+)", text)
+    mteps_match = re.search(r"Kernel MTEPS \(multi-device\)\s*=\s*([0-9.]+)", text)
     if not mteps_match:
         return {}
 
     return {"performance": round(float(mteps_match.group(1)) / 1000, 2)}
+
+
+def parse_clb_used(text: str) -> int | None:
+    match = re.search(r"^\|\s*CLB\s*\|\s*([0-9,\s]+?)\s*\|", text, re.MULTILINE)
+    if not match:
+        return None
+
+    return int(match.group(1).replace(",", "").strip())
+
+
+def extract_section(text: str, section_name: str) -> str:
+    match = re.search(rf"^\[SECTION\]\s+{re.escape(section_name)}[^\n]*\n(.*?)(?=^\[SECTION\]|\Z)", text, re.S | re.M)
+    return match.group(1) if match else ""
+
+
+def parse_part2_resource_log(lines: list[str], algo: str) -> dict[str, Any]:
+    text = "\n".join(lines)
+    graflex_section = extract_section(text, "GraFlex")
+    dfgraph_section = extract_section(text, "DFGraph")
+
+    graflex_clb = parse_clb_used(graflex_section)
+    dfgraph_clb = parse_clb_used(dfgraph_section)
+
+    if graflex_clb is None or dfgraph_clb is None:
+        clb_values = re.findall(r"^\|\s*CLB\s*\|\s*([0-9,\s]+?)\s*\|", text, re.MULTILINE)
+        if len(clb_values) >= 2:
+            graflex_clb = int(clb_values[0].replace(",", "").strip())
+            dfgraph_clb = int(clb_values[1].replace(",", "").strip())
+
+    if graflex_clb is None or dfgraph_clb is None:
+        return {}
+
+    resource_reduction = round((graflex_clb - dfgraph_clb) / graflex_clb * 100, 2)
+    assessment_target = 20
+    midterm_target = 10
+
+    return {
+        "algorithm": ALGORITHM_LABELS.get(algo, algo),
+        "graflexClbPerMteps": graflex_clb,
+        "dfgraphClbPerMteps": dfgraph_clb,
+        "resourceReduction": resource_reduction,
+        "completionRate": round(resource_reduction / assessment_target * 100, 2),
+        "status": "已达到考核指标" if resource_reduction >= assessment_target else "已完成中期指标"
+        if resource_reduction >= midterm_target
+        else "未完成中期指标",
+    }
+
+
+def parse_part4_code_density_log(lines: list[str], algo: str) -> dict[str, Any]:
+    text = "\n".join(lines)
+    code_line_match = re.search(r"有效代码行\s+([0-9]+)\s+([0-9]+)\s+([0-9]+)", text)
+    density_match = re.search(r"HitGraph\s*为\s*([0-9.]+)x", text)
+
+    if not code_line_match and not density_match:
+        return {}
+
+    result: dict[str, Any] = {"algorithm": ALGORITHM_LABELS.get(algo, algo)}
+
+    if code_line_match:
+        hitgraph_lines = int(code_line_match.group(1))
+        dfgraph_lines = int(code_line_match.group(2))
+        result.update(
+            {
+                "hitgraphCodeLines": hitgraph_lines,
+                "dfgraphCodeLines": dfgraph_lines,
+                "codeDensity": round(hitgraph_lines / dfgraph_lines, 2) if dfgraph_lines else 0,
+            }
+        )
+
+    if density_match:
+        result["codeDensity"] = round(float(density_match.group(1)), 2)
+
+    code_density = result.get("codeDensity")
+    if isinstance(code_density, (int, float)):
+        assessment_target = 10
+        midterm_target = 5
+        result["completionRate"] = round(code_density / assessment_target * 100, 2)
+        result["status"] = (
+            "已达到考核指标"
+            if code_density >= assessment_target
+            else "已完成中期指标"
+            if code_density >= midterm_target
+            else "未完成中期指标"
+        )
+
+    return result
 
 
 def parsed_log_result(project: str, algo: str, dataset: str, scale: str | None = None) -> dict[str, Any]:
@@ -263,8 +374,14 @@ def parsed_log_result(project: str, algo: str, dataset: str, scale: str | None =
     if project == "part3-update":
         result.update(parse_update_log(lines))
 
-    if project == "part3-algorithm":
+    if project in {"part1", "part3-algorithm"}:
         result.update(parse_algorithm_log(lines))
+
+    if project == "part2":
+        result.update(parse_part2_resource_log(lines, algo))
+
+    if project == "part4":
+        result.update(parse_part4_code_density_log(lines, algo))
 
     return result
 
@@ -284,3 +401,49 @@ def midterm_project_result(project: str, algo: str, dataset: str, scale: str | N
     }
 
     return merged
+
+
+def part4_code_paths(algo: str) -> list[Path]:
+    log_dir = project_log_dir("part4")
+    paths: list[Path] = []
+
+    for prefix in PART4_FILE_PREFIXES.get(algo, (algo,)):
+        paths.extend(sorted(log_dir.glob(f"{prefix}*.v")))
+        paths.extend(sorted(log_dir.glob(f"{prefix}*.h")))
+
+    deduped = list(dict.fromkeys(paths))
+    return sorted(deduped, key=lambda path: (0 if path.suffix == ".v" else 1, path.name.lower()))
+
+
+def code_panel_title(path: Path) -> str:
+    if path.suffix == ".v":
+        return "HitGraph的编程抽象"
+
+    return "本课题中设计的编程抽象"
+
+
+def code_panel_language(path: Path) -> str:
+    if path.suffix == ".v":
+        return "verilog"
+
+    if path.suffix in {".h", ".hpp", ".cc", ".cpp"}:
+        return "cpp"
+
+    return "text"
+
+
+def midterm_code_comparison(project: str, algo: str) -> dict[str, Any]:
+    if project != "part4":
+        return {"title": "代码对比展示", "panels": []}
+
+    panels = [
+        {
+            "title": code_panel_title(path),
+            "language": code_panel_language(path),
+            "filename": path.name,
+            "code": path.read_text(encoding="utf-8-sig", errors="replace"),
+        }
+        for path in part4_code_paths(algo)
+    ]
+
+    return {"title": "代码对比展示", "panels": panels}

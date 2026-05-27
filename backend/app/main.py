@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 
-from .mock_data import midterm_project_log, midterm_project_result
+from .mock_data import midterm_code_comparison, midterm_project_log, midterm_project_result
 from .sse import DEFAULT_STREAM_DURATION, sse_stream
 
 app = FastAPI(title="Middle Check Local Mock Backend", version="1.0.0")
@@ -39,3 +39,8 @@ async def midterm_project_execute(
 @app.get("/midterm/{project}/result/{algo}/{dataset}/")
 async def midterm_project_get_result(project: str, algo: str, dataset: str, scale: str | None = None) -> dict[str, object]:
     return {"data": midterm_project_result(project, algo, dataset, scale)}
+
+
+@app.get("/midterm/{project}/code/{algo}/")
+async def midterm_project_get_code(project: str, algo: str) -> dict[str, object]:
+    return {"data": midterm_code_comparison(project, algo)}

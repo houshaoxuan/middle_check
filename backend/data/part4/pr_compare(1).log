@@ -1,0 +1,20 @@
+generated_at: 2026-05-27T13:29:41+08:00
+====== HitGraph vs DFGraph 代码行数对比 ======
+HitGraph: /home/lzt/LSGraph/pr_PP.v
+DFGraph : /home/lzt/LSGraph/pr_l2.h
+
+指标                     HitGraph      DFGraph DFGraph 节省
+---------------------- ------------ ------------ ------------
+总行数                       261           48          213
+空行数                        27            8           19
+仅注释行                     21            3           18
+有效代码行                 196           37          159
+
+====== 对比结论（DFGraph 代码更少）======
+实现同等 PageRank 逻辑：
+  - HitGraph (pr_PP.v) 需 196 行有效代码（硬件 RTL）
+  - DFGraph  (pr_l2.h)    仅需 37 行有效代码（软件算子接口）
+  - DFGraph 比 HitGraph 少 159 行，代码量减少 81.1%
+  - 约为 HitGraph 的 18.9%（HitGraph 为 5.30x）
+
+总行数：DFGraph 比 HitGraph 少 213 行（减少 81.6%）

@@ -1,0 +1,20 @@
+generated_at: 2026-05-27T13:30:14+08:00
+====== HitGraph vs DFGraph 代码行数对比 ======
+HitGraph: /home/lzt/LSGraph/bfs_PP.v
+DFGraph : /home/lzt/LSGraph/bfs_l2.h
+
+指标                     HitGraph      DFGraph DFGraph 节省
+---------------------- ------------ ------------ ------------
+总行数                       359           61          298
+空行数                        50           10           40
+仅注释行                     64            3           61
+有效代码行                 245           48          197
+
+====== 对比结论（DFGraph 代码更少）======
+实现同等 BFS 逻辑：
+  - HitGraph (bfs_PP.v) 需 245 行有效代码（硬件 RTL）
+  - DFGraph  (bfs_l2.h)    仅需 48 行有效代码（软件算子接口）
+  - DFGraph 比 HitGraph 少 197 行，代码量减少 80.4%
+  - 约为 HitGraph 的 19.6%（HitGraph 为 5.10x）
+
+总行数：DFGraph 比 HitGraph 少 298 行（减少 83.0%）

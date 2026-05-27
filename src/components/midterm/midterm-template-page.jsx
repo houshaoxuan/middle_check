@@ -14,7 +14,7 @@ import RunControl from './run-control';
 import SelectionInfo from './selection-info';
 import TerminalLog from './terminal-log';
 
-const TARGET_LOG_DURATION_SECONDS = 4.2;
+const TARGET_LOG_DURATION_SECONDS = 3;
 
 function upsertRows(rows, incomingRows) {
   const map = new Map(rows.map((row) => [row.id, row]));
@@ -298,7 +298,7 @@ export default function MidtermTemplatePage({ config }) {
       <Grid container spacing={3}>
         {config.codeComparison ? (
           <Grid item xs={12}>
-            <CodeComparison config={config.codeComparison} selectedAlgorithm={selectedAlgorithm} />
+            <CodeComparison apiBasePath={apiBasePath} config={config.codeComparison} selectedAlgorithm={selectedAlgorithm} />
           </Grid>
         ) : null}
         <Grid item xs={12}>

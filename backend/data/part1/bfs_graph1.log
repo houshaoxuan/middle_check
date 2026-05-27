@@ -1,14 +1,50 @@
-[INFO] task=part1 accelerator throughput evaluation
-[INFO] algorithm=BFS
-[INFO] dataset=Graph1
+﻿[INFO] /local-ssd/SNAP/snap-1.el uses streamed huge-graph mode.
+[INFO] algorithm: BFS
+[INFO] dataset: SNAP-1
 [INFO] vertex num: 17.1M
 [INFO] edge num: 1046.9M
-[INFO] Loading local FPGA bitstream...
-[INFO] Creating graph processing kernels...
-[INFO] Transferring graph partitions to HBM...
-[RUN] Execute BFS on Graph1
-[RUN] Collecting GTEPS samples...
+[INFO] edges occupy 7980 MB capacity!
+[INFO] vertices occupy 65 MB capacity!
+[INFO] Combined: 8045 MB capacity!
+[INFO] Using device indices: 0,1,2,3
+Initialize the accelerator(s) and create kernels...
+Found Platform
+Platform Name: Xilinx
+INFO: Reading ./xclbin_hw_bfs/graph_fpga.hw.xilinx_u55c_gen3x16_xdma_3_202210_1.xclbin
+Trying to program device[0]: xilinx_u55c_gen3x16_xdma_base_3
+Device[0]: program successful!
+Creating a big kernel [bigKernelScatterGather:{bigKernelScatterGather_1}] for CU(1)
+Creating a little kernel [littleKernelScatterGather:{littleKernelScatterGather_1}] for CU(1)
+Creating the apply kernel [kernelApply:{kernelApply_1}]
+Creating the hbm kernel [kernelHBMWrapper:{kernelHBMWrapper_1}]
+Trying to program device[1]: xilinx_u55c_gen3x16_xdma_base_3
+Device[1]: program successful!
+Creating a big kernel [bigKernelScatterGather:{bigKernelScatterGather_2}] for CU(2)
+Creating a little kernel [littleKernelScatterGather:{littleKernelScatterGather_2}] for CU(2)
+Creating the apply kernel [kernelApply:{kernelApply_2}]
+Creating the hbm kernel [kernelHBMWrapper:{kernelHBMWrapper_2}]
+
+[HUGEGRAPH] ====== Configuration ======
+[HUGEGRAPH] algorithm=BFS
+[HUGEGRAPH] graph=/local-ssd/SNAP/snap-1.el
+[HUGEGRAPH] dataset=SNAP-1
+[HUGEGRAPH] num_vertex=17.1M  num_edge=1046.9M
+[HUGEGRAPH] chunk_size=8388608  K=10
+[HUGEGRAPH] num_devices=4
+[HUGEGRAPH] cpu_threads=32
+[HUGEGRAPH] timing=hbm_event profiling (hardware)
+
+[HUGEGRAPH] dst_tile=1 tiles=10 edges=1046.9M kernel_time=34.28 ms
+[HUGEGRAPH] dst_tile=2 tiles=10 edges=1046.9M kernel_time=33.95 ms
+[HUGEGRAPH] dst_tile=3 tiles=10 edges=1046.9M kernel_time=34.11 ms
+
+[HUGEGRAPH] ====== SUMMARY ======
+[HUGEGRAPH] num_vertex=17.1M  num_edge=1046.9M
+[HUGEGRAPH] K=10  nonempty_tiles=100  tiles_processed=100
+[HUGEGRAPH] Total kernel time (multi-device) =358.64 ms
+[HUGEGRAPH] Kernel MTEPS (multi-device) =30560.0
+[HUGEGRAPH] Kernel GTEPS (multi-device) =30.56
 RESULT algorithm=BFS
-RESULT dataset=Graph1
+RESULT dataset=SNAP-1
 RESULT performance=30.56
-[DONE] BFS Graph1 throughput evaluation finished.
+[DONE] BFS on SNAP-1 throughput evaluation finished.
