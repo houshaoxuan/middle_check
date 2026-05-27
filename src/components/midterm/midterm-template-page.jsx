@@ -206,6 +206,12 @@ export default function MidtermTemplatePage({ config }) {
 
             return nextResult;
           }, result);
+          const updateScaleLabel = normalizedResult.updateScale ?? updateScale?.label ?? dataset.updateScale;
+          const chartLabelParts = [
+            controls.showAlgorithmSelect === false ? null : normalizedResult.algorithm,
+            controls.showDatasetSelect === false ? null : datasetDisplayName,
+            updateScaleControl.enabled ? updateScaleLabel : null,
+          ];
           setResultRows((prev) =>
             upsertRows(prev, [
               {
@@ -213,7 +219,8 @@ export default function MidtermTemplatePage({ config }) {
                 dataset: datasetDisplayName,
                 vertices: normalizedResult.vertices ?? dataset.nodes,
                 edges: normalizedResult.edges ?? dataset.edges,
-                updateScale: normalizedResult.updateScale ?? updateScale?.label ?? dataset.updateScale,
+                updateScale: updateScaleLabel,
+                chartLabelParts,
                 algorithmKey: currentAlgorithm.key,
                 datasetKey: dataset.key,
                 updateScaleKey: updateScale?.key,

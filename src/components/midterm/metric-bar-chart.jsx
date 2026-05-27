@@ -20,13 +20,13 @@ export default function MetricBarChart({ metrics, rows, title = '性能图表' }
   const assessmentTarget = metric.assessmentTarget ?? metric.defaultTarget;
   const midtermTarget = metric.midtermTarget;
   const chartData = rows.map((row) => ({
-    dataset: compactLabel(row.algorithm, row.dataset, row.updateScale) || row.id,
+    dataset: compactLabel(...(row.chartLabelParts || [row.algorithm, row.dataset, row.updateScale])) || row.id,
     assessment: assessmentTarget,
     value: row[metric.valueKey],
     target: midtermTarget ?? row[metric.targetKey],
   }));
   const referenceTarget = midtermTarget ?? chartData.find((item) => typeof item.target === 'number')?.target;
-  const groupWidth = 120;
+  const groupWidth = 150;
   const chartWidth = Math.max(400, chartData.length * groupWidth + 220);
   const chartHeight = 330;
   const chartMargin = { top: 20, right: 30, left: 44, bottom: 44 };
@@ -94,7 +94,7 @@ export default function MetricBarChart({ metrics, rows, title = '性能图表' }
                 barCategoryGap={24}
               >
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="dataset" height={xAxisHeight} />
+                <XAxis dataKey="dataset" height={xAxisHeight} interval={0} minTickGap={0} />
                 <YAxis width={yAxisWidth} tickFormatter={formatMetricValue} />
                 <Tooltip formatter={(value) => [`${formatMetricValue(value)} ${metric.unit}`, '']} />
                 <Bar dataKey="assessment" name="考核指标" fill="#7e57c2" barSize={barSize} />
