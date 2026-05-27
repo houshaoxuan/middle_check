@@ -1,6 +1,8 @@
 import React from 'react';
 import { Box, Button, LinearProgress, MenuItem, Paper, Select, Typography } from '@mui/material';
 
+import { getDatasetDisplayName } from './dataset-utils';
+
 export default function RunControl({
   algorithms,
   datasets,
@@ -24,7 +26,7 @@ export default function RunControl({
 }) {
   const datasetOptions =
     allDatasetsKey && datasets.length > 1 && !disableDatasetSelect
-      ? [...datasets, { key: allDatasetsKey, label: '全部数据集' }]
+      ? [...datasets, { key: allDatasetsKey, displayName: '全部数据集' }]
       : datasets;
 
   return (
@@ -72,7 +74,7 @@ export default function RunControl({
           >
             {datasetOptions.map((dataset) => (
               <MenuItem key={dataset.key} value={dataset.key}>
-                {dataset.label}
+                {getDatasetDisplayName(dataset)}
               </MenuItem>
             ))}
           </Select>

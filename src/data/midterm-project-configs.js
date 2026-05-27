@@ -19,7 +19,9 @@ const platformItems = [
 
 const acceleratorGraph1 = {
   key: 'graph1',
+  apiKey: 'graph1',
   label: 'Graph1',
+  displayName: 'Graph1',
   nodes: '17.1M',
   edges: '1046.9M',
   source: 'PPT 图数据集规模与实验结果',
@@ -28,7 +30,9 @@ const acceleratorGraph1 = {
 
 const acceleratorGraph2 = {
   key: 'graph2',
+  apiKey: 'graph2',
   label: 'Graph2',
+  displayName: 'Graph2',
   nodes: '16.8M',
   edges: '503.3M',
   source: 'PPT 图数据集规模与实验结果',
@@ -37,7 +41,9 @@ const acceleratorGraph2 = {
 
 const deploymentDefaultDataset = {
   key: 'default',
+  apiKey: 'default',
   label: 'GraFlex/DFGraph 对比实验',
+  displayName: 'GraFlex/DFGraph 对比实验',
   nodes: '-',
   edges: '-',
   source: 'PPT 单位性能逻辑资源使用量对比',
@@ -46,7 +52,9 @@ const deploymentDefaultDataset = {
 
 const updateGraph1 = {
   key: 'graph1',
+  apiKey: 'graph1',
   label: 'Graph1',
+  displayName: 'Graph1',
   nodes: '268.4M',
   edges: '16.1B',
   updateScale: '0.1%-1%',
@@ -56,7 +64,9 @@ const updateGraph1 = {
 
 const updateGraph2 = {
   key: 'graph2',
+  apiKey: 'graph2',
   label: 'Graph2',
+  displayName: 'Graph2',
   nodes: '536.9M',
   edges: '4.4B',
   updateScale: '0.1%-1%',
@@ -66,7 +76,9 @@ const updateGraph2 = {
 
 const algorithmGraph1 = {
   key: 'graph1',
+  apiKey: 'graph1',
   label: 'Graph1',
+  displayName: 'Graph1',
   nodes: '268.4M',
   edges: '16.1B',
   source: 'PPT 图算法性能实验结果',
@@ -75,7 +87,9 @@ const algorithmGraph1 = {
 
 const abstractionDefaultDataset = {
   key: 'default',
+  apiKey: 'default',
   label: 'HitGraph 代码密度对比实验',
+  displayName: 'HitGraph 代码密度对比实验',
   nodes: '-',
   edges: '-',
   source: 'PPT 有效代码密度（行数）对比',
@@ -543,6 +557,7 @@ export const midtermProjectConfigs = {
 
   part4: {
     apiBasePath: '/midterm/part4',
+    logDurationSeconds: 1.5,
     allDatasetsKey: 'all',
     introSections: sections({
       assessment: [

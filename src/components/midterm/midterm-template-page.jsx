@@ -6,6 +6,7 @@ import { Box, Grid } from '@mui/material';
 import request, { BASE_URL } from '@/lib/request/request';
 
 import CodeComparison from './code-comparison';
+import { getDatasetApiKey, getDatasetDisplayName } from './dataset-utils';
 import MetricBarChart from './metric-bar-chart';
 import MetricIntro from './metric-intro';
 import ResultTable from './result-table';
@@ -162,7 +163,8 @@ export default function MidtermTemplatePage({ config }) {
           ? updateScaleOptions.filter((option) => option.key !== updateScaleControl.allKey)
           : updateScaleOptions.filter((option) => option.key === selectedUpdateScale);
     const runCount = Math.max(datasetsToRun.length * updateScalesToRun.length, 1);
-    const streamDuration = (TARGET_LOG_DURATION_SECONDS / runCount).toFixed(2);
+    const targetLogDuration = config.logDurationSeconds ?? TARGET_LOG_DURATION_SECONDS;
+    const streamDuration = (targetLogDuration / runCount).toFixed(2);
 
     try {
       setLogs([`开始执行 ${currentAlgorithm.label} 指标测试...`]);
@@ -172,17 +174,19 @@ export default function MidtermTemplatePage({ config }) {
           const requestParams = updateScale ? { scale: updateScale.key } : {};
           const streamParams = { ...requestParams, duration: streamDuration };
           const runKey = [currentAlgorithm.key, dataset.key, updateScale?.key].filter(Boolean).join(':');
+          const datasetApiKey = getDatasetApiKey(dataset);
+          const datasetDisplayName = getDatasetDisplayName(dataset);
 
           await streamRunLog({
             apiBasePath,
             algorithmKey: currentAlgorithm.key,
-            datasetKey: dataset.key,
+            datasetKey: datasetApiKey,
             params: streamParams,
             onLog: (line) => setLogs((prev) => [...prev, line]),
           });
 
           const response = await request({
-            url: `${apiBasePath}/result/${currentAlgorithm.key}/${dataset.key}/${buildQuery(requestParams)}`,
+            url: `${apiBasePath}/result/${currentAlgorithm.key}/${datasetApiKey}/${buildQuery(requestParams)}`,
             method: 'GET',
           });
           const result = response.data;
@@ -206,6 +210,7 @@ export default function MidtermTemplatePage({ config }) {
             upsertRows(prev, [
               {
                 ...normalizedResult,
+                dataset: datasetDisplayName,
                 vertices: normalizedResult.vertices ?? dataset.nodes,
                 edges: normalizedResult.edges ?? dataset.edges,
                 updateScale: normalizedResult.updateScale ?? updateScale?.label ?? dataset.updateScale,
@@ -217,7 +222,7 @@ export default function MidtermTemplatePage({ config }) {
             ])
           );
           const scaleLabel = updateScale ? ` / ${updateScale.label}` : '';
-          setLogs((prev) => [...prev, `✅ ${currentAlgorithm.label} / ${dataset.label}${scaleLabel} 执行完成`]);
+          setLogs((prev) => [...prev, `✅ ${currentAlgorithm.label} / ${datasetDisplayName}${scaleLabel} 执行完成`]);
         }
       }
     } catch (error) {

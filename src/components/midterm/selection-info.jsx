@@ -14,6 +14,8 @@ import {
   Typography,
 } from '@mui/material';
 
+import { getDatasetDisplayName } from './dataset-utils';
+
 function InfoLine({ label, value }) {
   return (
     <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 2, mb: 0.75 }}>
@@ -31,7 +33,7 @@ function DatasetSummary({ dataset }) {
   return (
     <Box sx={{ pb: 0.5 }}>
       <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 0.75 }}>
-        {dataset.label}
+        {getDatasetDisplayName(dataset)}
       </Typography>
       <InfoLine label="点规模" value={dataset.nodes} />
       <InfoLine label="边规模" value={dataset.edges} />
@@ -100,7 +102,7 @@ export default function SelectionInfo({ algorithm, datasetKey, allDatasetsKey, s
                 <TableBody>
                   {selectedDatasets.map((dataset) => (
                     <TableRow key={dataset.key}>
-                      <TableCell>{dataset.label}</TableCell>
+                      <TableCell>{getDatasetDisplayName(dataset)}</TableCell>
                       <TableCell align="right">{dataset.nodes || '-'}</TableCell>
                       <TableCell align="right">{dataset.edges || '-'}</TableCell>
                     </TableRow>
