@@ -14,7 +14,7 @@ function line(...parts) {
 
 const platformItems = [
   'CPU：1 颗 36-core 2-way hyper-threaded Intel Xeon 6554S CPU @ 2.20GHz；内存 2TB；缓存 180MB；g++ 编译器。',
-  'FPGA：4 张 Xilinx Alveo U55C；16GB 高带宽内存（460GB/s）；AMD Vitis 编译器。',
+  'FPGA：4 张 Xilinx Alveo U55C；4*16GB 高带宽内存（460GB/s）；AMD Vitis 编译器。',
 ];
 
 const acceleratorGraph1 = {
