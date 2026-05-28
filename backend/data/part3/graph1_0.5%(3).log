@@ -1,24 +1,24 @@
-command: /home/lzt/LSGraph/DFGraph -f /home/lzt/graph500/converters/converters/map2864_1.adj -bs 22850535
+command: /home/lzt/LSGraph/DFGraph -f /home/lzt/graph500/converters/converters/RMAT-28.adj -bs 80530635
 batch_pct: 0.5%
 hostname: hacchead
 cwd: /home/lzt/LSGraph
 ----------------------------------------
-Partation edge: Total Time Elapsed: 1.561650 seconds
-bulk load time: Total Time Elapsed: 22.313772 seconds
-[DFGRAPH] graph construction update_time_ms=23875.70 construction Throughput=75824237.47 edges/s
+Partation edge: Total Time Elapsed: 2.613217 seconds
+bulk load time: Total Time Elapsed: 42.587432 seconds
+[DFGRAPH] graph construction update_time_ms=45723.91 construction Throughput=73289213.12 edges/s
 [DFGRAPH] ====== SUMMARY ======
-[DFGRAPH] graph=/home/lzt/graph500/converters/converters/map2864_1.adj
-[DFGRAPH] insert update_edges=22850535
-[DFGRAPH] insert update_time_ms=177.35
-[DFGRAPH] inserting throughput=128843275.84 edges/s
-[DFGRAPH] delete update_edges=22850535
-[DFGRAPH] delete update_time_ms=41.22
-[DFGRAPH] delete throughput=554382431.28 edges/s
-[DFGRAPH] total update update_edges=45701070
-[DFGRAPH] total update update_time_ms=218.57
-[DFGRAPH] total update throughput=209091806.03 edges/s
+[DFGRAPH] graph=/home/lzt/graph500/converters/converters/RMAT-28.adj
+[DFGRAPH] insert update_edges=80530635
+[DFGRAPH] insert update_time_ms=760.26
+[DFGRAPH] inserting throughput=105961361.84 edges/s
+[DFGRAPH] delete update_edges=80530635
+[DFGRAPH] delete update_time_ms=227.10
+[DFGRAPH] delete throughput=354604293.26 edges/s
+[DFGRAPH] total update update_edges=161061270
+[DFGRAPH] total update update_time_ms=987.36
+[DFGRAPH] total update throughput=163123897.16 edges/s
 ----------------------------------------
-elapsed_seconds: 61
+elapsed_seconds: 104
 Validation...
 Construct the Graph with Updates...
 Comparison...

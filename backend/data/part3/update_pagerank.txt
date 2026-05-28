@@ -26,8 +26,8 @@ Creating a little kernel [littleKernelScatterGather:{littleKernelScatterGather_8
 Creating a little kernel [littleKernelScatterGather:{littleKernelScatterGather_9}] for CU(9)
 Creating a little kernel [littleKernelScatterGather:{littleKernelScatterGather_10}] for CU(10)
 Creating a little kernel [littleKernelScatterGather:{littleKernelScatterGather_11}] for CU(11)
-Creating the apply kernel [kernelApply:{kernelApply_1}] 
-Creating the hbm kernel [kernelHBMWrapper:{kernelHBMWrapper_1}] 
+Creating the apply kernel [kernelApply:{kernelApply_1}]
+Creating the hbm kernel [kernelHBMWrapper:{kernelHBMWrapper_1}]
 Trying to program device[1]: xilinx_u55c_gen3x16_xdma_base_3
 Device[1]: program successful!
 Creating a big kernel [bigKernelScatterGather:{bigKernelScatterGather_1}] for CU(1)
@@ -44,8 +44,8 @@ Creating a little kernel [littleKernelScatterGather:{littleKernelScatterGather_8
 Creating a little kernel [littleKernelScatterGather:{littleKernelScatterGather_9}] for CU(9)
 Creating a little kernel [littleKernelScatterGather:{littleKernelScatterGather_10}] for CU(10)
 Creating a little kernel [littleKernelScatterGather:{littleKernelScatterGather_11}] for CU(11)
-Creating the apply kernel [kernelApply:{kernelApply_1}] 
-Creating the hbm kernel [kernelHBMWrapper:{kernelHBMWrapper_1}] 
+Creating the apply kernel [kernelApply:{kernelApply_1}]
+Creating the hbm kernel [kernelHBMWrapper:{kernelHBMWrapper_1}]
 Trying to program device[2]: xilinx_u55c_gen3x16_xdma_base_3
 Device[2]: program successful!
 Creating a big kernel [bigKernelScatterGather:{bigKernelScatterGather_1}] for CU(1)
@@ -62,8 +62,8 @@ Creating a little kernel [littleKernelScatterGather:{littleKernelScatterGather_8
 Creating a little kernel [littleKernelScatterGather:{littleKernelScatterGather_9}] for CU(9)
 Creating a little kernel [littleKernelScatterGather:{littleKernelScatterGather_10}] for CU(10)
 Creating a little kernel [littleKernelScatterGather:{littleKernelScatterGather_11}] for CU(11)
-Creating the apply kernel [kernelApply:{kernelApply_1}] 
-Creating the hbm kernel [kernelHBMWrapper:{kernelHBMWrapper_1}] 
+Creating the apply kernel [kernelApply:{kernelApply_1}]
+Creating the hbm kernel [kernelHBMWrapper:{kernelHBMWrapper_1}]
 Trying to program device[3]: xilinx_u55c_gen3x16_xdma_base_3
 Device[3]: program successful!
 Creating a big kernel [bigKernelScatterGather:{bigKernelScatterGather_1}] for CU(1)
@@ -80,8 +80,8 @@ Creating a little kernel [littleKernelScatterGather:{littleKernelScatterGather_8
 Creating a little kernel [littleKernelScatterGather:{littleKernelScatterGather_9}] for CU(9)
 Creating a little kernel [littleKernelScatterGather:{littleKernelScatterGather_10}] for CU(10)
 Creating a little kernel [littleKernelScatterGather:{littleKernelScatterGather_11}] for CU(11)
-Creating the apply kernel [kernelApply:{kernelApply_1}] 
-Creating the hbm kernel [kernelHBMWrapper:{kernelHBMWrapper_1}] 
+Creating the apply kernel [kernelApply:{kernelApply_1}]
+Creating the hbm kernel [kernelHBMWrapper:{kernelHBMWrapper_1}]
 
 [HUGEGRAPH] ====== Configuration ======
 [HUGEGRAPH] graph=/local-ssd/CONNECT\jhuang683/graph2880.txt
@@ -98,5 +98,5 @@ Creating the hbm kernel [kernelHBMWrapper:{kernelHBMWrapper_1}]
 [HUGEGRAPH] num_vertex=268435456  num_edge=16106127360
 [HUGEGRAPH] K=10  nonempty_tiles=100  tiles_processed=100
 [HUGEGRAPH] Total kernel time (multi-device) =4398.86 ms
-[HUGEGRAPH] Kernel MTEPS (multi-device)       =3661.4
+[HUGEGRAPH] Kernel MTEPS (multi-device)       =3606.4
 

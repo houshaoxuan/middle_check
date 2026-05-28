@@ -1,4 +1,4 @@
-command: /home/lzt/LSGraph/DFGraph -f /home/lzt/graph500/converters/converters/map2864_2.adj -bs 22126843
+command: /home/lzt/LSGraph/DFGraph -f /home/lzt/graph500/converters/converters/RMAT-29.adj -bs 22126843
 batch_pct: 0.5%
 hostname: hacchead
 cwd: /home/lzt/LSGraph
@@ -7,7 +7,7 @@ Partation edge: Total Time Elapsed: 1.573554 seconds
 bulk load time: Total Time Elapsed: 22.844988 seconds
 [DFGRAPH] graph construction update_time_ms=24419.80 construction Throughput=74127186.97 edges/s
 [DFGRAPH] ====== SUMMARY ======
-[DFGRAPH] graph=/home/lzt/graph500/converters/converters/map2864_2.adj
+[DFGRAPH] graph=/home/lzt/graph500/converters/converters/RMAT-29.adj
 [DFGRAPH] insert update_edges=22126843
 [DFGRAPH] insert update_time_ms=165.31
 [DFGRAPH] inserting throughput=133847524.18 edges/s

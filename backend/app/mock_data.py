@@ -368,6 +368,9 @@ def parse_part4_code_density_log(lines: list[str], algo: str) -> dict[str, Any]:
 
 
 def parsed_log_result(project: str, algo: str, dataset: str, scale: str | None = None) -> dict[str, Any]:
+    if project == "part2":
+        return {}
+
     lines = read_log_lines(project, algo, dataset, scale)
     result = parse_result_fields(lines)
 
@@ -376,9 +379,6 @@ def parsed_log_result(project: str, algo: str, dataset: str, scale: str | None =
 
     if project in {"part1", "part3-algorithm"}:
         result.update(parse_algorithm_log(lines))
-
-    if project == "part2":
-        result.update(parse_part2_resource_log(lines, algo))
 
     if project == "part4":
         result.update(parse_part4_code_density_log(lines, algo))

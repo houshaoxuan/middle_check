@@ -202,7 +202,7 @@ export const midtermProjectConfigs = {
         line('指标2.1：相比GraFlex生成的寄存器传输级（RTL）加速器，综合后的单位性能逻辑资源使用量降低', highlight('43.06%')),
       ],
       method: [
-        '在 Xilinx Alveo U55C FPGA 板卡上使用所提出方法综合和部署动态图计算加速器（DFGraph），对比 GraFlex 与 DFGraph 的逻辑资源使用量（CLB）。',
+        '在 Xilinx Alveo U55C FPGA 板卡上使用所提出方法综合和部署动态图计算加速器（DFGraph），对比 GraFlex 与 DFGraph 的单位逻辑资源使用量（CLB/MTEPS）。',
         ...platformItems,
       ],
     }),
@@ -212,11 +212,11 @@ export const midtermProjectConfigs = {
       algorithmLabel: '选择算法',
     },
     algorithms: graphAlgorithms([deploymentDefaultDataset]),
-    tableTitle: '资源占用对比结果汇总',
+    tableTitle: '单位逻辑资源使用量对比结果汇总',
     tableColumns: [
       { key: 'algorithm', label: '算法' },
-      { key: 'graflexClbPerMteps', label: 'GraFlex 资源占用（CLB）', align: 'right' },
-      { key: 'dfgraphClbPerMteps', label: 'DFGraph 资源占用（CLB）', align: 'right' },
+      { key: 'graflexClbPerMteps', label: 'GraFlex（CLB/MTEPS）', align: 'right' },
+      { key: 'dfgraphClbPerMteps', label: 'DFGraph（CLB/MTEPS）', align: 'right' },
       { key: 'resourceReductionTarget', label: '资源使用量降低中期指标（%）', align: 'right' },
       { key: 'resourceReduction', label: '中期完成值（%）', align: 'right' },
       { key: 'assessmentTarget', label: '考核指标（%）', align: 'right' },
@@ -413,4 +413,3 @@ export const midtermProjectConfigs = {
     },
   },
 };
-
