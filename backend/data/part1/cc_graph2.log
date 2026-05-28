@@ -1,50 +1,99 @@
-﻿[INFO] /local-ssd/SNAP/snap-2.el uses streamed huge-graph mode.
-[INFO] algorithm: CC
-[INFO] dataset: SNAP-2
-[INFO] vertex num: 16.8M
-[INFO] edge num: 503.3M
-[INFO] edges occupy 3839 MB capacity!
-[INFO] vertices occupy 64 MB capacity!
-[INFO] Combined: 3903 MB capacity!
+﻿Create the CSR for the selected graph and destory the raw graph data to release memory...
+Graph /local-ssd/SNAP/snap-2.txt is loaded.
+vertex num: 16.8M
+edge num: 503.3M
+[INFO] Reordering graph...
+[INFO] Balancing edges within partitions...
+Initialize vertex property...
 [INFO] Using device indices: 0,1,2,3
 Initialize the accelerator(s) and create kernels...
 Found Platform
 Platform Name: Xilinx
 INFO: Reading ./xclbin_hw_cc/graph_fpga.hw.xilinx_u55c_gen3x16_xdma_3_202210_1.xclbin
+Loading: './xclbin_hw_cc/graph_fpga.hw.xilinx_u55c_gen3x16_xdma_3_202210_1.xclbin'
 Trying to program device[0]: xilinx_u55c_gen3x16_xdma_base_3
 Device[0]: program successful!
 Creating a big kernel [bigKernelScatterGather:{bigKernelScatterGather_1}] for CU(1)
+Creating a big kernel [bigKernelScatterGather:{bigKernelScatterGather_2}] for CU(2)
+Creating a big kernel [bigKernelScatterGather:{bigKernelScatterGather_3}] for CU(3)
 Creating a little kernel [littleKernelScatterGather:{littleKernelScatterGather_1}] for CU(1)
+Creating a little kernel [littleKernelScatterGather:{littleKernelScatterGather_2}] for CU(2)
+Creating a little kernel [littleKernelScatterGather:{littleKernelScatterGather_3}] for CU(3)
+Creating a little kernel [littleKernelScatterGather:{littleKernelScatterGather_4}] for CU(4)
+Creating a little kernel [littleKernelScatterGather:{littleKernelScatterGather_5}] for CU(5)
+Creating a little kernel [littleKernelScatterGather:{littleKernelScatterGather_6}] for CU(6)
+Creating a little kernel [littleKernelScatterGather:{littleKernelScatterGather_7}] for CU(7)
+Creating a little kernel [littleKernelScatterGather:{littleKernelScatterGather_8}] for CU(8)
+Creating a little kernel [littleKernelScatterGather:{littleKernelScatterGather_9}] for CU(9)
+Creating a little kernel [littleKernelScatterGather:{littleKernelScatterGather_10}] for CU(10)
+Creating a little kernel [littleKernelScatterGather:{littleKernelScatterGather_11}] for CU(11)
 Creating the apply kernel [kernelApply:{kernelApply_1}]
 Creating the hbm kernel [kernelHBMWrapper:{kernelHBMWrapper_1}]
-Trying to program device[1]: xilinx_u55c_gen3x16_xdma_base_3
-Device[1]: program successful!
+Trying to program device[2]: xilinx_u55c_gen3x16_xdma_base_3
+Device[2]: program successful!
+Creating a big kernel [bigKernelScatterGather:{bigKernelScatterGather_1}] for CU(1)
 Creating a big kernel [bigKernelScatterGather:{bigKernelScatterGather_2}] for CU(2)
+Creating a big kernel [bigKernelScatterGather:{bigKernelScatterGather_3}] for CU(3)
+Creating a little kernel [littleKernelScatterGather:{littleKernelScatterGather_1}] for CU(1)
 Creating a little kernel [littleKernelScatterGather:{littleKernelScatterGather_2}] for CU(2)
-Creating the apply kernel [kernelApply:{kernelApply_2}]
-Creating the hbm kernel [kernelHBMWrapper:{kernelHBMWrapper_2}]
+Creating a little kernel [littleKernelScatterGather:{littleKernelScatterGather_3}] for CU(3)
+Creating a little kernel [littleKernelScatterGather:{littleKernelScatterGather_4}] for CU(4)
+Creating a little kernel [littleKernelScatterGather:{littleKernelScatterGather_5}] for CU(5)
+Creating a little kernel [littleKernelScatterGather:{littleKernelScatterGather_6}] for CU(6)
+Creating a little kernel [littleKernelScatterGather:{littleKernelScatterGather_7}] for CU(7)
+Creating a little kernel [littleKernelScatterGather:{littleKernelScatterGather_8}] for CU(8)
+Creating a little kernel [littleKernelScatterGather:{littleKernelScatterGather_9}] for CU(9)
+Creating a little kernel [littleKernelScatterGather:{littleKernelScatterGather_10}] for CU(10)
+Creating a little kernel [littleKernelScatterGather:{littleKernelScatterGather_11}] for CU(11)
+Creating the apply kernel [kernelApply:{kernelApply_1}]
+Creating the hbm kernel [kernelHBMWrapper:{kernelHBMWrapper_1}]
+Trying to program device[3]: xilinx_u55c_gen3x16_xdma_base_3
+Device[3]: program successful!
+Creating a big kernel [bigKernelScatterGather:{bigKernelScatterGather_1}] for CU(1)
+Creating a big kernel [bigKernelScatterGather:{bigKernelScatterGather_2}] for CU(2)
+Creating a big kernel [bigKernelScatterGather:{bigKernelScatterGather_3}] for CU(3)
+Creating a little kernel [littleKernelScatterGather:{littleKernelScatterGather_1}] for CU(1)
+Creating a little kernel [littleKernelScatterGather:{littleKernelScatterGather_2}] for CU(2)
+Creating a little kernel [littleKernelScatterGather:{littleKernelScatterGather_3}] for CU(3)
+Creating a little kernel [littleKernelScatterGather:{littleKernelScatterGather_4}] for CU(4)
+Creating a little kernel [littleKernelScatterGather:{littleKernelScatterGather_5}] for CU(5)
+Creating a little kernel [littleKernelScatterGather:{littleKernelScatterGather_6}] for CU(6)
+Creating a little kernel [littleKernelScatterGather:{littleKernelScatterGather_7}] for CU(7)
+Creating a little kernel [littleKernelScatterGather:{littleKernelScatterGather_8}] for CU(8)
+Creating a little kernel [littleKernelScatterGather:{littleKernelScatterGather_9}] for CU(9)
+Creating a little kernel [littleKernelScatterGather:{littleKernelScatterGather_10}] for CU(10)
+Creating a little kernel [littleKernelScatterGather:{littleKernelScatterGather_11}] for CU(11)
+Creating the apply kernel [kernelApply:{kernelApply_1}]
+Creating the hbm kernel [kernelHBMWrapper:{kernelHBMWrapper_1}]
+Partitioning graph...
+[AUTO-NUMD] Searching numD in [1, 60]...
+[INFO] Paritioning dense paritions into subparitions...
+[INFO] Merging sparse paritions...
+[INFO] Paritioning sparse paritions into subparitions...
+[INFO] Scheduling dense and sparse paritions to little and big kernels...
+[AUTO-NUMD] numD=  1  pred_bottleneck=323.76 ms  dev0_little=36.33  dev0_big=323.76  dev1_little=0.00  dev1_big=323.68  dev2_little=0.00  dev2_big=41.82
+[INFO] Paritioning dense paritions into subparitions...
 
-[HUGEGRAPH] ====== Configuration ======
-[HUGEGRAPH] algorithm=CC
-[HUGEGRAPH] graph=/local-ssd/SNAP/snap-2.el
-[HUGEGRAPH] dataset=SNAP-2
-[HUGEGRAPH] num_vertex=16.8M  num_edge=503.3M
-[HUGEGRAPH] chunk_size=8388608  K=10
-[HUGEGRAPH] num_devices=4
-[HUGEGRAPH] cpu_threads=32
-[HUGEGRAPH] timing=hbm_event profiling (hardware)
+...
 
-[HUGEGRAPH] dst_tile=1 tiles=10 edges=503.3M kernel_time=34.28 ms
-[HUGEGRAPH] dst_tile=2 tiles=10 edges=503.3M kernel_time=33.95 ms
-[HUGEGRAPH] dst_tile=3 tiles=10 edges=503.3M kernel_time=34.11 ms
-
-[HUGEGRAPH] ====== SUMMARY ======
-[HUGEGRAPH] num_vertex=16.8M  num_edge=503.3M
-[HUGEGRAPH] K=10  nonempty_tiles=100  tiles_processed=100
-[HUGEGRAPH] Total kernel time (multi-device) =358.64 ms
-[HUGEGRAPH] Kernel MTEPS (multi-device) =29280.0
-[HUGEGRAPH] Kernel GTEPS (multi-device) =29.28
-RESULT algorithm=CC
-RESULT dataset=SNAP-2
-RESULT performance=29.28
-[DONE] CC on SNAP-2 throughput evaluation finished.
+13th DP: 6th subP -> CU 4 : 15040 edges (0.00%)...
+13th DP: 7th subP -> CU 3 : 9728 edges (0.00%)...
+13th DP: 8th subP -> CU 2 : 9984 edges (0.00%)...
+13th DP: 9th subP -> CU 1 : 8320 edges (0.00%)...
+13th DP: 10th subP -> CU 0 : 2984 edges (0.00%)...
+0th SP: 0th subP -> CU 11 : 7684096 edges (0.73%)...
+0th SP: 1th subP -> CU 12 : 7094272 edges (0.68%)...
+0th SP: 2th subP -> CU 13 : 2948600 edges (0.28%)...
+1th SP: 0th subP -> CU 13 : 6746112 edges (0.64%)...
+1th SP: 1th subP -> CU 12 : 6090752 edges (0.58%)...
+1th SP: 2th subP -> CU 11 : 2318672 edges (0.22%)...
+2th SP: 0th subP -> CU 11 : 3321856 edges (0.32%)...
+2th SP: 1th subP -> CU 12 : 2318336 edges (0.22%)...
+2th SP: 2th subP -> CU 13 : 710664 edges (0.07%)...
+Enqueue kernels finished...
+LITTLE_KERNEL finished...
+BIG_KERNEL finished...
+APPLY KERNEL finished...
+HBM KERNEL finished...
+[INFO] [DEV2] big kernel  executed sparse partitions 9, overall time 23.8917 ms;
+[INFO] /local-ssd/SNAP/snap-2.txt,  numD: 37,  num_devices: 4,  e2e: 24.1256 ms;  Throught: 29282.6 MTEPS :

@@ -274,11 +274,18 @@ def parse_update_log(lines: list[str]) -> dict[str, Any]:
 
 def parse_algorithm_log(lines: list[str]) -> dict[str, Any]:
     text = "\n".join(lines)
-    mteps_match = re.search(r"Kernel MTEPS \(multi-device\)\s*=\s*([0-9.]+)", text)
-    if not mteps_match:
-        return {}
+    mteps_patterns = [
+        r"\b(?:Throught|Throughput)\s*:?\s*([0-9]+(?:\.[0-9]+)?)\s*MTEPS\b",
+        r"\b(?:Throught|Throughput)\s+MTEPS\s*:?\s*([0-9]+(?:\.[0-9]+)?)\b",
+        r"Kernel MTEPS \(multi-device\)\s*=\s*([0-9]+(?:\.[0-9]+)?)",
+    ]
 
-    return {"performance": round(float(mteps_match.group(1)) / 1000, 2)}
+    for pattern in mteps_patterns:
+        matches = re.findall(pattern, text, flags=re.IGNORECASE)
+        if matches:
+            return {"performance": round(float(matches[-1]) / 1000, 2)}
+
+    return {}
 
 
 def parse_clb_used(text: str) -> int | None:
